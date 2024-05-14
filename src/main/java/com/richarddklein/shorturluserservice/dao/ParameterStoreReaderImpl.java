@@ -19,8 +19,6 @@ public class ParameterStoreReaderImpl implements ParameterStoreReader {
 
     private final SsmClient ssmClient;
 
-    private String shortUrlUserTableName;
-
     /**
      * General constructor.
      *
@@ -29,19 +27,11 @@ public class ParameterStoreReaderImpl implements ParameterStoreReader {
      */
     public ParameterStoreReaderImpl(SsmClient ssmClient) {
         this.ssmClient = ssmClient;
-        loadParameters();
     }
 
     @Override
     public String getShortUrlUserTableName() {
-        return shortUrlUserTableName;
-    }
-
-    /**
-     * Load all parameters from the Parameter Store.
-     */
-    private void loadParameters() {
-        shortUrlUserTableName = getParameter(SHORT_URL_USER_TABLE_NAME);
+        return getParameter(SHORT_URL_USER_TABLE_NAME);
     }
 
     /**
