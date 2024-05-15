@@ -27,6 +27,12 @@ Resources:
         - SSMParameterWithSlashPrefixReadPolicy:
             ParameterName:
               /shortUrl/users/tableName
+        - SSMParameterWithSlashPrefixReadPolicy:
+            ParameterName:
+              /shortUrl/users/adminUsername
+        - SSMParameterWithSlashPrefixReadPolicy:
+            ParameterName:
+              /shortUrl/users/adminPassword
       SnapStart:
         ApplyOn: "PublishedVersions"
 

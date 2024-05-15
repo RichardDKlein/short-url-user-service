@@ -13,5 +13,7 @@ package com.richarddklein.shorturluserservice.response;
  */
 public enum ShortUrlUserStatus {
     SUCCESS,
+    INVALID_ADMIN_CREDENTIALS,
+    MISSING_AUTHORIZATION_HEADER,
     NOT_ON_LOCAL_MACHINE,
 }

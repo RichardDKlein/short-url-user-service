@@ -21,11 +21,16 @@ import com.richarddklein.shorturluserservice.controller.ShortUrlUserControllerIm
 @Configuration
 public class ControllerConfig {
     @Autowired
+    DaoConfig daoConfig;
+
+    @Autowired
     ServiceConfig serviceConfig;
 
     @Bean
     public ShortUrlUserController
     shortUrlReservationController() {
-        return new ShortUrlUserControllerImpl(serviceConfig.shortUrlUserService());
+        return new ShortUrlUserControllerImpl(
+                daoConfig.parameterStoreReader(),
+                serviceConfig.shortUrlUserService());
     }
 }

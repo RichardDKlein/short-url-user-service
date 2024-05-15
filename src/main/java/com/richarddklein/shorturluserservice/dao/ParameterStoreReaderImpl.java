@@ -15,6 +15,8 @@ import software.amazon.awssdk.services.ssm.model.GetParameterResponse;
  */
 @Component
 public class ParameterStoreReaderImpl implements ParameterStoreReader {
+    private static final String ADMIN_USERNAME = "/shortUrl/users/adminUsername";
+    private static final String ADMIN_PASSWORD = "/shortUrl/users/adminPassword";
     private static final String SHORT_URL_USER_TABLE_NAME = "/shortUrl/users/tableName";
 
     private final SsmClient ssmClient;
@@ -27,6 +29,16 @@ public class ParameterStoreReaderImpl implements ParameterStoreReader {
      */
     public ParameterStoreReaderImpl(SsmClient ssmClient) {
         this.ssmClient = ssmClient;
+    }
+
+    @Override
+    public String getAdminUsername() {
+        return getParameter(ADMIN_USERNAME);
+    }
+
+    @Override
+    public String getAdminPassword() {
+        return getParameter(ADMIN_PASSWORD);
     }
 
     @Override

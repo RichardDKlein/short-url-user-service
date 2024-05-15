@@ -14,6 +14,20 @@ package com.richarddklein.shorturluserservice.dao;
  */
 public interface ParameterStoreReader {
     /**
+     * Get the admin (unencrypted) username
+     *
+     * @return The admin (unencrypted) username
+     */
+    String getAdminUsername();
+
+    /**
+     * Get the admin (unencrypted) password
+     *
+     * @return The admin (unencrypted) password
+     */
+    String getAdminPassword();
+
+    /**
      * Get the name of the Short URL User table in the DynamoDB
      * database.
      *

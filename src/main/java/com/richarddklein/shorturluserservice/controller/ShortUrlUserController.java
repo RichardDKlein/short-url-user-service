@@ -36,8 +36,11 @@ public interface ShortUrlUserController {
      */
     @PostMapping("/dbinit")
     ResponseEntity<StatusResponse>
-    initializeShortUrlUserRepository(ServerHttpRequest request);
+    initializeShortUrlUserRepository(
+//            @RequestHeader("Authorization") String authorizationHeader,
+            ServerHttpRequest request);
 }
+
 /*
 Here are some REST endpoints that your ShortUrlUsers microservice could include:
 
@@ -48,7 +51,6 @@ User Profile: Endpoint to retrieve user information.
 Password Reset: Endpoint for users to reset their passwords.
 Role Assignment: Endpoint to assign roles to users.
 Role-Based Access Control (RBAC): Endpoint to check user roles and permissions.
-This design aligns well with microservices principles, promoting separation of concerns and scalability. However, ensure proper security measures are implemented within the microservice itself, including secure token handling, input validation, and protection against common security vulnerabilities like injection attacks and unauthorized access.
 
 User
 What sort of information would the User Profile endpoint return?
