@@ -5,7 +5,11 @@
 
 package com.richarddklein.shorturluserservice.dao;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
@@ -81,7 +85,12 @@ import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
  */
 @Repository
 public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
+    private static final String ADMIN_ROLE = "ADMIN";
+    private static final String ADMIN_NAME = "Richard Klein";
+    private static final String ADMIN_EMAIL = "RichardDKlein@gmail.com";
+
     private final ParameterStoreReader parameterStoreReader;
+    private final BCryptPasswordEncoder passwordEncoder;
     private final DynamoDbClient dynamoDbClient;
     private final DynamoDbTable<ShortUrlUser> shortUrlUserTable;
 
@@ -96,6 +105,8 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
      *                             is to play the role of reading parameters from
      *                             the Parameter Store component of the AWS Simple
      *                             System Manager (SSM).
+     * @param passwordEncoder Dependency injection of a class instance that is
+     *                        able to encode (encrypt) passwords.
      * @param dynamoDbClient Dependency injection of a class instance that is to
      *                       play the role of a DynamoDB Client.
      * @param shortUrlUserTable Dependency injection of a class instance that is
@@ -103,10 +114,12 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
      */
     public ShortUrlUserDaoImpl(
             ParameterStoreReader parameterStoreReader,
+            BCryptPasswordEncoder passwordEncoder,
             DynamoDbClient dynamoDbClient,
             DynamoDbTable<ShortUrlUser> shortUrlUserTable) {
 
         this.parameterStoreReader = parameterStoreReader;
+        this.passwordEncoder = passwordEncoder;
         this.dynamoDbClient = dynamoDbClient;
         this.shortUrlUserTable = shortUrlUserTable;
     }
@@ -172,8 +185,17 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
      */
     private void addAdminToShortUrlUserTable() {
         System.out.print("Adding the Admin to the Short URL User table ...");
-        ShortUrlUser shortUrlUser = new ShortUrlUser();
-        // Insert the Admin item
+        ShortUrlUser admin = new ShortUrlUser(
+                parameterStoreReader.getAdminUsername(),
+                passwordEncoder.encode(parameterStoreReader.getAdminPassword()),
+                ADMIN_ROLE,
+                ADMIN_NAME,
+                ADMIN_EMAIL,
+                "hasn't logged in yet",
+                LocalDateTime.now().format(
+                        DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss"))
+        );
+        shortUrlUserTable.putItem(admin);
         System.out.println(" done!");
     }
 }

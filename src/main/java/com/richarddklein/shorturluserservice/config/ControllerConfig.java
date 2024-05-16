@@ -5,6 +5,7 @@
 
 package com.richarddklein.shorturluserservice.config;
 
+import com.richarddklein.shorturluserservice.dao.ParameterStoreReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,7 +22,7 @@ import com.richarddklein.shorturluserservice.controller.ShortUrlUserControllerIm
 @Configuration
 public class ControllerConfig {
     @Autowired
-    DaoConfig daoConfig;
+    ParameterStoreReader parameterStoreReader;
 
     @Autowired
     ServiceConfig serviceConfig;
@@ -30,7 +31,7 @@ public class ControllerConfig {
     public ShortUrlUserController
     shortUrlReservationController() {
         return new ShortUrlUserControllerImpl(
-                daoConfig.parameterStoreReader(),
+                parameterStoreReader,
                 serviceConfig.shortUrlUserService());
     }
 }
