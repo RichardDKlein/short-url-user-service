@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -26,21 +27,16 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.ReactiveAuthorizationManager;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
-import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
 import org.springframework.security.web.server.authentication.ServerAuthenticationFailureHandler;
 import org.springframework.security.web.server.authorization.AuthorizationContext;
-import org.springframework.security.web.server.authorization.AuthorizationWebFilter;
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
 import org.springframework.security.web.server.util.matcher.ServerWebExchangeMatchers;
 
-import org.springframework.web.server.ServerWebExchange;
-import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
 /**
@@ -61,18 +57,17 @@ public class SecurityConfig {
     securityWebFilterChain(ServerHttpSecurity http) {
         return http
                 // Disable default security.
+                .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .logout(ServerHttpSecurity.LogoutSpec::disable)
 
-                // Add custom security.
-                .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
-                .addFilterAt(authenticationWebFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
-
-                // Enable security only for database initialization endpoint.
+                // Require authorization only for the database initialization endpoint.
                 .authorizeExchange(authorize -> authorize
-                        .pathMatchers("/dbinit", "/shorturl/users/dbinit")
+                        .pathMatchers(
+                                HttpMethod.POST,
+                                "/dbinit", "/shorturl/users/dbinit")
                         .access(reactiveAuthorizationManager())
                         .anyExchange().permitAll())
 
@@ -88,7 +83,9 @@ public class SecurityConfig {
         filter.setServerAuthenticationConverter(serverAuthenticationConverter());
         filter.setAuthenticationFailureHandler(serverAuthenticationFailureHandler());
         filter.setRequiresAuthenticationMatcher(
-                ServerWebExchangeMatchers.pathMatchers("/dbinit"));
+                ServerWebExchangeMatchers.pathMatchers(
+                        HttpMethod.POST,
+                        "/dbinit", "/shorturl/users/dbinit"));
 
         return filter;
     }
@@ -104,17 +101,9 @@ public class SecurityConfig {
     public ReactiveAuthenticationManager
     reactiveAuthenticationManager() {
         return authentication -> {
-            System.out.println("====> Entering ReactiveAuthenticationManager...");
-            if (authentication == null) {
-                return Mono.error(
-                        new MissingAuthorizationHeaderException("Missing authorization header"));
-            }
-            UsernamePasswordAuthenticationToken authToken =
-                    (UsernamePasswordAuthenticationToken)authentication;
-
-            if (authToken.getPrincipal().equals(parameterStoreReader.getAdminUsername()) &&
-                    authToken.getCredentials().equals(parameterStoreReader.getAdminPassword())) {
-                return Mono.empty();
+            if (authentication.getPrincipal().equals(parameterStoreReader.getAdminUsername()) &&
+                    authentication.getCredentials().equals(parameterStoreReader.getAdminPassword())) {
+                return Mono.just(authentication);
             } else {
                 return Mono.error(new BadCredentialsException("Invalid username or password"));
             }
@@ -125,12 +114,11 @@ public class SecurityConfig {
     public ServerAuthenticationConverter
     serverAuthenticationConverter() {
         return exchange -> {
-            System.out.println("====> Entering ServerAuthenticationConverter...");
             String authorizationHeader =
                     exchange.getRequest().getHeaders().getFirst("Authorization");
-            System.out.printf("====> authorizationHeader = %s\n", authorizationHeader);
             if (authorizationHeader == null || !authorizationHeader.startsWith("Basic ")) {
-                return Mono.empty();
+                return Mono.error(
+                        new MissingAuthorizationHeaderException("Missing authorization header"));
             }
             String base64Credentials = authorizationHeader.substring("Basic ".length()).trim();
             byte[] decodedBytes = java.util.Base64.getDecoder().decode(base64Credentials);
