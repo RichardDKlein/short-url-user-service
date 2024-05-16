@@ -36,9 +36,7 @@ public interface ShortUrlUserController {
      */
     @PostMapping("/dbinit")
     ResponseEntity<StatusResponse>
-    initializeShortUrlUserRepository(
-//            @RequestHeader("Authorization") String authorizationHeader,
-            ServerHttpRequest request);
+    initializeShortUrlUserRepository(ServerHttpRequest request);
 }
 
 /*
