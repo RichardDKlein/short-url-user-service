@@ -63,13 +63,8 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .logout(ServerHttpSecurity.LogoutSpec::disable)
 
-                // Require authorization only for the database initialization endpoint.
-                .authorizeExchange(authorize -> authorize
-                        .pathMatchers(
-                                HttpMethod.POST,
-                                "/dbinit", "/shorturl/users/dbinit")
-                        .access(reactiveAuthorizationManager())
-                        .anyExchange().permitAll())
+                // Authorize all endpoints unconditionally.
+                .authorizeExchange(authorize -> authorize.anyExchange().permitAll())
 
                 .build();
     }
@@ -78,10 +73,10 @@ public class SecurityConfig {
     public AuthenticationWebFilter
     authenticationWebFilter() {
         AuthenticationWebFilter filter =
-                new AuthenticationWebFilter(reactiveAuthenticationManager());
+                new AuthenticationWebFilter(adminAuthenticationManager());
 
-        filter.setServerAuthenticationConverter(serverAuthenticationConverter());
-        filter.setAuthenticationFailureHandler(serverAuthenticationFailureHandler());
+        filter.setServerAuthenticationConverter(adminAuthenticationConverter());
+        filter.setAuthenticationFailureHandler(adminAuthenticationFailureHandler());
         filter.setRequiresAuthenticationMatcher(
                 ServerWebExchangeMatchers.pathMatchers(
                         HttpMethod.POST,
@@ -91,15 +86,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public ReactiveAuthorizationManager<AuthorizationContext>
-    reactiveAuthorizationManager() {
-        return (authentication, object) ->
-            authentication.map(auth -> new AuthorizationDecision(true));
-    }
-
-    @Bean
     public ReactiveAuthenticationManager
-    reactiveAuthenticationManager() {
+    adminAuthenticationManager() {
         return authentication -> {
             if (authentication.getPrincipal().equals(parameterStoreReader.getAdminUsername()) &&
                     authentication.getCredentials().equals(parameterStoreReader.getAdminPassword())) {
@@ -112,7 +100,7 @@ public class SecurityConfig {
 
     @Bean
     public ServerAuthenticationConverter
-    serverAuthenticationConverter() {
+    adminAuthenticationConverter() {
         return exchange -> {
             String authorizationHeader =
                     exchange.getRequest().getHeaders().getFirst("Authorization");
@@ -131,7 +119,7 @@ public class SecurityConfig {
 
     @Bean
     public ServerAuthenticationFailureHandler
-    serverAuthenticationFailureHandler() {
+    adminAuthenticationFailureHandler() {
         return (exchange, exception) -> {
             ShortUrlUserStatus status = null;
             String message = null;
