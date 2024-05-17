@@ -68,7 +68,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationWebFilter
-    authenticationWebFilter() {
+    adminAuthenticationWebFilter() {
         AuthenticationWebFilter filter =
                 new AuthenticationWebFilter(adminAuthenticationManager());
 
@@ -86,6 +86,7 @@ public class SecurityConfig {
     public ReactiveAuthenticationManager
     adminAuthenticationManager() {
         return authentication -> {
+            System.out.println("====> Entering ReactiveAuthenticationManager ...");
             if (authentication.getPrincipal().equals(parameterStoreReader.getAdminUsername()) &&
                     authentication.getCredentials().equals(parameterStoreReader.getAdminPassword())) {
                 return Mono.just(authentication);
@@ -99,6 +100,7 @@ public class SecurityConfig {
     public ServerAuthenticationConverter
     adminAuthenticationConverter() {
         return exchange -> {
+            System.out.println("====> Entering ServerAuthenticationConverter ...");
             String authorizationHeader =
                     exchange.getRequest().getHeaders().getFirst("Authorization");
             if (authorizationHeader == null || !authorizationHeader.startsWith("Basic ")) {
@@ -118,6 +120,7 @@ public class SecurityConfig {
     public ServerAuthenticationFailureHandler
     adminAuthenticationFailureHandler() {
         return (exchange, exception) -> {
+            System.out.println("====> Entering ServerAuthenticationFailureHandler ...");
             ShortUrlUserStatus status = null;
             String message = null;
 

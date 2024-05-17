@@ -42,6 +42,7 @@ public interface ShortUrlUserController {
 /*
 User Registration: Endpoint for users to create new accounts.
 Login: Endpoint for users to authenticate and obtain JWT tokens.
+Logout: Endpoint to invalidate JWT tokens.
 Token Validation: Endpoint to validate JWT tokens.
 User Profile: Endpoint to retrieve user information.
 Password Reset: Endpoint for users to reset their passwords.
