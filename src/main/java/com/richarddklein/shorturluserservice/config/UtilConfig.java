@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 
 import software.amazon.awssdk.services.ssm.SsmClient;
 
-
 /**
  * The Utility @Configuration class.
  *
