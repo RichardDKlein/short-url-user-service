@@ -21,6 +21,10 @@ public class ParameterStoreReaderImpl implements ParameterStoreReader {
 
     private final SsmClient ssmClient;
 
+    private String adminUsername;
+    private String adminPassword;
+    private String shortUrlUserTableName;
+
     /**
      * General constructor.
      *
@@ -33,17 +37,26 @@ public class ParameterStoreReaderImpl implements ParameterStoreReader {
 
     @Override
     public String getAdminUsername() {
-        return getParameter(ADMIN_USERNAME);
+        if (adminUsername == null) {
+            adminUsername = getParameter(ADMIN_USERNAME);
+        }
+        return adminUsername;
     }
 
     @Override
     public String getAdminPassword() {
-        return getParameter(ADMIN_PASSWORD);
+        if (adminPassword == null) {
+            adminPassword = getParameter(ADMIN_PASSWORD);
+        }
+        return adminPassword;
     }
 
     @Override
     public String getShortUrlUserTableName() {
-        return getParameter(SHORT_URL_USER_TABLE_NAME);
+        if (shortUrlUserTableName == null) {
+            shortUrlUserTableName = getParameter(SHORT_URL_USER_TABLE_NAME);
+        }
+        return shortUrlUserTableName;
     }
 
     /**
