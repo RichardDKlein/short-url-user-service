@@ -6,7 +6,9 @@
 package com.richarddklein.shorturluserservice.controller;
 
 import com.richarddklein.shorturluserservice.dao.ParameterStoreReader;
+import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.response.ShortUrlUserStatus;
+import com.richarddklein.shorturluserservice.response.StatusAndJwtTokenResponse;
 import com.richarddklein.shorturluserservice.service.ShortUrlUserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -64,6 +66,44 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                             + "running on your local machine");
             return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
         }
+    }
+
+    @Override
+    public ResponseEntity<StatusAndJwtTokenResponse>
+    signup(ShortUrlUser shortUrlUser) {
+        Object[] statusAndJwtToken = shortUrlUserService.signup(shortUrlUser);
+
+        HttpStatus httpStatus;
+        StatusResponse statusResponse;
+        ShortUrlUserStatus shortUrlUserStatus =
+                (ShortUrlUserStatus)statusAndJwtToken[0];
+        String jwtToken = (String)statusAndJwtToken[1];
+
+        if (shortUrlUserStatus == ShortUrlUserStatus.USER_ALREADY_EXISTS) {
+            httpStatus = HttpStatus.CONFLICT;
+            statusResponse = new StatusResponse(
+                    ShortUrlUserStatus.USER_ALREADY_EXISTS,
+                    String.format("User already exists")
+            );
+        } else if (shortUrlUserStatus ==
+                ShortUrlUserStatus.MISSING_PASSWORD) {
+            httpStatus = HttpStatus.BAD_REQUEST;
+            statusResponse = new StatusResponse(
+                    ShortUrlUserStatus.MISSING_PASSWORD,
+                    String.format("A password must be specified")
+            );
+        } else {
+            httpStatus = HttpStatus.OK;
+            statusResponse = new StatusResponse(
+                    ShortUrlUserStatus.SUCCESS,
+                    "User account successfully created"
+            );
+        }
+
+        StatusAndJwtTokenResponse statusAndJwtTokenResponse =
+                new StatusAndJwtTokenResponse(statusResponse, jwtToken);
+
+        return new ResponseEntity<>(statusAndJwtTokenResponse, httpStatus);
     }
 
     // ------------------------------------------------------------------------

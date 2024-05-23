@@ -5,6 +5,8 @@
 
 package com.richarddklein.shorturluserservice.service;
 
+import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
+
 /**
  * The Short URL User Service interface.
  *
@@ -19,4 +21,6 @@ public interface ShortUrlUserService {
      * initialization has completed successfully, or has failed.</p>
      */
     void initializeShortUrlUserRepository();
+
+    Object[] signup(ShortUrlUser shortUrlUser);
 }

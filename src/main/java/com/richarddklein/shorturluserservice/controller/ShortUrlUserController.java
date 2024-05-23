@@ -5,6 +5,8 @@
 
 package com.richarddklein.shorturluserservice.controller;
 
+import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
+import com.richarddklein.shorturluserservice.response.StatusAndJwtTokenResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
@@ -37,4 +39,8 @@ public interface ShortUrlUserController {
     @PostMapping("/dbinit")
     ResponseEntity<StatusResponse>
     initializeShortUrlUserRepository(ServerHttpRequest request);
+
+    @PostMapping("/signup")
+    ResponseEntity<StatusAndJwtTokenResponse>
+    signup(@RequestBody ShortUrlUser shortUrlUser);
 }

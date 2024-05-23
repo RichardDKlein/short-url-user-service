@@ -17,12 +17,16 @@ import software.amazon.awssdk.services.ssm.model.GetParameterResponse;
 public class ParameterStoreReaderImpl implements ParameterStoreReader {
     private static final String ADMIN_USERNAME = "/shortUrl/users/adminUsername";
     private static final String ADMIN_PASSWORD = "/shortUrl/users/adminPassword";
+    private static final String JWT_MINUTES_TO_LIVE = "/shortUrl/users/jwtMinutesToLive";
+    private static final String JWT_SECRET_KEY = "/shortUrl/users/jwtSecretKey";
     private static final String SHORT_URL_USER_TABLE_NAME = "/shortUrl/users/tableName";
 
     private final SsmClient ssmClient;
 
     private String adminUsername;
     private String adminPassword;
+    private int jwtMinutesToLive;
+    private String jwtSecretKey;
     private String shortUrlUserTableName;
 
     /**
@@ -49,6 +53,22 @@ public class ParameterStoreReaderImpl implements ParameterStoreReader {
             adminPassword = getParameter(ADMIN_PASSWORD);
         }
         return adminPassword;
+    }
+
+    @Override
+    public int getJwtMinutesToLive() {
+        if (jwtMinutesToLive == 0) {
+            jwtMinutesToLive = Integer.parseInt(getParameter(JWT_MINUTES_TO_LIVE));
+        }
+        return jwtMinutesToLive;
+    }
+
+    @Override
+    public String getJwtSecretKey() {
+        if (jwtSecretKey == null) {
+            jwtSecretKey = getParameter(JWT_SECRET_KEY);
+        }
+        return jwtSecretKey;
     }
 
     @Override

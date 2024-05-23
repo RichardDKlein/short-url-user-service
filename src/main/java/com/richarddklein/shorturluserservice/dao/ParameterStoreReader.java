@@ -27,6 +27,10 @@ public interface ParameterStoreReader {
      */
     String getAdminPassword();
 
+    int getJwtMinutesToLive();
+
+    String getJwtSecretKey();
+
     /**
      * Get the name of the Short URL User table in the DynamoDB
      * database.

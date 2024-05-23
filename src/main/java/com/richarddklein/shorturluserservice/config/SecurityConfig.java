@@ -80,4 +80,10 @@ public class SecurityConfig {
     passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+    @Bean
+    public JwtUtils
+    jwtUtils() {
+        return new JwtUtilsImpl(parameterStoreReader);
+    }
 }
