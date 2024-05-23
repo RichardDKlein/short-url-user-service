@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
@@ -35,7 +35,8 @@ import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
  * acceptable throughput regardless of the user load.</p>
  *
  * <p>Each Short URL User item in the table consists of several attributes: `username`,
- * `password`, `role`, and `version`.</p>
+ * `password`, `role`, `name`, `email`, `lastLogin`, `accountCreationDate`, and `version`.
+ * </p>
  *
  * <p>The `username` attribute is the user name of the user. This name is chosen by
  * the user when he signs up with the Short URL User service. The service will ensure
@@ -90,7 +91,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     private static final String ADMIN_EMAIL = "RichardDKlein@gmail.com";
 
     private final ParameterStoreReader parameterStoreReader;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     private final DynamoDbClient dynamoDbClient;
     private final DynamoDbTable<ShortUrlUser> shortUrlUserTable;
 
@@ -114,7 +115,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
      */
     public ShortUrlUserDaoImpl(
             ParameterStoreReader parameterStoreReader,
-            BCryptPasswordEncoder passwordEncoder,
+            PasswordEncoder passwordEncoder,
             DynamoDbClient dynamoDbClient,
             DynamoDbTable<ShortUrlUser> shortUrlUserTable) {
 

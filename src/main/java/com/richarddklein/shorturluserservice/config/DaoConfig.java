@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
@@ -33,7 +33,7 @@ public class DaoConfig {
     ParameterStoreReader parameterStoreReader;
 
     @Autowired
-    BCryptPasswordEncoder passwordEncoder;
+    PasswordEncoder passwordEncoder;
 
     @Bean
     public ShortUrlUserDao
