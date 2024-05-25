@@ -73,3 +73,13 @@ Resources:
           Properties:
             Path: /dbinit
             Method: POST
+        SignupNewUserViaApiGatewayOrLocalHost:
+          Type: Api
+          Properties:
+            Path: /shorturl/users/signup
+            Method: POST
+        SignupNewUserViaCustomDomain:
+          Type: Api
+          Properties:
+            Path: /signup
+            Method: POST

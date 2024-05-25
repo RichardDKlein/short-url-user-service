@@ -5,6 +5,8 @@
 
 package com.richarddklein.shorturluserservice.entity;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import software.amazon.awssdk.enhanced.dynamodb.extensions.annotations.DynamoDbVersionAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
@@ -21,7 +23,7 @@ public class ShortUrlUser {
      * Javadoc for a detailed description of these attributes.
      */
     private String username;
-    private String encodedPassword;
+    private String password;
     private String role;
     private String name;
     private String email;
@@ -41,23 +43,26 @@ public class ShortUrlUser {
      * General constructor.
      *
      * @param username The username.
-     * @param encodedPassword The encoded password.
+     * @param plaintextPassword The password, in plaintext.
      * @param role The user's role.
      * @param name The user's name.
      * @param email The user's email address.
      * @param lastLogin The date/time the user last logged in.
      * @param accountCreationDate The date/time the user's account was created.
+     * @param passwordEncoder Dependency injection of the class instance that
+     *                        should be used to encode the plaintext password.
      */
     public ShortUrlUser(String username,
-                        String encodedPassword,
+                        String plaintextPassword,
                         String role,
                         String name,
                         String email,
                         String lastLogin,
-                        String accountCreationDate) {
+                        String accountCreationDate,
+                        PasswordEncoder passwordEncoder) {
 
         this.username = username;
-        this.encodedPassword = encodedPassword;
+        this.password = passwordEncoder.encode(plaintextPassword);
         this.role = role;
         this.name = name;
         this.email = email;
@@ -74,13 +79,13 @@ public class ShortUrlUser {
         this.username = username;
     }
 
-    @DynamoDbAttribute("encodedPassword")
-    public String getEncodedPassword() {
-        return encodedPassword;
+    @DynamoDbAttribute("password")
+    public String getPassword() {
+        return password;
     }
 
-    public void setEncodedPassword(String encodedPassword) {
-        this.encodedPassword = encodedPassword;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     @DynamoDbAttribute("role")
@@ -141,7 +146,7 @@ public class ShortUrlUser {
     public String toString() {
         return "ShortUrlUser{" +
                 "username='" + username + '\'' +
-                ", encodedPassword='" + encodedPassword + '\'' +
+                ", password='" + password + '\'' +
                 ", role='" + role + '\'' +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +

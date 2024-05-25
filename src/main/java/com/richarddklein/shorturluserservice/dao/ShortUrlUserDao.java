@@ -5,6 +5,9 @@
 
 package com.richarddklein.shorturluserservice.dao;
 
+import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
+import com.richarddklein.shorturluserservice.response.ShortUrlUserStatus;
+
 /**
  * The Short URL User DAO (Data Access Object) interface.
  *
@@ -20,4 +23,6 @@ public interface ShortUrlUserDao {
      * and create a new one, containing a single item for the admin.</p>
      */
     void initializeShortUrlUserRepository();
+
+    ShortUrlUserStatus signup(ShortUrlUser shortUrlUser);
 }

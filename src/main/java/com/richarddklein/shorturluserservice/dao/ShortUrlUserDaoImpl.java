@@ -9,11 +9,15 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
+import com.richarddklein.shorturluserservice.response.ShortUrlUserStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
+import org.springframework.web.bind.annotation.RequestBody;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.model.CreateTableEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedResponse;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
@@ -46,10 +50,10 @@ import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
  * Because it has a uniform hash distribution, it can be used to quickly locate the
  * database partition containing the corresponding Short URL User item.</p>
  *
- * <p>The `encodedPassword` attribute of each Short URL User item is the encoded
- * password for the user. The password is specified by the user in plain text when he
- * signs up with the Short URL User service. The password is then salted and encoded
- * by Spring Security before being stored in the Short URL User table.</p>
+ * <p>The `password` attribute of each Short URL User item is the user's password.
+ * The password is specified by the user in plain text when he signs up with the
+ * Short URL User service. The password is then salted and encoded before being
+ * stored in the Short URL User table.</p>
  *
  * <p>The `role` attribute of each Short URL User item is specifies the user's role,
  * which in turn specifies the operations the user is permitted to perform. A user
@@ -134,6 +138,27 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         addAdminToShortUrlUserTable();
     }
 
+    @Override
+    public ShortUrlUserStatus
+    signup(@RequestBody ShortUrlUser shortUrlUser) {
+        String plaintextPassword = shortUrlUser.getPassword();
+        if (plaintextPassword == null || plaintextPassword.isEmpty()) {
+            return ShortUrlUserStatus.MISSING_PASSWORD;
+        }
+        shortUrlUser.setPassword(passwordEncoder.encode(plaintextPassword));
+
+        PutItemEnhancedResponse<ShortUrlUser> response =
+                shortUrlUserTable.putItemWithResponse(req -> req
+                        .item(shortUrlUser)
+                        .conditionExpression(Expression.builder()
+                                .expression("attribute_not_exists(username)")
+                                .build())
+                        .returnConsumedCapacity(ReturnConsumedCapacity.TOTAL));
+        return (response.consumedCapacity().capacityUnits() > 0) ?
+                ShortUrlUserStatus.SUCCESS :
+                ShortUrlUserStatus.USER_ALREADY_EXISTS;
+    }
+
     // ------------------------------------------------------------------------
     // PRIVATE METHODS
     // ------------------------------------------------------------------------
@@ -188,13 +213,14 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         System.out.print("Adding the Admin to the Short URL User table ...");
         ShortUrlUser admin = new ShortUrlUser(
                 parameterStoreReader.getAdminUsername(),
-                passwordEncoder.encode(parameterStoreReader.getAdminPassword()),
+                parameterStoreReader.getAdminPassword(),
                 ADMIN_ROLE,
                 ADMIN_NAME,
                 ADMIN_EMAIL,
                 "hasn't logged in yet",
                 LocalDateTime.now().format(
-                        DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss"))
+                        DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")),
+                passwordEncoder
         );
         shortUrlUserTable.putItem(admin);
         System.out.println(" done!");

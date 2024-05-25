@@ -5,6 +5,8 @@
 
 package com.richarddklein.shorturluserservice.config;
 
+import com.richarddklein.shorturluserservice.dao.ShortUrlUserDao;
+import com.richarddklein.shorturluserservice.security.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,11 +23,14 @@ import com.richarddklein.shorturluserservice.service.ShortUrlUserServiceImpl;
 @Configuration
 public class ServiceConfig {
     @Autowired
-    DaoConfig daoConfig;
+    ShortUrlUserDao shortUrlUserDao;
+
+    @Autowired
+    JwtUtils jwtUtils;
 
     @Bean
     public ShortUrlUserService
     shortUrlUserService() {
-        return new ShortUrlUserServiceImpl(daoConfig.shortUrlUserDao());
+        return new ShortUrlUserServiceImpl(shortUrlUserDao, jwtUtils);
     }
 }

@@ -90,7 +90,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
             httpStatus = HttpStatus.BAD_REQUEST;
             statusResponse = new StatusResponse(
                     ShortUrlUserStatus.MISSING_PASSWORD,
-                    String.format("A password must be specified")
+                    String.format("A non-empty password must be specified")
             );
         } else {
             httpStatus = HttpStatus.OK;
