@@ -6,6 +6,7 @@
 package com.richarddklein.shorturluserservice.service;
 
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
+import com.richarddklein.shorturluserservice.response.ShortUrlUserStatus;
 
 /**
  * The Short URL User Service interface.
@@ -22,5 +23,5 @@ public interface ShortUrlUserService {
      */
     void initializeShortUrlUserRepository();
 
-    Object[] signup(ShortUrlUser shortUrlUser);
+    ShortUrlUserStatus signup(ShortUrlUser shortUrlUser);
 }

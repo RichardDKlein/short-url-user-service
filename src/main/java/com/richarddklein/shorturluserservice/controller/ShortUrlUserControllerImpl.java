@@ -69,15 +69,13 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     }
 
     @Override
-    public ResponseEntity<StatusAndJwtTokenResponse>
+    public ResponseEntity<StatusResponse>
     signup(ShortUrlUser shortUrlUser) {
-        Object[] statusAndJwtToken = shortUrlUserService.signup(shortUrlUser);
+        ShortUrlUserStatus shortUrlUserStatus =
+                shortUrlUserService.signup(shortUrlUser);
 
         HttpStatus httpStatus;
         StatusResponse statusResponse;
-        ShortUrlUserStatus shortUrlUserStatus =
-                (ShortUrlUserStatus)statusAndJwtToken[0];
-        String jwtToken = (String)statusAndJwtToken[1];
 
         if (shortUrlUserStatus == ShortUrlUserStatus.USER_ALREADY_EXISTS) {
             httpStatus = HttpStatus.CONFLICT;
@@ -97,15 +95,51 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
             httpStatus = HttpStatus.OK;
             statusResponse = new StatusResponse(
                     ShortUrlUserStatus.SUCCESS,
-                    "User account successfully created"
+                    String.format("User '%s' successfully created",
+                            shortUrlUser.getUsername())
             );
         }
-
-        StatusAndJwtTokenResponse statusAndJwtTokenResponse =
-                new StatusAndJwtTokenResponse(statusResponse, jwtToken);
-
-        return new ResponseEntity<>(statusAndJwtTokenResponse, httpStatus);
+        return new ResponseEntity<>(statusResponse, httpStatus);
     }
+
+//    @Override
+//    public ResponseEntity<StatusAndJwtTokenResponse>
+//    signup(ShortUrlUser shortUrlUser) {
+//        Object[] statusAndJwtToken = shortUrlUserService.signup(shortUrlUser);
+//
+//        HttpStatus httpStatus;
+//        StatusResponse statusResponse;
+//        ShortUrlUserStatus shortUrlUserStatus =
+//                (ShortUrlUserStatus)statusAndJwtToken[0];
+//        String jwtToken = (String)statusAndJwtToken[1];
+//
+//        if (shortUrlUserStatus == ShortUrlUserStatus.USER_ALREADY_EXISTS) {
+//            httpStatus = HttpStatus.CONFLICT;
+//            statusResponse = new StatusResponse(
+//                    ShortUrlUserStatus.USER_ALREADY_EXISTS,
+//                    String.format("User '%s' already exists",
+//                            shortUrlUser.getUsername())
+//            );
+//        } else if (shortUrlUserStatus ==
+//                ShortUrlUserStatus.MISSING_PASSWORD) {
+//            httpStatus = HttpStatus.BAD_REQUEST;
+//            statusResponse = new StatusResponse(
+//                    ShortUrlUserStatus.MISSING_PASSWORD,
+//                    String.format("A non-empty password must be specified")
+//            );
+//        } else {
+//            httpStatus = HttpStatus.OK;
+//            statusResponse = new StatusResponse(
+//                    ShortUrlUserStatus.SUCCESS,
+//                    "User account successfully created"
+//            );
+//        }
+//
+//        StatusAndJwtTokenResponse statusAndJwtTokenResponse =
+//                new StatusAndJwtTokenResponse(statusResponse, jwtToken);
+//
+//        return new ResponseEntity<>(statusAndJwtTokenResponse, httpStatus);
+//    }
 
     // ------------------------------------------------------------------------
     // PRIVATE METHODS

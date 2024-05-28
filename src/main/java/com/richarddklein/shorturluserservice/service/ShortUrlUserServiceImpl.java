@@ -47,14 +47,19 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
     }
 
     @Override
-    public Object[] signup(ShortUrlUser shortUrlUser) {
-        ShortUrlUserStatus status = shortUrlUserDao.signup(shortUrlUser);
-        if (status != ShortUrlUserStatus.SUCCESS) {
-            return new Object[] {status, null};
-        }
-        String jwtToken = jwtUtils.generateToken(shortUrlUser);
-        return new Object[] {ShortUrlUserStatus.SUCCESS, jwtToken};
+    public ShortUrlUserStatus signup(ShortUrlUser shortUrlUser) {
+        return shortUrlUserDao.signup(shortUrlUser);
     }
+
+//    @Override
+//    public Object[] signup(ShortUrlUser shortUrlUser) {
+//        ShortUrlUserStatus status = shortUrlUserDao.signup(shortUrlUser);
+//        if (status != ShortUrlUserStatus.SUCCESS) {
+//            return new Object[] {status, null};
+//        }
+//        String jwtToken = jwtUtils.generateToken(shortUrlUser);
+//        return new Object[] {ShortUrlUserStatus.SUCCESS, jwtToken};
+//    }
 
     // ------------------------------------------------------------------------
     // PRIVATE METHODS
