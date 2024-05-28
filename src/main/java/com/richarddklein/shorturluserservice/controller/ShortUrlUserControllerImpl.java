@@ -83,7 +83,8 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
             httpStatus = HttpStatus.CONFLICT;
             statusResponse = new StatusResponse(
                     ShortUrlUserStatus.USER_ALREADY_EXISTS,
-                    String.format("User already exists")
+                    String.format("User '%s' already exists",
+                            shortUrlUser.getUsername())
             );
         } else if (shortUrlUserStatus ==
                 ShortUrlUserStatus.MISSING_PASSWORD) {

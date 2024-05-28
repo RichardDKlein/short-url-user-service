@@ -147,16 +147,17 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         }
         shortUrlUser.setPassword(passwordEncoder.encode(plaintextPassword));
 
-        PutItemEnhancedResponse<ShortUrlUser> response =
-                shortUrlUserTable.putItemWithResponse(req -> req
-                        .item(shortUrlUser)
-                        .conditionExpression(Expression.builder()
-                                .expression("attribute_not_exists(username)")
-                                .build())
-                        .returnConsumedCapacity(ReturnConsumedCapacity.TOTAL));
-        return (response.consumedCapacity().capacityUnits() > 0) ?
-                ShortUrlUserStatus.SUCCESS :
-                ShortUrlUserStatus.USER_ALREADY_EXISTS;
+        try {
+            shortUrlUserTable.putItem(req -> req
+                    .item(shortUrlUser)
+                    .conditionExpression(Expression.builder()
+                            .expression("attribute_not_exists(username)")
+                            .build())
+                    .returnConsumedCapacity(ReturnConsumedCapacity.TOTAL));
+            return ShortUrlUserStatus.SUCCESS;
+        } catch (ConditionalCheckFailedException e) {
+            return ShortUrlUserStatus.USER_ALREADY_EXISTS;
+        }
     }
 
     // ------------------------------------------------------------------------
