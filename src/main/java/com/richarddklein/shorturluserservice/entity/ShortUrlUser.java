@@ -5,6 +5,9 @@
 
 package com.richarddklein.shorturluserservice.entity;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import software.amazon.awssdk.enhanced.dynamodb.extensions.annotations.DynamoDbVersionAttribute;
@@ -40,7 +43,44 @@ public class ShortUrlUser {
     }
 
     /**
-     * General constructor.
+     * General constructor #1.
+     *
+     * Call this constructor to create an account for a new user. The
+     * `lastLogin` and `accountCreationDate` fields will be generated
+     * automatically.
+     *
+     * @param username The username.
+     * @param plaintextPassword The password, in plaintext.
+     * @param role The user's role.
+     * @param name The user's name.
+     * @param email The user's email address.
+     * @param passwordEncoder Dependency injection of the class instance that
+     *                        should be used to encode the plaintext password.
+     */
+    public ShortUrlUser(
+            String username,
+            String plaintextPassword,
+            String role,
+            String name,
+            String email,
+            PasswordEncoder passwordEncoder) {
+
+        this(
+                username,
+                plaintextPassword,
+                role,
+                name,
+                email,
+                "hasn't logged in yet",
+                LocalDateTime.now().format(
+                        DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")),
+                passwordEncoder);
+    }
+
+    /**
+     * General constructor #2.
+     *
+     * Call this constructor if you want to set all fields explicitly.
      *
      * @param username The username.
      * @param plaintextPassword The password, in plaintext.

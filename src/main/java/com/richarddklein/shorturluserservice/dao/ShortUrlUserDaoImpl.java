@@ -93,6 +93,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     private static final String ADMIN_ROLE = "ADMIN";
     private static final String ADMIN_NAME = "Richard Klein";
     private static final String ADMIN_EMAIL = "RichardDKlein@gmail.com";
+    private static final String USER_ROLE = "USER";
 
     private final ParameterStoreReader parameterStoreReader;
     private final PasswordEncoder passwordEncoder;
@@ -145,11 +146,18 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         if (plaintextPassword == null || plaintextPassword.isEmpty()) {
             return ShortUrlUserStatus.MISSING_PASSWORD;
         }
-        shortUrlUser.setPassword(passwordEncoder.encode(plaintextPassword));
+        ShortUrlUser shortUrlUserCopy = new ShortUrlUser(
+                shortUrlUser.getUsername(),
+                shortUrlUser.getPassword(),
+                USER_ROLE,
+                shortUrlUser.getName(),
+                shortUrlUser.getEmail(),
+                passwordEncoder
+        );
 
         try {
             shortUrlUserTable.putItem(req -> req
-                    .item(shortUrlUser)
+                    .item(shortUrlUserCopy)
                     .conditionExpression(Expression.builder()
                             .expression("attribute_not_exists(username)")
                             .build())
@@ -218,9 +226,6 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                 ADMIN_ROLE,
                 ADMIN_NAME,
                 ADMIN_EMAIL,
-                "hasn't logged in yet",
-                LocalDateTime.now().format(
-                        DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")),
                 passwordEncoder
         );
         shortUrlUserTable.putItem(admin);
