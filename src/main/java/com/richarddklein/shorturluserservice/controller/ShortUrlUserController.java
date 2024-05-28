@@ -43,4 +43,8 @@ public interface ShortUrlUserController {
     @PostMapping("/signup")
     ResponseEntity<StatusResponse>
     signup(@RequestBody ShortUrlUser shortUrlUser);
+
+    @PatchMapping("/login")
+    ResponseEntity<StatusAndJwtTokenResponse>
+    login(@RequestBody ShortUrlUser shortUrlUser);
 }

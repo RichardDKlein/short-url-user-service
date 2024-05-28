@@ -24,4 +24,6 @@ public interface ShortUrlUserService {
     void initializeShortUrlUserRepository();
 
     ShortUrlUserStatus signup(ShortUrlUser shortUrlUser);
+
+    Object[] login(ShortUrlUser shortUrlUser);
 }

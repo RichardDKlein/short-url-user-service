@@ -168,6 +168,18 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         }
     }
 
+    @Override
+    public ShortUrlUserStatus login(ShortUrlUser shortUrlUser) {
+        ShortUrlUser item = shortUrlUserTable.getItem(shortUrlUser);
+        if (item == null) {
+            return ShortUrlUserStatus.NO_SUCH_USER;
+        }
+        item.setLastLogin(LocalDateTime.now().format(
+                DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
+        shortUrlUserTable.putItem(item);
+        return ShortUrlUserStatus.SUCCESS;
+    }
+
     // ------------------------------------------------------------------------
     // PRIVATE METHODS
     // ------------------------------------------------------------------------

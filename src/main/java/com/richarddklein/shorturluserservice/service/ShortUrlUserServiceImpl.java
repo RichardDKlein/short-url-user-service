@@ -51,15 +51,15 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
         return shortUrlUserDao.signup(shortUrlUser);
     }
 
-//    @Override
-//    public Object[] signup(ShortUrlUser shortUrlUser) {
-//        ShortUrlUserStatus status = shortUrlUserDao.signup(shortUrlUser);
-//        if (status != ShortUrlUserStatus.SUCCESS) {
-//            return new Object[] {status, null};
-//        }
-//        String jwtToken = jwtUtils.generateToken(shortUrlUser);
-//        return new Object[] {ShortUrlUserStatus.SUCCESS, jwtToken};
-//    }
+    @Override
+    public Object[] login(ShortUrlUser shortUrlUser) {
+        ShortUrlUserStatus status = shortUrlUserDao.login(shortUrlUser);
+        if (status != ShortUrlUserStatus.SUCCESS) {
+            return new Object[] {status, null};
+        }
+        String jwtToken = jwtUtils.generateToken(shortUrlUser);
+        return new Object[] {ShortUrlUserStatus.SUCCESS, jwtToken};
+    }
 
     // ------------------------------------------------------------------------
     // PRIVATE METHODS

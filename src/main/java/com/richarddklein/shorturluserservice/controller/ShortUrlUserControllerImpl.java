@@ -102,44 +102,45 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
         return new ResponseEntity<>(statusResponse, httpStatus);
     }
 
-//    @Override
-//    public ResponseEntity<StatusAndJwtTokenResponse>
-//    signup(ShortUrlUser shortUrlUser) {
-//        Object[] statusAndJwtToken = shortUrlUserService.signup(shortUrlUser);
-//
-//        HttpStatus httpStatus;
-//        StatusResponse statusResponse;
-//        ShortUrlUserStatus shortUrlUserStatus =
-//                (ShortUrlUserStatus)statusAndJwtToken[0];
-//        String jwtToken = (String)statusAndJwtToken[1];
-//
-//        if (shortUrlUserStatus == ShortUrlUserStatus.USER_ALREADY_EXISTS) {
-//            httpStatus = HttpStatus.CONFLICT;
-//            statusResponse = new StatusResponse(
-//                    ShortUrlUserStatus.USER_ALREADY_EXISTS,
-//                    String.format("User '%s' already exists",
-//                            shortUrlUser.getUsername())
-//            );
-//        } else if (shortUrlUserStatus ==
-//                ShortUrlUserStatus.MISSING_PASSWORD) {
-//            httpStatus = HttpStatus.BAD_REQUEST;
-//            statusResponse = new StatusResponse(
-//                    ShortUrlUserStatus.MISSING_PASSWORD,
-//                    String.format("A non-empty password must be specified")
-//            );
-//        } else {
-//            httpStatus = HttpStatus.OK;
-//            statusResponse = new StatusResponse(
-//                    ShortUrlUserStatus.SUCCESS,
-//                    "User account successfully created"
-//            );
-//        }
-//
-//        StatusAndJwtTokenResponse statusAndJwtTokenResponse =
-//                new StatusAndJwtTokenResponse(statusResponse, jwtToken);
-//
-//        return new ResponseEntity<>(statusAndJwtTokenResponse, httpStatus);
-//    }
+    @Override
+    public ResponseEntity<StatusAndJwtTokenResponse>
+    login(ShortUrlUser shortUrlUser) {
+        Object[] statusAndJwtToken = shortUrlUserService.login(shortUrlUser);
+
+        HttpStatus httpStatus;
+        StatusResponse statusResponse;
+        ShortUrlUserStatus shortUrlUserStatus =
+                (ShortUrlUserStatus)statusAndJwtToken[0];
+        String jwtToken = (String)statusAndJwtToken[1];
+
+        if (shortUrlUserStatus == ShortUrlUserStatus.NO_SUCH_USER) {
+            httpStatus = HttpStatus.UNAUTHORIZED;
+            statusResponse = new StatusResponse(
+                    ShortUrlUserStatus.NO_SUCH_USER,
+                    String.format("User '%s' does not exist",
+                            shortUrlUser.getUsername())
+            );
+        } else if (shortUrlUserStatus ==
+                ShortUrlUserStatus.WRONG_PASSWORD) {
+            httpStatus = HttpStatus.UNAUTHORIZED;
+            statusResponse = new StatusResponse(
+                    ShortUrlUserStatus.WRONG_PASSWORD,
+                    String.format("The supplied password is not correct")
+            );
+        } else {
+            httpStatus = HttpStatus.OK;
+            statusResponse = new StatusResponse(
+                    ShortUrlUserStatus.SUCCESS,
+                    String.format("User '%s' successfully logged in",
+                            shortUrlUser.getUsername())
+            );
+        }
+
+        StatusAndJwtTokenResponse statusAndJwtTokenResponse =
+                new StatusAndJwtTokenResponse(statusResponse, jwtToken);
+
+        return new ResponseEntity<>(statusAndJwtTokenResponse, httpStatus);
+    }
 
     // ------------------------------------------------------------------------
     // PRIVATE METHODS

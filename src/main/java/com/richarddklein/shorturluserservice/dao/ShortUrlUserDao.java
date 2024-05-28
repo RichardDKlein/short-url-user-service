@@ -25,4 +25,6 @@ public interface ShortUrlUserDao {
     void initializeShortUrlUserRepository();
 
     ShortUrlUserStatus signup(ShortUrlUser shortUrlUser);
+
+    ShortUrlUserStatus login(ShortUrlUser shortUrlUser);
 }
