@@ -43,7 +43,23 @@ public class ShortUrlUser {
     }
 
     /**
-     * General constructor #1.
+     * General constructor.
+     *
+     * Call this constructor when you just want to specify the
+     * `username` and `password` fields.
+     *
+     * @param username The username.
+     * @param plaintextPassword The password, in plaintext.
+     */
+    public ShortUrlUser(
+            String username,
+            String plaintextPassword) {
+
+        this.username = username;
+        this.password = plaintextPassword;
+    }
+    /**
+     * General constructor.
      *
      * Call this constructor to create an account for a new user. The
      * `lastLogin` and `accountCreationDate` fields will be generated
@@ -78,7 +94,7 @@ public class ShortUrlUser {
     }
 
     /**
-     * General constructor #2.
+     * General constructor.
      *
      * Call this constructor if you want to set all fields explicitly.
      *

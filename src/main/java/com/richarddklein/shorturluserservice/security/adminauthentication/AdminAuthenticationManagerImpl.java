@@ -3,7 +3,7 @@
  * (Copyright 2024 by Richard Klein)
  */
 
-package com.richarddklein.shorturluserservice.security;
+package com.richarddklein.shorturluserservice.security.adminauthentication;
 
 import com.richarddklein.shorturluserservice.dao.ParameterStoreReader;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ public class AdminAuthenticationManagerImpl implements AdminAuthenticationManage
 
     @Override
     public Mono<Authentication> authenticate(Authentication authentication) {
-        System.out.println("====> Entering ReactiveAuthenticationManager ...");
+        System.out.println("====> Entering AdminAuthenticationManagerImpl ...");
         if (authentication.getPrincipal().equals(parameterStoreReader.getAdminUsername()) &&
                 authentication.getCredentials().equals(parameterStoreReader.getAdminPassword())) {
             return Mono.just(authentication);

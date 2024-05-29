@@ -3,7 +3,7 @@
  * (Copyright 2024 by Richard Klein)
  */
 
-package com.richarddklein.shorturluserservice.security;
+package com.richarddklein.shorturluserservice.security.adminauthentication;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,7 +25,7 @@ public class AdminAuthenticationFailureHandlerImpl implements AdminAuthenticatio
     public Mono<Void> onAuthenticationFailure(WebFilterExchange webFilterExchange,
                                               AuthenticationException exception) {
 
-        System.out.println("====> Entering ServerAuthenticationFailureHandler ...");
+        System.out.println("====> Entering AdminAuthenticationFailureHandlerImpl ...");
         ShortUrlUserStatus status = null;
         String message = null;
 

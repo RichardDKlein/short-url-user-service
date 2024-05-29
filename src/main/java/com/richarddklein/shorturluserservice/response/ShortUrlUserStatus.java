@@ -14,10 +14,10 @@ package com.richarddklein.shorturluserservice.response;
 public enum ShortUrlUserStatus {
     SUCCESS,
     INVALID_ADMIN_CREDENTIALS,
+    INVALID_USER_CREDENTIALS,
     MISSING_AUTHORIZATION_HEADER,
     MISSING_PASSWORD,
-    NO_SUCH_USER,
     NOT_ON_LOCAL_MACHINE,
+    UNKNOWN_ERROR,
     USER_ALREADY_EXISTS,
-    WRONG_PASSWORD,
 }

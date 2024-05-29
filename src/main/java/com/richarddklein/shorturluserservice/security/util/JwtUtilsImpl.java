@@ -3,17 +3,18 @@
  * (Copyright 2024 by Richard Klein)
  */
 
-package com.richarddklein.shorturluserservice.security;
+package com.richarddklein.shorturluserservice.security.util;
 
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import com.richarddklein.shorturluserservice.dao.ParameterStoreReader;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import io.jsonwebtoken.security.Keys;
@@ -36,9 +37,7 @@ public class JwtUtilsImpl implements JwtUtils {
                 .claim("role", shortUrlUser.getRole())
                 .issuedAt(now)
                 .expiration(expiryDate)
-                .signWith(
-                        SignatureAlgorithm.HS512,
-                        parameterStoreReader.getJwtSecretKey())
+                .signWith(getKeyFromString(parameterStoreReader.getJwtSecretKey()))
                 .compact();
     }
 
@@ -49,5 +48,10 @@ public class JwtUtilsImpl implements JwtUtils {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    private Key getKeyFromString(String keyString) {
+        byte[] keyBytes = keyString.getBytes(StandardCharsets.UTF_8);
+        return new SecretKeySpec(keyBytes, Jwts.SIG.HS256.toString());
     }
 }

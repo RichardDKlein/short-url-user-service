@@ -170,14 +170,10 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
 
     @Override
     public ShortUrlUserStatus login(ShortUrlUser shortUrlUser) {
+        // The username and password have already been authenticated
+        // by `UserLoginAuthenticationManagerImpl`. Now we just need
+        // to update the `lastLogin` property.
         ShortUrlUser item = shortUrlUserTable.getItem(shortUrlUser);
-        if (item == null) {
-            return ShortUrlUserStatus.NO_SUCH_USER;
-        }
-        if (!passwordEncoder.matches(
-                shortUrlUser.getPassword(), item.getPassword())) {
-            return ShortUrlUserStatus.WRONG_PASSWORD;
-        }
         item.setLastLogin(LocalDateTime.now().format(
                 DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
         shortUrlUserTable.putItem(item);

@@ -3,13 +3,13 @@
  * (Copyright 2024 by Richard Klein)
  */
 
-package com.richarddklein.shorturluserservice.security;
+package com.richarddklein.shorturluserservice.security.userloginauthentication;
 
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 
-public class AdminAuthenticationWebFilter extends AuthenticationWebFilter {
-    public AdminAuthenticationWebFilter(ReactiveAuthenticationManager authenticationManager) {
+public class UserLoginAuthenticationWebFilter extends AuthenticationWebFilter {
+    public UserLoginAuthenticationWebFilter(ReactiveAuthenticationManager authenticationManager) {
         super(authenticationManager);
     }
 }

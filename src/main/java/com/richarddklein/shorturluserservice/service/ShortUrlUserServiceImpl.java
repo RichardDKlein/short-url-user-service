@@ -7,7 +7,7 @@ package com.richarddklein.shorturluserservice.service;
 
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.response.ShortUrlUserStatus;
-import com.richarddklein.shorturluserservice.security.JwtUtils;
+import com.richarddklein.shorturluserservice.security.util.JwtUtils;
 import org.springframework.stereotype.Service;
 
 import com.richarddklein.shorturluserservice.dao.ShortUrlUserDao;

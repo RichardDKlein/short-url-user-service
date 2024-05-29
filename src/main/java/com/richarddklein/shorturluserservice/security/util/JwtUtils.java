@@ -3,7 +3,7 @@
  * (Copyright 2024 by Richard Klein)
  */
 
-package com.richarddklein.shorturluserservice.security;
+package com.richarddklein.shorturluserservice.security.util;
 
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import io.jsonwebtoken.Claims;

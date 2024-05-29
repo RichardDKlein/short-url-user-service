@@ -3,9 +3,9 @@
  * (Copyright 2024 by Richard Klein)
  */
 
-package com.richarddklein.shorturluserservice.security;
+package com.richarddklein.shorturluserservice.security.userloginauthentication;
 
 import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
 
-public interface AdminAuthenticationConverter extends ServerAuthenticationConverter {
+public interface UserLoginAuthenticationConverter extends ServerAuthenticationConverter {
 }

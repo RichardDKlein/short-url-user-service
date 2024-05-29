@@ -87,9 +87,9 @@ Resources:
           Type: Api
           Properties:
             Path: /shorturl/users/login
-            Method: PATCH
+            Method: POST
         LoginViaCustomDomain:
           Type: Api
           Properties:
             Path: /login
-            Method: PATCH
+            Method: POST
