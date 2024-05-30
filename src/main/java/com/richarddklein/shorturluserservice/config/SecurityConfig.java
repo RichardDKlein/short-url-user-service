@@ -50,8 +50,8 @@ public class SecurityConfig {
                 // Authorize all endpoints unconditionally.
                 .authorizeExchange(authorize -> authorize.anyExchange().permitAll())
 
-                .addFilterAt(adminAuthenticationWebFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
-                .addFilterAt(userLoginAuthenticationWebFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
+//                .addFilterAt(adminAuthenticationWebFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
+//                .addFilterAt(userLoginAuthenticationWebFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
 
                 .build();
     }
