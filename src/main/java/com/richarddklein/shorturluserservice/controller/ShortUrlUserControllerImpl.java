@@ -105,11 +105,6 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     @Override
     public ResponseEntity<StatusAndJwtTokenResponse>
     login(ShortUrlUser shortUrlUser) {
-        // The `UserLoginAuthenticationManagerImpl` class will authenticate
-        // the user credentials, and respond immediately to the HTTP client
-        // with an error if they are invalid.
-
-        // If we get to this point, the user credentials are valid.
         Object[] statusAndJwtToken = shortUrlUserService.login(shortUrlUser);
 
         HttpStatus httpStatus;
@@ -118,18 +113,27 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                 (ShortUrlUserStatus)statusAndJwtToken[0];
         String jwtToken = (String)statusAndJwtToken[1];
 
-        if (shortUrlUserStatus == ShortUrlUserStatus.SUCCESS) {
+        if (shortUrlUserStatus == ShortUrlUserStatus.NO_SUCH_USER) {
+            httpStatus = HttpStatus.UNAUTHORIZED;
+            statusResponse = new StatusResponse(
+                    ShortUrlUserStatus.NO_SUCH_USER,
+                    String.format("User '%s' does not exist",
+                            shortUrlUser.getUsername())
+            );
+        } else if (shortUrlUserStatus ==
+                ShortUrlUserStatus.WRONG_PASSWORD) {
+            httpStatus = HttpStatus.UNAUTHORIZED;
+            statusResponse = new StatusResponse(
+                    ShortUrlUserStatus.WRONG_PASSWORD,
+                    String.format("The supplied password is not correct")
+            );
+        } else {
             httpStatus = HttpStatus.OK;
             statusResponse = new StatusResponse(
                     ShortUrlUserStatus.SUCCESS,
                     String.format("User '%s' successfully logged in",
                             shortUrlUser.getUsername())
             );
-        } else {
-            httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-            statusResponse = new StatusResponse(
-                    ShortUrlUserStatus.UNKNOWN_ERROR,
-                    "An unexpected error occurred");
         }
 
         StatusAndJwtTokenResponse statusAndJwtTokenResponse =

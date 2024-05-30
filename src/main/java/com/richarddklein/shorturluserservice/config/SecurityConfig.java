@@ -7,7 +7,6 @@ package com.richarddklein.shorturluserservice.config;
 
 import com.richarddklein.shorturluserservice.dao.ParameterStoreReader;
 import com.richarddklein.shorturluserservice.security.adminauthentication.*;
-import com.richarddklein.shorturluserservice.security.userloginauthentication.*;
 import com.richarddklein.shorturluserservice.security.util.JwtUtils;
 import com.richarddklein.shorturluserservice.security.util.JwtUtilsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
-import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -49,9 +47,6 @@ public class SecurityConfig {
 
                 // Authorize all endpoints unconditionally.
                 .authorizeExchange(authorize -> authorize.anyExchange().permitAll())
-
-//                .addFilterAt(adminAuthenticationWebFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
-//                .addFilterAt(userLoginAuthenticationWebFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
 
                 .build();
     }
@@ -86,37 +81,6 @@ public class SecurityConfig {
     public AdminAuthenticationFailureHandler
     adminAuthenticationFailureHandler() {
         return new AdminAuthenticationFailureHandlerImpl();
-    }
-
-    // ------------------------------------------------------------------------
-    // USER LOGIN WEB FILTER
-    // ------------------------------------------------------------------------
-
-    @Bean
-    public UserLoginAuthenticationWebFilter
-    userLoginAuthenticationWebFilter() {
-        return new UserLoginAuthenticationWebFilterImpl(
-                userLoginAuthenticationManager(),
-                userLoginAuthenticationConverter(),
-                userLoginAuthenticationFailureHandler());
-    }
-
-    @Bean
-    public UserLoginAuthenticationManager
-    userLoginAuthenticationManager() {
-        return new UserLoginAuthenticationManagerImpl();
-    }
-
-    @Bean
-    public UserLoginAuthenticationConverter
-    userLoginAuthenticationConverter() {
-        return new UserLoginAuthenticationConverterImpl();
-    }
-
-    @Bean
-    public UserLoginAuthenticationFailureHandler
-    userLoginAuthenticationFailureHandler() {
-        return new UserLoginAuthenticationFailureHandlerImpl();
     }
 
     // ------------------------------------------------------------------------

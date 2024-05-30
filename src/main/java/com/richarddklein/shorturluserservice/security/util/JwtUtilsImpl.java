@@ -5,18 +5,17 @@
 
 package com.richarddklein.shorturluserservice.security.util;
 
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
-
-import javax.crypto.spec.SecretKeySpec;
 
 import com.richarddklein.shorturluserservice.dao.ParameterStoreReader;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 public class JwtUtilsImpl implements JwtUtils {
@@ -32,12 +31,16 @@ public class JwtUtilsImpl implements JwtUtils {
                 parameterStoreReader.getJwtMinutesToLive());
         Date expiryDate = new Date(now.getTime() + timeToLive);
 
+        byte[] keyBytes = Decoders.BASE64.decode(
+                parameterStoreReader.getJwtSecretKey());
+        Key key = Keys.hmacShaKeyFor(keyBytes);
+
         return Jwts.builder()
                 .subject(shortUrlUser.getUsername())
                 .claim("role", shortUrlUser.getRole())
                 .issuedAt(now)
                 .expiration(expiryDate)
-                .signWith(getKeyFromString(parameterStoreReader.getJwtSecretKey()))
+                .signWith(key)
                 .compact();
     }
 
@@ -48,10 +51,5 @@ public class JwtUtilsImpl implements JwtUtils {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-    }
-
-    private Key getKeyFromString(String keyString) {
-        byte[] keyBytes = keyString.getBytes(StandardCharsets.UTF_8);
-        return new SecretKeySpec(keyBytes, Jwts.SIG.HS256.toString());
     }
 }
