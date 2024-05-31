@@ -11,8 +11,4 @@ public class MissingAuthorizationHeaderException extends AuthenticationException
     public MissingAuthorizationHeaderException(String msg) {
         super(msg);
     }
-
-    public MissingAuthorizationHeaderException(String msg, Throwable t) {
-        super(msg, t);
-    }
 }

@@ -5,45 +5,50 @@
 
 package com.richarddklein.shorturluserservice.security.jwttokenauthentication;
 
-import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
 
-import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
-import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.server.ServerWebExchange;
 
 import reactor.core.publisher.Mono;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.Claims;
+
+import com.richarddklein.shorturluserservice.exception.MissingAuthorizationHeaderException;
+import com.richarddklein.shorturluserservice.security.util.JwtUtils;
 
 public class JwtTokenAuthenticationConverterImpl implements JwtTokenAuthenticationConverter {
+    @Autowired
+    private JwtUtils jwtUtils;
+
     @Override
     public Mono<Authentication> convert(ServerWebExchange exchange) {
         System.out.println("====> Entering JwtTokenAuthenticationConverterImpl ...");
 
-//        ServerHttpRequest request = exchange.getRequest();
-//        Mono<DataBuffer> body = DataBufferUtils.join(request.getBody());
+        String authorizationHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            return Mono.error(new MissingAuthorizationHeaderException("Missing authorization header"));
+        }
 
-        return DataBufferUtils.join(exchange.getRequest().getBody()).flatMap(dataBuffer -> {
-            try {
-                // Read the request body
-                byte[] bytes = new byte[dataBuffer.readableByteCount()];
-                dataBuffer.read(bytes);
-                // Release the buffer
-                DataBufferUtils.release(dataBuffer);
-                // Parse the request body to ShortUrlUser
-                String body = new String(bytes, StandardCharsets.UTF_8);
-                ObjectMapper objectMapper = new ObjectMapper();
-                ShortUrlUser shortUrlUser = objectMapper.readValue(body, ShortUrlUser.class);
-                String username = shortUrlUser.getUsername();
-                String plaintextPassword = shortUrlUser.getPassword();
-                // Return the Authentication object
-                return Mono.just(new UsernamePasswordAuthenticationToken(username, plaintextPassword));
-            } catch (Exception e) {
-                System.out.println("====> Exception: " + e.getMessage());
-                return Mono.error(e);
-            }
-        });
+        String jwtToken = authorizationHeader.substring("Bearer ".length()).trim();
+
+        try {
+            Claims claims = jwtUtils.getClaimsFromToken(jwtToken);
+            String username = claims.getSubject();
+            String role = claims.get("role", String.class);
+
+            List<SimpleGrantedAuthority> authorities =
+                    Collections.singletonList(new SimpleGrantedAuthority(role));
+            UsernamePasswordAuthenticationToken authenticationToken =
+                    new UsernamePasswordAuthenticationToken(username, null, authorities);
+
+            return Mono.just(authenticationToken);
+        } catch (Exception e) {
+            return Mono.error(new InvalidJwtException("The JWT token has expired", e));
+        }
     }
 }
