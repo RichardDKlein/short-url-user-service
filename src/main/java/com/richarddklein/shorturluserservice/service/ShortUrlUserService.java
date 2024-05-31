@@ -5,8 +5,11 @@
 
 package com.richarddklein.shorturluserservice.service;
 
+import java.security.Principal;
+
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.response.ShortUrlUserStatus;
+import reactor.core.publisher.Mono;
 
 /**
  * The Short URL User Service interface.
@@ -26,4 +29,6 @@ public interface ShortUrlUserService {
     ShortUrlUserStatus signup(ShortUrlUser shortUrlUser);
 
     Object[] login(ShortUrlUser shortUrlUser);
+
+    Object[] validate(Mono<Principal> principal);
 }

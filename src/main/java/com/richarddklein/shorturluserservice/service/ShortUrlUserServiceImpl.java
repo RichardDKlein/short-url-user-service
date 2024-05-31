@@ -5,12 +5,16 @@
 
 package com.richarddklein.shorturluserservice.service;
 
+import java.security.Principal;
+
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.response.ShortUrlUserStatus;
 import com.richarddklein.shorturluserservice.security.util.JwtUtils;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import com.richarddklein.shorturluserservice.dao.ShortUrlUserDao;
+import reactor.core.publisher.Mono;
 
 /**
  * The production implementation of the Short URL User Service interface.
@@ -60,19 +64,21 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
         String jwtToken = jwtUtils.generateToken(shortUrlUser);
         return new Object[] {ShortUrlUserStatus.SUCCESS, jwtToken};
     }
-/*
+
     @Override
-    public Mono<Map<String, Object>> authenticate(Mono<Principal> principal) {
-        return principal.map(auth -> {
-            Authentication authentication = (Authentication) auth;
-            Map<String, Object> response = new HashMap<>();
-            response.put("username", authentication.getName());
-            String role = authentication.getAuthorities().iterator().next().getAuthority();
-            response.put("role", role);
-            return response;
+    public Object[] validate(Mono<Principal> principal) {
+        Mono<ShortUrlUser> shortUrlUserMono = principal.map(auth -> {
+            Authentication authentication = (Authentication)auth;
+            ShortUrlUser shortUrlUser = new ShortUrlUser();
+            shortUrlUser.setUsername(authentication.getName());
+            shortUrlUser.setRole(authentication.getAuthorities()
+                    .iterator().next().getAuthority());
+            return shortUrlUser;
         });
+
+        return new Object[] {ShortUrlUserStatus.SUCCESS, shortUrlUserMono};
     }
- */
+
     // ------------------------------------------------------------------------
     // PRIVATE METHODS
     // ------------------------------------------------------------------------

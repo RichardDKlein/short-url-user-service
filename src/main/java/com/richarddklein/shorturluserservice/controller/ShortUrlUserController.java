@@ -5,13 +5,17 @@
 
 package com.richarddklein.shorturluserservice.controller;
 
+import java.security.Principal;
+
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.response.StatusAndJwtTokenResponse;
+import com.richarddklein.shorturluserservice.response.StatusAndShortUrlUserResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 
 import com.richarddklein.shorturluserservice.response.StatusResponse;
+import reactor.core.publisher.Mono;
 
 /**
  * The Short URL User Controller interface.
@@ -47,4 +51,8 @@ public interface ShortUrlUserController {
     @PostMapping("/login")
     ResponseEntity<StatusAndJwtTokenResponse>
     login(@RequestBody ShortUrlUser shortUrlUser);
+
+    @GetMapping("/validate")
+    ResponseEntity<StatusAndShortUrlUserResponse>
+    validate(Mono<Principal> principal);
 }
