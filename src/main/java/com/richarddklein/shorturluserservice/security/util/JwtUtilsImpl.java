@@ -29,7 +29,7 @@ public class JwtUtilsImpl implements JwtUtils {
         Date now = new Date();
         long timeToLive = TimeUnit.MINUTES.toMillis(
                 parameterStoreReader.getJwtMinutesToLive());
-        Date expiryDate = new Date(now.getTime() + timeToLive);
+        Date expirationDate = new Date(now.getTime() + timeToLive);
 
         byte[] keyBytes = Decoders.BASE64.decode(
                 parameterStoreReader.getJwtSecretKey());
@@ -39,7 +39,7 @@ public class JwtUtilsImpl implements JwtUtils {
                 .subject(shortUrlUser.getUsername())
                 .claim("role", shortUrlUser.getRole())
                 .issuedAt(now)
-                .expiration(expiryDate)
+                .expiration(expirationDate)
                 .signWith(key)
                 .compact();
     }
