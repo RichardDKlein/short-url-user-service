@@ -147,34 +147,36 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     }
 
     @Override
-    public ResponseEntity<StatusAndShortUrlUserResponse>
+    public Mono<ResponseEntity<StatusAndShortUrlUserResponse>>
     validate(Mono<Principal> principal) {
         Object[] statusAndShortUrlUser = shortUrlUserService.validate(principal);
 
-        HttpStatus httpStatus;
-        StatusResponse statusResponse;
-        ShortUrlUserStatus shortUrlUserStatus =
-                (ShortUrlUserStatus)statusAndShortUrlUser[0];
-        ShortUrlUser shortUrlUser = (ShortUrlUser)statusAndShortUrlUser[1];
+        ShortUrlUserStatus shortUrlUserStatus = (ShortUrlUserStatus)statusAndShortUrlUser[0];
+        Mono<ShortUrlUser> shortUrlUserMono = (Mono<ShortUrlUser>)statusAndShortUrlUser[1];
 
-        if (shortUrlUserStatus != ShortUrlUserStatus.SUCCESS) {
-            httpStatus = HttpStatus.UNAUTHORIZED;
-            statusResponse = new StatusResponse(
-                    shortUrlUserStatus,
-                    "Provided JWT token is not valid"
-            );
-        } else {
-            httpStatus = HttpStatus.OK;
-            statusResponse = new StatusResponse(
-                    ShortUrlUserStatus.SUCCESS,
-                    "Provided JWT token is valid"
-            );
-        }
+        return shortUrlUserMono.map(shortUrlUser -> {
+            HttpStatus httpStatus;
+            StatusResponse statusResponse;
 
-        StatusAndShortUrlUserResponse statusAndShortUrlUserResponse =
-                new StatusAndShortUrlUserResponse(statusResponse, shortUrlUser);
+            if (shortUrlUserStatus != ShortUrlUserStatus.SUCCESS) {
+                httpStatus = HttpStatus.UNAUTHORIZED;
+                statusResponse = new StatusResponse(
+                        shortUrlUserStatus,
+                        "Provided JWT token is not valid"
+                );
+            } else {
+                httpStatus = HttpStatus.OK;
+                statusResponse = new StatusResponse(
+                        ShortUrlUserStatus.SUCCESS,
+                        "Provided JWT token is valid"
+                );
+            }
 
-        return new ResponseEntity<>(statusAndShortUrlUserResponse, httpStatus);
+            StatusAndShortUrlUserResponse statusAndShortUrlUserResponse =
+                    new StatusAndShortUrlUserResponse(statusResponse, shortUrlUser);
+
+            return new ResponseEntity<>(statusAndShortUrlUserResponse, httpStatus);
+        });
     }
 
     // ------------------------------------------------------------------------

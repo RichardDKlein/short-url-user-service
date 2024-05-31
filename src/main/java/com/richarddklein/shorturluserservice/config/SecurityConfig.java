@@ -66,7 +66,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Primary
     public AdminAuthenticationManager
     adminAuthenticationManager() {
         return new AdminAuthenticationManagerImpl();

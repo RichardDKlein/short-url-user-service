@@ -93,3 +93,13 @@ Resources:
           Properties:
             Path: /login
             Method: POST
+        ValidateViaApiGatewayOrLocalHost:
+          Type: Api
+          Properties:
+            Path: /shorturl/users/validate
+            Method: GET
+        ValidateViaCustomDomain:
+          Type: Api
+          Properties:
+            Path: /validate
+            Method: GET

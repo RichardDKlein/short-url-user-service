@@ -9,6 +9,8 @@ import java.security.Key;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import javax.crypto.SecretKey;
+
 import com.richarddklein.shorturluserservice.dao.ParameterStoreReader;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -30,25 +32,26 @@ public class JwtUtilsImpl implements JwtUtils {
                 parameterStoreReader.getJwtMinutesToLive());
         Date expirationDate = new Date(now.getTime() + timeToLive);
 
-        byte[] keyBytes = Decoders.BASE64.decode(
-                parameterStoreReader.getJwtSecretKey());
-        Key key = Keys.hmacShaKeyFor(keyBytes);
-
         return Jwts.builder()
                 .subject(shortUrlUser.getUsername())
                 .claim("role", shortUrlUser.getRole())
                 .issuedAt(now)
                 .expiration(expirationDate)
-                .signWith(key)
+                .signWith(getKey())
                 .compact();
     }
 
     public Claims getClaimsFromToken(String token) {
         return Jwts.parser()
-                .verifyWith(Keys.hmacShaKeyFor(
-                        parameterStoreReader.getJwtSecretKey().getBytes()))
+                .verifyWith(getKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    private SecretKey getKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(
+                parameterStoreReader.getJwtSecretKey());
+        return Keys.hmacShaKeyFor(keyBytes);
     }
 }

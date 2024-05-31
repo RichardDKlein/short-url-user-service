@@ -39,6 +39,7 @@ public class JwtTokenAuthenticationConverterImpl implements JwtTokenAuthenticati
 
         try {
             Claims claims = jwtUtils.getClaimsFromToken(jwtToken);
+            System.out.printf("====> claims = %s\n", claims);
             String username = claims.getSubject();
             String role = claims.get("role", String.class);
 
@@ -49,6 +50,7 @@ public class JwtTokenAuthenticationConverterImpl implements JwtTokenAuthenticati
 
             return Mono.just(authenticationToken);
         } catch (Exception e) {
+            System.out.println("====> " + e.getMessage());
             return Mono.error(new InvalidJwtException("The JWT token has expired"));
         }
     }

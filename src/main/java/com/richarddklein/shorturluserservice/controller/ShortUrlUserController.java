@@ -53,6 +53,6 @@ public interface ShortUrlUserController {
     login(@RequestBody ShortUrlUser shortUrlUser);
 
     @GetMapping("/validate")
-    ResponseEntity<StatusAndShortUrlUserResponse>
+    Mono<ResponseEntity<StatusAndShortUrlUserResponse>>
     validate(Mono<Principal> principal);
 }

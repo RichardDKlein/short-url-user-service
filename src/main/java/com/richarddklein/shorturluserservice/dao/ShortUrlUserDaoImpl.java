@@ -171,6 +171,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     @Override
     public ShortUrlUserStatus login(ShortUrlUser shortUrlUser) {
         ShortUrlUser item = shortUrlUserTable.getItem(shortUrlUser);
+
         if (item == null) {
             return ShortUrlUserStatus.NO_SUCH_USER;
         }
@@ -181,6 +182,11 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         item.setLastLogin(LocalDateTime.now().format(
                 DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
         shortUrlUserTable.putItem(item);
+
+        // Set the `role` property, so that the Service layer can
+        // embed it in the JWT token along with the `username`.
+        shortUrlUser.setRole(item.getRole());
+
         return ShortUrlUserStatus.SUCCESS;
     }
 
