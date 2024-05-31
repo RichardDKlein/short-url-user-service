@@ -141,7 +141,12 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
 
         return new ResponseEntity<>(statusAndJwtTokenResponse, httpStatus);
     }
-
+/*
+    @GetMapping
+    public Mono<Map<String, Object>> authenticate(Mono<Principal> principal) {
+        return authenticationService.authenticate(principal);
+    }
+ */
     // ------------------------------------------------------------------------
     // PRIVATE METHODS
     // ------------------------------------------------------------------------

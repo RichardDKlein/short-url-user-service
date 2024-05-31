@@ -60,7 +60,19 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
         String jwtToken = jwtUtils.generateToken(shortUrlUser);
         return new Object[] {ShortUrlUserStatus.SUCCESS, jwtToken};
     }
-
+/*
+    @Override
+    public Mono<Map<String, Object>> authenticate(Mono<Principal> principal) {
+        return principal.map(auth -> {
+            Authentication authentication = (Authentication) auth;
+            Map<String, Object> response = new HashMap<>();
+            response.put("username", authentication.getName());
+            String role = authentication.getAuthorities().iterator().next().getAuthority();
+            response.put("role", role);
+            return response;
+        });
+    }
+ */
     // ------------------------------------------------------------------------
     // PRIVATE METHODS
     // ------------------------------------------------------------------------

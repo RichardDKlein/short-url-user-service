@@ -7,6 +7,7 @@ package com.richarddklein.shorturluserservice.security.jwttokenauthentication;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.richarddklein.shorturluserservice.exception.InvalidJwtException;
 import com.richarddklein.shorturluserservice.exception.MissingAuthorizationHeaderException;
 import com.richarddklein.shorturluserservice.response.ShortUrlUserStatus;
 import com.richarddklein.shorturluserservice.response.StatusResponse;
@@ -32,9 +33,9 @@ public class JwtTokenAuthenticationFailureHandlerImpl implements JwtTokenAuthent
         if (exception instanceof MissingAuthorizationHeaderException) {
             status = ShortUrlUserStatus.MISSING_AUTHORIZATION_HEADER;
             message = "The request does not contain a Basic Authorization header";
-        } else if (exception instanceof BadCredentialsException) {
-            status = ShortUrlUserStatus.INVALID_USER_CREDENTIALS;
-            message = "The Authorization header does not contain valid user credentials";
+        } else if (exception instanceof InvalidJwtException) {
+            status = ShortUrlUserStatus.EXPIRED_JWT_TOKEN;
+            message = "The provided JWT token has expired";
         }
 
         ServerHttpResponse response = webFilterExchange.getExchange().getResponse();
