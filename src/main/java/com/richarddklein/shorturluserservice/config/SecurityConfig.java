@@ -7,6 +7,7 @@ package com.richarddklein.shorturluserservice.config;
 
 import com.richarddklein.shorturluserservice.dao.ParameterStoreReader;
 import com.richarddklein.shorturluserservice.security.adminauthentication.*;
+import com.richarddklein.shorturluserservice.security.jwttokenauthentication.*;
 import com.richarddklein.shorturluserservice.security.util.JwtUtils;
 import com.richarddklein.shorturluserservice.security.util.JwtUtilsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,6 +82,38 @@ public class SecurityConfig {
     public AdminAuthenticationFailureHandler
     adminAuthenticationFailureHandler() {
         return new AdminAuthenticationFailureHandlerImpl();
+    }
+
+    // ------------------------------------------------------------------------
+    // JWT TOKEN AUTHENTICATION WEB FILTER
+    // ------------------------------------------------------------------------
+
+    @Bean
+    public JwtTokenAuthenticationWebFilter
+    jwtTokenAuthenticationWebFilter() {
+        return new JwtTokenAuthenticationWebFilterImpl(
+                jwtTokenAuthenticationManager(),
+                jwtTokenAuthenticationConverter(),
+                jwtTokenAuthenticationFailureHandler());
+    }
+
+    @Bean
+    @Primary
+    public JwtTokenAuthenticationManager
+    jwtTokenAuthenticationManager() {
+        return new JwtTokenAuthenticationManagerImpl();
+    }
+
+    @Bean
+    public JwtTokenAuthenticationConverter
+    jwtTokenAuthenticationConverter() {
+        return new JwtTokenAuthenticationConverterImpl();
+    }
+
+    @Bean
+    public JwtTokenAuthenticationFailureHandler
+    jwtTokenAuthenticationFailureHandler() {
+        return new JwtTokenAuthenticationFailureHandlerImpl();
     }
 
     // ------------------------------------------------------------------------
