@@ -31,7 +31,7 @@ public class AdminAuthenticationFailureHandlerImpl implements AdminAuthenticatio
 
         if (exception instanceof MissingAuthorizationHeaderException) {
             status = ShortUrlUserStatus.MISSING_AUTHORIZATION_HEADER;
-            message = "The request does not contain a Basic Authorization header";
+            message = "The request does not contain a Basic authorization header";
         } else if (exception instanceof BadCredentialsException) {
             status = ShortUrlUserStatus.INVALID_ADMIN_CREDENTIALS;
             message = "The Authorization header does not contain valid Admin credentials";

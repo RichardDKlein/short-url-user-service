@@ -31,4 +31,6 @@ public interface ShortUrlUserService {
     Object[] login(ShortUrlUser shortUrlUser);
 
     Object[] validate(Mono<Principal> principal);
+
+    Object[] getUserDetails(Mono<Principal> principal);
 }

@@ -148,8 +148,8 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
 
     @Override
     public Mono<ResponseEntity<StatusAndShortUrlUserResponse>>
-    validate(Mono<Principal> principal) {
-        Object[] statusAndShortUrlUser = shortUrlUserService.validate(principal);
+    validate(Mono<Principal> username) {
+        Object[] statusAndShortUrlUser = shortUrlUserService.validate(username);
 
         ShortUrlUserStatus shortUrlUserStatus = (ShortUrlUserStatus)statusAndShortUrlUser[0];
         Mono<ShortUrlUser> shortUrlUserMono = (Mono<ShortUrlUser>)statusAndShortUrlUser[1];
@@ -159,16 +159,49 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
             StatusResponse statusResponse;
 
             if (shortUrlUserStatus != ShortUrlUserStatus.SUCCESS) {
-                httpStatus = HttpStatus.UNAUTHORIZED;
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                 statusResponse = new StatusResponse(
                         shortUrlUserStatus,
-                        "Provided JWT token is not valid"
+                        "Internal server error"
                 );
             } else {
                 httpStatus = HttpStatus.OK;
                 statusResponse = new StatusResponse(
                         ShortUrlUserStatus.SUCCESS,
                         "Provided JWT token is valid"
+                );
+            }
+
+            StatusAndShortUrlUserResponse statusAndShortUrlUserResponse =
+                    new StatusAndShortUrlUserResponse(statusResponse, shortUrlUser);
+
+            return new ResponseEntity<>(statusAndShortUrlUserResponse, httpStatus);
+        });
+    }
+
+    @Override
+    public Mono<ResponseEntity<StatusAndShortUrlUserResponse>>
+    getUserDetails(Mono<Principal> principal) {
+        Object[] statusAndShortUrlUser = shortUrlUserService.getUserDetails(principal);
+
+        ShortUrlUserStatus shortUrlUserStatus = (ShortUrlUserStatus)statusAndShortUrlUser[0];
+        Mono<ShortUrlUser> shortUrlUserMono = (Mono<ShortUrlUser>)statusAndShortUrlUser[1];
+
+        return shortUrlUserMono.map(shortUrlUser -> {
+            HttpStatus httpStatus;
+            StatusResponse statusResponse;
+
+            if (shortUrlUserStatus != ShortUrlUserStatus.SUCCESS) {
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                statusResponse = new StatusResponse(
+                        shortUrlUserStatus,
+                        "Internal server error"
+                );
+            } else {
+                httpStatus = HttpStatus.OK;
+                statusResponse = new StatusResponse(
+                        ShortUrlUserStatus.SUCCESS,
+                        "User details successfully retrieved"
                 );
             }
 

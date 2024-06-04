@@ -79,6 +79,20 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
         return new Object[] {ShortUrlUserStatus.SUCCESS, shortUrlUserMono};
     }
 
+    @Override
+    public Object[] getUserDetails(Mono<Principal> principal) {
+        Mono<ShortUrlUser> shortUrlUserMono = principal.map(auth -> {
+            Authentication authentication = (Authentication)auth;
+            ShortUrlUser key = new ShortUrlUser();
+            key.setUsername(authentication.getName());
+            ShortUrlUser shortUrlUser = shortUrlUserDao.getUserDetails(key);
+            shortUrlUser.setPassword(null);
+            return shortUrlUser;
+        });
+
+        return new Object[] {ShortUrlUserStatus.SUCCESS, shortUrlUserMono};
+    }
+
     // ------------------------------------------------------------------------
     // PRIVATE METHODS
     // ------------------------------------------------------------------------

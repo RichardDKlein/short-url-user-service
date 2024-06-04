@@ -27,4 +27,6 @@ public interface ShortUrlUserDao {
     ShortUrlUserStatus signup(ShortUrlUser shortUrlUser);
 
     ShortUrlUserStatus login(ShortUrlUser shortUrlUser);
+
+    ShortUrlUser getUserDetails(ShortUrlUser key);
 }

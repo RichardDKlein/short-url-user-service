@@ -32,10 +32,10 @@ public class JwtTokenAuthenticationFailureHandlerImpl implements JwtTokenAuthent
 
         if (exception instanceof MissingAuthorizationHeaderException) {
             status = ShortUrlUserStatus.MISSING_AUTHORIZATION_HEADER;
-            message = "The request does not contain a Basic Authorization header";
+            message = "The request does not contain a Bearer Token authorization header";
         } else if (exception instanceof InvalidJwtException) {
-            status = ShortUrlUserStatus.EXPIRED_JWT_TOKEN;
-            message = "The provided JWT token has expired";
+            status = ShortUrlUserStatus.INVALID_JWT_EXCEPTION;
+            message = exception.getMessage();
         }
 
         ServerHttpResponse response = webFilterExchange.getExchange().getResponse();

@@ -22,6 +22,7 @@ public class JwtTokenAuthenticationWebFilterImpl extends JwtTokenAuthenticationW
         setRequiresAuthenticationMatcher(
                 ServerWebExchangeMatchers.pathMatchers(
                         HttpMethod.GET,
-                        "/validate", "/shorturl/users/validate"));
+                        "/validate", "/shorturl/users/validate",
+                        "/details", "/shorturl/users/details"));
     }
 }

@@ -55,4 +55,8 @@ public interface ShortUrlUserController {
     @GetMapping("/validate")
     Mono<ResponseEntity<StatusAndShortUrlUserResponse>>
     validate(Mono<Principal> principal);
+
+    @GetMapping("/details")
+    Mono<ResponseEntity<StatusAndShortUrlUserResponse>>
+    getUserDetails(Mono<Principal> principal);
 }

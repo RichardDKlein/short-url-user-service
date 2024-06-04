@@ -51,7 +51,10 @@ public class JwtTokenAuthenticationConverterImpl implements JwtTokenAuthenticati
             return Mono.just(authenticationToken);
         } catch (Exception e) {
             System.out.println("====> " + e.getMessage());
-            return Mono.error(new InvalidJwtException("The JWT token has expired"));
+            int indexOfColon = e.getMessage().indexOf(':');
+            String errorMsg = (indexOfColon < 0) ?
+                    e.getMessage() : e.getMessage().substring(0, indexOfColon);
+            return Mono.error(new InvalidJwtException(errorMsg));
         }
     }
 }

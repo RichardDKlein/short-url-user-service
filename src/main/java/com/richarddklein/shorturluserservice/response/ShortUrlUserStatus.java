@@ -13,8 +13,8 @@ package com.richarddklein.shorturluserservice.response;
  */
 public enum ShortUrlUserStatus {
     SUCCESS,
-    EXPIRED_JWT_TOKEN,
     INVALID_ADMIN_CREDENTIALS,
+    INVALID_JWT_EXCEPTION,
     MISSING_AUTHORIZATION_HEADER,
     MISSING_PASSWORD,
     NO_SUCH_USER,

@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.model.CreateTableEnhancedRequest;
-import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedResponse;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
@@ -170,7 +169,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
 
     @Override
     public ShortUrlUserStatus login(ShortUrlUser shortUrlUser) {
-        ShortUrlUser item = shortUrlUserTable.getItem(shortUrlUser);
+        ShortUrlUser item = getUserDetails(shortUrlUser);
 
         if (item == null) {
             return ShortUrlUserStatus.NO_SUCH_USER;
@@ -188,6 +187,10 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         shortUrlUser.setRole(item.getRole());
 
         return ShortUrlUserStatus.SUCCESS;
+    }
+
+    public ShortUrlUser getUserDetails(ShortUrlUser shortUrlUser) {
+        return shortUrlUserTable.getItem(shortUrlUser);
     }
 
     // ------------------------------------------------------------------------
