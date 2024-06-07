@@ -7,7 +7,7 @@ package com.richarddklein.shorturluserservice.controller;
 
 import java.security.Principal;
 
-import com.richarddklein.shorturluserservice.dao.ParameterStoreReader;
+import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.response.ShortUrlUserStatus;
 import com.richarddklein.shorturluserservice.response.StatusAndJwtTokenResponse;
@@ -93,7 +93,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
             httpStatus = HttpStatus.BAD_REQUEST;
             statusResponse = new StatusResponse(
                     ShortUrlUserStatus.MISSING_PASSWORD,
-                    String.format("A non-empty password must be specified")
+                    "A non-empty password must be specified"
             );
         } else {
             httpStatus = HttpStatus.OK;
@@ -129,7 +129,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
             httpStatus = HttpStatus.UNAUTHORIZED;
             statusResponse = new StatusResponse(
                     ShortUrlUserStatus.WRONG_PASSWORD,
-                    String.format("The supplied password is not correct")
+                    "The supplied password is not correct"
             );
         } else {
             httpStatus = HttpStatus.OK;
@@ -219,8 +219,8 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     /**
      * Is the service running locally?
      *
-     * Determine whether the Short URL User Service is running on your local
-     * machine, or in the AWS cloud.
+     * <p>Determine whether the Short URL User Service is running on your local
+     * machine, or in the AWS cloud.</p>
      *
      * @param hostString The host that sent the HTTP request.
      * @return 'true' if the service is running locally, 'false' otherwise.

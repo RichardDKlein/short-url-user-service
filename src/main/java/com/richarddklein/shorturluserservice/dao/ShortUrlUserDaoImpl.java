@@ -8,6 +8,7 @@ package com.richarddklein.shorturluserservice.dao;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.response.ShortUrlUserStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;

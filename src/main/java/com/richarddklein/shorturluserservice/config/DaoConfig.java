@@ -5,6 +5,7 @@
 
 package com.richarddklein.shorturluserservice.config;
 
+import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
 import com.richarddklein.shorturluserservice.dao.ShortUrlUserDao;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,6 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 import com.richarddklein.shorturluserservice.dao.ShortUrlUserDaoImpl;
-import com.richarddklein.shorturluserservice.dao.ParameterStoreReader;
 
 /**
  * The DAO (Data Access Object) @Configuration class.

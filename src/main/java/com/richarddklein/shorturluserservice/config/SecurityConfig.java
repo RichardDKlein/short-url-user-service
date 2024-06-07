@@ -5,7 +5,7 @@
 
 package com.richarddklein.shorturluserservice.config;
 
-import com.richarddklein.shorturluserservice.dao.ParameterStoreReader;
+import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
 import com.richarddklein.shorturluserservice.security.adminauthentication.*;
 import com.richarddklein.shorturluserservice.security.jwttokenauthentication.*;
 import com.richarddklein.shorturluserservice.security.util.JwtUtils;

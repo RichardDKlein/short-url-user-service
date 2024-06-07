@@ -5,13 +5,12 @@
 
 package com.richarddklein.shorturluserservice.security.util;
 
-import java.security.Key;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import javax.crypto.SecretKey;
 
-import com.richarddklein.shorturluserservice.dao.ParameterStoreReader;
+import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
@@ -20,7 +19,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
 public class JwtUtilsImpl implements JwtUtils {
-    private ParameterStoreReader parameterStoreReader;
+    private final ParameterStoreReader parameterStoreReader;
 
     public JwtUtilsImpl(ParameterStoreReader parameterStoreReader) {
         this.parameterStoreReader = parameterStoreReader;

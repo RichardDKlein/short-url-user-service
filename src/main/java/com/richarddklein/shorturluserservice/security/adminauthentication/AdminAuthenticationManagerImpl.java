@@ -5,7 +5,7 @@
 
 package com.richarddklein.shorturluserservice.security.adminauthentication;
 
-import com.richarddklein.shorturluserservice.dao.ParameterStoreReader;
+import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
