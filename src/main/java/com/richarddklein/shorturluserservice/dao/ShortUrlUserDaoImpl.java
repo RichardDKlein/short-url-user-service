@@ -9,6 +9,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
+import com.richarddklein.shorturlcommonlibrary.security.dto.UsernameAndRole;
+import com.richarddklein.shorturluserservice.dto.StatusAndRole;
+import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.response.ShortUrlUserStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -169,29 +172,28 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     }
 
     @Override
-    public ShortUrlUserStatus login(ShortUrlUser shortUrlUser) {
-        ShortUrlUser item = getUserDetails(shortUrlUser);
+    public StatusAndRole login(UsernameAndPassword usernameAndPassword) {
+        ShortUrlUser item = getUserDetails(usernameAndPassword.getUsername());
 
         if (item == null) {
-            return ShortUrlUserStatus.NO_SUCH_USER;
+            return new StatusAndRole(ShortUrlUserStatus.NO_SUCH_USER, null);
         }
         if (!passwordEncoder.matches(
-                shortUrlUser.getPassword(), item.getPassword())) {
-            return ShortUrlUserStatus.WRONG_PASSWORD;
+                usernameAndPassword.getPassword(), item.getPassword())) {
+            return new StatusAndRole(ShortUrlUserStatus.WRONG_PASSWORD, null);
         }
+
         item.setLastLogin(LocalDateTime.now().format(
                 DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
         shortUrlUserTable.putItem(item);
 
-        // Set the `role` property, so that the Service layer can
-        // embed it in the JWT token along with the `username`.
-        shortUrlUser.setRole(item.getRole());
-
-        return ShortUrlUserStatus.SUCCESS;
+        return new StatusAndRole(ShortUrlUserStatus.SUCCESS, item.getRole());
     }
 
-    public ShortUrlUser getUserDetails(ShortUrlUser shortUrlUser) {
-        return shortUrlUserTable.getItem(shortUrlUser);
+    public ShortUrlUser getUserDetails(String username) {
+        ShortUrlUser key = new ShortUrlUser();
+        key.setUsername(username);
+        return shortUrlUserTable.getItem(key);
     }
 
     // ------------------------------------------------------------------------

@@ -7,6 +7,7 @@ package com.richarddklein.shorturluserservice.controller;
 
 import java.security.Principal;
 
+import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.response.StatusAndJwtTokenResponse;
 import com.richarddklein.shorturluserservice.response.StatusAndShortUrlUserResponse;
@@ -50,7 +51,7 @@ public interface ShortUrlUserController {
 
     @PostMapping("/login")
     ResponseEntity<StatusAndJwtTokenResponse>
-    login(@RequestBody ShortUrlUser shortUrlUser);
+    login(@RequestBody UsernameAndPassword usernameAndPassword);
 
     @GetMapping("/validate")
     Mono<ResponseEntity<StatusAndShortUrlUserResponse>>

@@ -8,6 +8,7 @@ package com.richarddklein.shorturluserservice.controller;
 import java.security.Principal;
 
 import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
+import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.response.ShortUrlUserStatus;
 import com.richarddklein.shorturluserservice.response.StatusAndJwtTokenResponse;
@@ -108,8 +109,8 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
 
     @Override
     public ResponseEntity<StatusAndJwtTokenResponse>
-    login(ShortUrlUser shortUrlUser) {
-        Object[] statusAndJwtToken = shortUrlUserService.login(shortUrlUser);
+    login(UsernameAndPassword usernameAndPassword) {
+        Object[] statusAndJwtToken = shortUrlUserService.login(usernameAndPassword);
 
         HttpStatus httpStatus;
         StatusResponse statusResponse;
@@ -122,7 +123,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
             statusResponse = new StatusResponse(
                     ShortUrlUserStatus.NO_SUCH_USER,
                     String.format("User '%s' does not exist",
-                            shortUrlUser.getUsername())
+                            usernameAndPassword.getUsername())
             );
         } else if (shortUrlUserStatus ==
                 ShortUrlUserStatus.WRONG_PASSWORD) {
@@ -136,7 +137,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
             statusResponse = new StatusResponse(
                     ShortUrlUserStatus.SUCCESS,
                     String.format("User '%s' successfully logged in",
-                            shortUrlUser.getUsername())
+                            usernameAndPassword.getUsername())
             );
         }
 

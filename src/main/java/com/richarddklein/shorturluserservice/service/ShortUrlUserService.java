@@ -7,6 +7,7 @@ package com.richarddklein.shorturluserservice.service;
 
 import java.security.Principal;
 
+import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.response.ShortUrlUserStatus;
 import reactor.core.publisher.Mono;
@@ -28,7 +29,7 @@ public interface ShortUrlUserService {
 
     ShortUrlUserStatus signup(ShortUrlUser shortUrlUser);
 
-    Object[] login(ShortUrlUser shortUrlUser);
+    Object[] login(UsernameAndPassword usernameAndPassword);
 
     Object[] validate(Mono<Principal> principal);
 

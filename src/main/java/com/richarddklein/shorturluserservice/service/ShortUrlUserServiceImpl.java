@@ -7,9 +7,12 @@ package com.richarddklein.shorturluserservice.service;
 
 import java.security.Principal;
 
+import com.richarddklein.shorturlcommonlibrary.security.dto.UsernameAndRole;
+import com.richarddklein.shorturlcommonlibrary.security.util.JwtUtils;
+import com.richarddklein.shorturluserservice.dto.StatusAndRole;
+import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.response.ShortUrlUserStatus;
-import com.richarddklein.shorturluserservice.security.util.JwtUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -56,12 +59,14 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
     }
 
     @Override
-    public Object[] login(ShortUrlUser shortUrlUser) {
-        ShortUrlUserStatus status = shortUrlUserDao.login(shortUrlUser);
-        if (status != ShortUrlUserStatus.SUCCESS) {
-            return new Object[] {status, null};
+    public Object[] login(UsernameAndPassword usernameAndPassword) {
+        StatusAndRole statusAndRole = shortUrlUserDao.login(usernameAndPassword);
+        if (statusAndRole.getStatus() != ShortUrlUserStatus.SUCCESS) {
+            return new Object[] {statusAndRole.getStatus(), null};
         }
-        String jwtToken = jwtUtils.generateToken(shortUrlUser);
+        UsernameAndRole usernameAndRole = new UsernameAndRole(
+                usernameAndPassword.getUsername(), statusAndRole.getRole());
+        String jwtToken = jwtUtils.generateToken(usernameAndRole);
         return new Object[] {ShortUrlUserStatus.SUCCESS, jwtToken};
     }
 
@@ -83,9 +88,8 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
     public Object[] getUserDetails(Mono<Principal> principal) {
         Mono<ShortUrlUser> shortUrlUserMono = principal.map(auth -> {
             Authentication authentication = (Authentication)auth;
-            ShortUrlUser key = new ShortUrlUser();
-            key.setUsername(authentication.getName());
-            ShortUrlUser shortUrlUser = shortUrlUserDao.getUserDetails(key);
+            String username = authentication.getName();
+            ShortUrlUser shortUrlUser = shortUrlUserDao.getUserDetails(username);
             shortUrlUser.setPassword(null);
             return shortUrlUser;
         });
