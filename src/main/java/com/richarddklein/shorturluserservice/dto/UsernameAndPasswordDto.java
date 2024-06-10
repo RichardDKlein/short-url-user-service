@@ -10,7 +10,7 @@ package com.richarddklein.shorturluserservice.dto;
  * `username` and `password` fields.
  */
 @SuppressWarnings("unused")
-public class UsernameAndPassword {
+public class UsernameAndPasswordDto {
     private String username;
     private String password;
 
@@ -21,7 +21,7 @@ public class UsernameAndPassword {
      * @param password The user's password, in plaintext.
      */
     @SuppressWarnings("unused")
-    public UsernameAndPassword(String username, String password) {
+    public UsernameAndPasswordDto(String username, String password) {
         this.username = username;
         this.password = password;
     }

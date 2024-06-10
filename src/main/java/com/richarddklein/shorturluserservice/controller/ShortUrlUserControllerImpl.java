@@ -8,18 +8,18 @@ package com.richarddklein.shorturluserservice.controller;
 import java.security.Principal;
 
 import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
-import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
+import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
+import com.richarddklein.shorturluserservice.dto.UsernameAndPasswordDto;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
-import com.richarddklein.shorturluserservice.response.ShortUrlUserStatus;
-import com.richarddklein.shorturluserservice.response.StatusAndJwtTokenResponse;
-import com.richarddklein.shorturluserservice.response.StatusAndShortUrlUserResponse;
+import com.richarddklein.shorturluserservice.controller.response.StatusAndJwtTokenResponse;
+import com.richarddklein.shorturluserservice.controller.response.StatusAndShortUrlUserResponse;
 import com.richarddklein.shorturluserservice.service.ShortUrlUserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 
-import com.richarddklein.shorturluserservice.response.StatusResponse;
+import com.richarddklein.shorturluserservice.controller.response.StatusResponse;
 import reactor.core.publisher.Mono;
 
 /**
@@ -109,8 +109,8 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
 
     @Override
     public ResponseEntity<StatusAndJwtTokenResponse>
-    login(UsernameAndPassword usernameAndPassword) {
-        Object[] statusAndJwtToken = shortUrlUserService.login(usernameAndPassword);
+    login(UsernameAndPasswordDto usernameAndPasswordDto) {
+        Object[] statusAndJwtToken = shortUrlUserService.login(usernameAndPasswordDto);
 
         HttpStatus httpStatus;
         StatusResponse statusResponse;
@@ -123,7 +123,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
             statusResponse = new StatusResponse(
                     ShortUrlUserStatus.NO_SUCH_USER,
                     String.format("User '%s' does not exist",
-                            usernameAndPassword.getUsername())
+                            usernameAndPasswordDto.getUsername())
             );
         } else if (shortUrlUserStatus ==
                 ShortUrlUserStatus.WRONG_PASSWORD) {
@@ -137,7 +137,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
             statusResponse = new StatusResponse(
                     ShortUrlUserStatus.SUCCESS,
                     String.format("User '%s' successfully logged in",
-                            usernameAndPassword.getUsername())
+                            usernameAndPasswordDto.getUsername())
             );
         }
 

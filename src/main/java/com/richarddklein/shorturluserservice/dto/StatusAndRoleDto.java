@@ -5,13 +5,13 @@
 
 package com.richarddklein.shorturluserservice.dto;
 
-import com.richarddklein.shorturluserservice.response.ShortUrlUserStatus;
+import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
 
 /**
  * Class defining a DTO (Data Transfer Object) containing
  * `status` and `role` fields.
  */
-public class StatusAndRole {
+public class StatusAndRoleDto {
     private ShortUrlUserStatus status;
     private String role;
 
@@ -22,7 +22,7 @@ public class StatusAndRole {
      * @param role The user's role.
      */
     @SuppressWarnings("unused")
-    public StatusAndRole(ShortUrlUserStatus status, String role) {
+    public StatusAndRoleDto(ShortUrlUserStatus status, String role) {
         this.status = status;
         this.role = role;
     }
@@ -45,7 +45,7 @@ public class StatusAndRole {
 
     @Override
     public String toString() {
-        return "StatusAndRole{" +
+        return "StatusAndRoleDto{" +
                 "status=" + status +
                 ", role='" + role + '\'' +
                 '}';

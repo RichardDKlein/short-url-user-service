@@ -7,4 +7,4 @@
  * This package contains files that implement the JSON responses
  * returned to the HTTP client by the Short URL User service.
  */
-package com.richarddklein.shorturluserservice.response;
+package com.richarddklein.shorturluserservice.controller.response;

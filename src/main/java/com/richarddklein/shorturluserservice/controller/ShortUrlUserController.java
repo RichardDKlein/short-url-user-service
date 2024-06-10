@@ -7,15 +7,15 @@ package com.richarddklein.shorturluserservice.controller;
 
 import java.security.Principal;
 
-import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
+import com.richarddklein.shorturluserservice.dto.UsernameAndPasswordDto;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
-import com.richarddklein.shorturluserservice.response.StatusAndJwtTokenResponse;
-import com.richarddklein.shorturluserservice.response.StatusAndShortUrlUserResponse;
+import com.richarddklein.shorturluserservice.controller.response.StatusAndJwtTokenResponse;
+import com.richarddklein.shorturluserservice.controller.response.StatusAndShortUrlUserResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 
-import com.richarddklein.shorturluserservice.response.StatusResponse;
+import com.richarddklein.shorturluserservice.controller.response.StatusResponse;
 import reactor.core.publisher.Mono;
 
 /**
@@ -51,7 +51,7 @@ public interface ShortUrlUserController {
 
     @PostMapping("/login")
     ResponseEntity<StatusAndJwtTokenResponse>
-    login(@RequestBody UsernameAndPassword usernameAndPassword);
+    login(@RequestBody UsernameAndPasswordDto usernameAndPasswordDto);
 
     @GetMapping("/validate")
     Mono<ResponseEntity<StatusAndShortUrlUserResponse>>

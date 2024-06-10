@@ -9,11 +9,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
-import com.richarddklein.shorturlcommonlibrary.security.dto.UsernameAndRole;
-import com.richarddklein.shorturluserservice.dto.StatusAndRole;
-import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
+import com.richarddklein.shorturluserservice.dto.StatusAndRoleDto;
+import com.richarddklein.shorturluserservice.dto.UsernameAndPasswordDto;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
-import com.richarddklein.shorturluserservice.response.ShortUrlUserStatus;
+import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
@@ -172,22 +171,22 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     }
 
     @Override
-    public StatusAndRole login(UsernameAndPassword usernameAndPassword) {
-        ShortUrlUser item = getUserDetails(usernameAndPassword.getUsername());
+    public StatusAndRoleDto login(UsernameAndPasswordDto usernameAndPasswordDto) {
+        ShortUrlUser item = getUserDetails(usernameAndPasswordDto.getUsername());
 
         if (item == null) {
-            return new StatusAndRole(ShortUrlUserStatus.NO_SUCH_USER, null);
+            return new StatusAndRoleDto(ShortUrlUserStatus.NO_SUCH_USER, null);
         }
         if (!passwordEncoder.matches(
-                usernameAndPassword.getPassword(), item.getPassword())) {
-            return new StatusAndRole(ShortUrlUserStatus.WRONG_PASSWORD, null);
+                usernameAndPasswordDto.getPassword(), item.getPassword())) {
+            return new StatusAndRoleDto(ShortUrlUserStatus.WRONG_PASSWORD, null);
         }
 
         item.setLastLogin(LocalDateTime.now().format(
                 DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
         shortUrlUserTable.putItem(item);
 
-        return new StatusAndRole(ShortUrlUserStatus.SUCCESS, item.getRole());
+        return new StatusAndRoleDto(ShortUrlUserStatus.SUCCESS, item.getRole());
     }
 
     public ShortUrlUser getUserDetails(String username) {

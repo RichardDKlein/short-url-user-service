@@ -3,7 +3,7 @@
  * (Copyright 2024 by Richard Klein)
  */
 
-package com.richarddklein.shorturluserservice.response;
+package com.richarddklein.shorturluserservice.controller.response;
 
 /**
  * The Global Error Response class.

@@ -9,10 +9,10 @@ import java.security.Principal;
 
 import com.richarddklein.shorturlcommonlibrary.security.dto.UsernameAndRole;
 import com.richarddklein.shorturlcommonlibrary.security.util.JwtUtils;
-import com.richarddklein.shorturluserservice.dto.StatusAndRole;
-import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
+import com.richarddklein.shorturluserservice.dto.StatusAndRoleDto;
+import com.richarddklein.shorturluserservice.dto.UsernameAndPasswordDto;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
-import com.richarddklein.shorturluserservice.response.ShortUrlUserStatus;
+import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -59,13 +59,13 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
     }
 
     @Override
-    public Object[] login(UsernameAndPassword usernameAndPassword) {
-        StatusAndRole statusAndRole = shortUrlUserDao.login(usernameAndPassword);
-        if (statusAndRole.getStatus() != ShortUrlUserStatus.SUCCESS) {
-            return new Object[] {statusAndRole.getStatus(), null};
+    public Object[] login(UsernameAndPasswordDto usernameAndPasswordDto) {
+        StatusAndRoleDto statusAndRoleDto = shortUrlUserDao.login(usernameAndPasswordDto);
+        if (statusAndRoleDto.getStatus() != ShortUrlUserStatus.SUCCESS) {
+            return new Object[] {statusAndRoleDto.getStatus(), null};
         }
         UsernameAndRole usernameAndRole = new UsernameAndRole(
-                usernameAndPassword.getUsername(), statusAndRole.getRole());
+                usernameAndPasswordDto.getUsername(), statusAndRoleDto.getRole());
         String jwtToken = jwtUtils.generateToken(usernameAndRole);
         return new Object[] {ShortUrlUserStatus.SUCCESS, jwtToken};
     }

@@ -5,10 +5,10 @@
 
 package com.richarddklein.shorturluserservice.dao;
 
-import com.richarddklein.shorturluserservice.dto.StatusAndRole;
-import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
+import com.richarddklein.shorturluserservice.dto.StatusAndRoleDto;
+import com.richarddklein.shorturluserservice.dto.UsernameAndPasswordDto;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
-import com.richarddklein.shorturluserservice.response.ShortUrlUserStatus;
+import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
 
 /**
  * The Short URL User DAO (Data Access Object) interface.
@@ -28,7 +28,7 @@ public interface ShortUrlUserDao {
 
     ShortUrlUserStatus signup(ShortUrlUser shortUrlUser);
 
-    StatusAndRole login(UsernameAndPassword usernameAndPassword);
+    StatusAndRoleDto login(UsernameAndPasswordDto usernameAndPasswordDto);
 
     ShortUrlUser getUserDetails(String username);
 }
