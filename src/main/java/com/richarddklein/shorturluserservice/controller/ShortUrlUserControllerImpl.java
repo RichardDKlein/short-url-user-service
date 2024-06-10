@@ -9,7 +9,8 @@ import java.security.Principal;
 
 import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
-import com.richarddklein.shorturluserservice.dto.UsernameAndPasswordDto;
+import com.richarddklein.shorturluserservice.dto.StatusAndJwtTokenMono;
+import com.richarddklein.shorturluserservice.dto.UsernameAndPasswordMono;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.StatusAndJwtTokenResponse;
 import com.richarddklein.shorturluserservice.controller.response.StatusAndShortUrlUserResponse;
@@ -109,14 +110,14 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
 
     @Override
     public ResponseEntity<StatusAndJwtTokenResponse>
-    login(UsernameAndPasswordDto usernameAndPasswordDto) {
-        Object[] statusAndJwtToken = shortUrlUserService.login(usernameAndPasswordDto);
+    login(UsernameAndPasswordMono usernameAndPasswordDto) {
+        StatusAndJwtTokenMono statusAndJwtToken =
+                shortUrlUserService.login(usernameAndPasswordDto);
 
         HttpStatus httpStatus;
         StatusResponse statusResponse;
-        ShortUrlUserStatus shortUrlUserStatus =
-                (ShortUrlUserStatus)statusAndJwtToken[0];
-        String jwtToken = (String)statusAndJwtToken[1];
+        ShortUrlUserStatus shortUrlUserStatus = statusAndJwtToken.getStatus();
+        String jwtToken = statusAndJwtToken.getJwtToken();
 
         if (shortUrlUserStatus == ShortUrlUserStatus.NO_SUCH_USER) {
             httpStatus = HttpStatus.UNAUTHORIZED;
@@ -145,39 +146,6 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                 new StatusAndJwtTokenResponse(statusResponse, jwtToken);
 
         return new ResponseEntity<>(statusAndJwtTokenResponse, httpStatus);
-    }
-
-    @Override
-    public Mono<ResponseEntity<StatusAndShortUrlUserResponse>>
-    validate(Mono<Principal> username) {
-        Object[] statusAndShortUrlUser = shortUrlUserService.validate(username);
-
-        ShortUrlUserStatus shortUrlUserStatus = (ShortUrlUserStatus)statusAndShortUrlUser[0];
-        Mono<ShortUrlUser> shortUrlUserMono = (Mono<ShortUrlUser>)statusAndShortUrlUser[1];
-
-        return shortUrlUserMono.map(shortUrlUser -> {
-            HttpStatus httpStatus;
-            StatusResponse statusResponse;
-
-            if (shortUrlUserStatus != ShortUrlUserStatus.SUCCESS) {
-                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                statusResponse = new StatusResponse(
-                        shortUrlUserStatus,
-                        "Internal server error"
-                );
-            } else {
-                httpStatus = HttpStatus.OK;
-                statusResponse = new StatusResponse(
-                        ShortUrlUserStatus.SUCCESS,
-                        "Provided JWT token is valid"
-                );
-            }
-
-            StatusAndShortUrlUserResponse statusAndShortUrlUserResponse =
-                    new StatusAndShortUrlUserResponse(statusResponse, shortUrlUser);
-
-            return new ResponseEntity<>(statusAndShortUrlUserResponse, httpStatus);
-        });
     }
 
     @Override

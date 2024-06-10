@@ -7,10 +7,11 @@ package com.richarddklein.shorturluserservice.service;
 
 import java.security.Principal;
 
-import com.richarddklein.shorturlcommonlibrary.security.dto.UsernameAndRole;
 import com.richarddklein.shorturlcommonlibrary.security.util.JwtUtils;
-import com.richarddklein.shorturluserservice.dto.StatusAndRoleDto;
-import com.richarddklein.shorturluserservice.dto.UsernameAndPasswordDto;
+import com.richarddklein.shorturluserservice.dto.StatusAndJwtTokenMono;
+import com.richarddklein.shorturluserservice.dto.StatusAndRoleMono;
+import com.richarddklein.shorturluserservice.dto.StatusAndShortUrlUserMono;
+import com.richarddklein.shorturluserservice.dto.UsernameAndPasswordMono;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
 import org.springframework.security.core.Authentication;
@@ -48,53 +49,54 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
         this.jwtUtils = jwtUtils;
     }
 
+    // Initialization of the Short URL User repository is performed rarely,
+    // and then only by the Admin from a local machine. Therefore, we do not
+    // need to use reactive (asynchronous) programming techniques here. Simple
+    // synchronous logic will work just fine.
     @Override
     public void initializeShortUrlUserRepository() {
         shortUrlUserDao.initializeShortUrlUserRepository();
     }
 
     @Override
-    public ShortUrlUserStatus signup(ShortUrlUser shortUrlUser) {
-        return shortUrlUserDao.signup(shortUrlUser);
+    public Mono<ShortUrlUserStatus>
+    signup(Mono<ShortUrlUser> shortUrlUserMono) {
+        return shortUrlUserDao.signup(shortUrlUserMono);
     }
 
     @Override
-    public Object[] login(UsernameAndPasswordDto usernameAndPasswordDto) {
-        StatusAndRoleDto statusAndRoleDto = shortUrlUserDao.login(usernameAndPasswordDto);
-        if (statusAndRoleDto.getStatus() != ShortUrlUserStatus.SUCCESS) {
-            return new Object[] {statusAndRoleDto.getStatus(), null};
-        }
-        UsernameAndRole usernameAndRole = new UsernameAndRole(
-                usernameAndPasswordDto.getUsername(), statusAndRoleDto.getRole());
-        String jwtToken = jwtUtils.generateToken(usernameAndRole);
-        return new Object[] {ShortUrlUserStatus.SUCCESS, jwtToken};
-    }
-
-    @Override
-    public Object[] validate(Mono<Principal> principal) {
-        Mono<ShortUrlUser> shortUrlUserMono = principal.map(auth -> {
-            Authentication authentication = (Authentication)auth;
-            ShortUrlUser shortUrlUser = new ShortUrlUser();
-            shortUrlUser.setUsername(authentication.getName());
-            shortUrlUser.setRole(authentication.getAuthorities()
-                    .iterator().next().getAuthority());
-            return shortUrlUser;
+    public Mono<StatusAndJwtTokenMono>
+    login(Mono<UsernameAndPasswordMono> usernameAndPasswordDtoMono) {
+        Mono<StatusAndRoleMono> statusAndRoleDtoMono =
+                shortUrlUserDao.login(usernameAndPasswordDtoMono);
+        return statusAndRoleDtoMono.map(statusAndRoleMono -> {
+            if (statusAndRoleMono.getStatus() != ShortUrlUserStatus.SUCCESS) {
+                return new StatusAndJwtTokenMono(statusAndRoleMono.getStatus(), null);
+            }
+            Mono<String> usernameMono =
+                    usernameAndPasswordDtoMono.map(UsernameAndPasswordMono::getUsername);
+            Mono<String> roleMono = Mono.just(statusAndRoleMono.getRole());
+            Mono<String> jwtTokenMono = jwtUtils.generateToken(usernameMono, roleMono);
+            return new StatusAndJwtTokenMono(ShortUrlUserStatus.SUCCESS, jwtTokenMono);
         });
-
-        return new Object[] {ShortUrlUserStatus.SUCCESS, shortUrlUserMono};
     }
 
     @Override
-    public Object[] getUserDetails(Mono<Principal> principal) {
-        Mono<ShortUrlUser> shortUrlUserMono = principal.map(auth -> {
+    public Mono<StatusAndShortUrlUserMono>
+    getUserDetails(Mono<Principal> principalMono) {
+        return principalMono.map(auth -> {
             Authentication authentication = (Authentication)auth;
             String username = authentication.getName();
             ShortUrlUser shortUrlUser = shortUrlUserDao.getUserDetails(username);
-            shortUrlUser.setPassword(null);
-            return shortUrlUser;
+            ShortUrlUserStatus shortUrlUserStatus;
+            if (shortUrlUser == null) {
+                shortUrlUserStatus = ShortUrlUserStatus.NO_SUCH_USER;
+            } else {
+                shortUrlUserStatus = ShortUrlUserStatus.SUCCESS;
+                shortUrlUser.setPassword(null);
+            }
+            return new StatusAndShortUrlUserMono(ShortUrlUserStatus.SUCCESS, shortUrlUser);
         });
-
-        return new Object[] {ShortUrlUserStatus.SUCCESS, shortUrlUserMono};
     }
 
     // ------------------------------------------------------------------------

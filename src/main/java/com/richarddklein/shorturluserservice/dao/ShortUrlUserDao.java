@@ -5,10 +5,11 @@
 
 package com.richarddklein.shorturluserservice.dao;
 
-import com.richarddklein.shorturluserservice.dto.StatusAndRoleDto;
-import com.richarddklein.shorturluserservice.dto.UsernameAndPasswordDto;
+import com.richarddklein.shorturluserservice.dto.StatusAndRoleMono;
+import com.richarddklein.shorturluserservice.dto.UsernameAndPasswordMono;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
+import reactor.core.publisher.Mono;
 
 /**
  * The Short URL User DAO (Data Access Object) interface.
@@ -26,9 +27,12 @@ public interface ShortUrlUserDao {
      */
     void initializeShortUrlUserRepository();
 
-    ShortUrlUserStatus signup(ShortUrlUser shortUrlUser);
+    Mono<ShortUrlUserStatus>
+    signup(Mono<ShortUrlUser> shortUrlUserMono);
 
-    StatusAndRoleDto login(UsernameAndPasswordDto usernameAndPasswordDto);
+    Mono<StatusAndRoleMono>
+    login(Mono<UsernameAndPasswordMono> usernameAndPasswordMono);
 
-    ShortUrlUser getUserDetails(String username);
+    Mono<ShortUrlUser>
+    getUserDetails(Mono<String> usernameMono);
 }
