@@ -148,73 +148,59 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
 
     @Override
     public Mono<ShortUrlUserStatus>
-    signup(@RequestBody Mono<ShortUrlUser> shortUrlUserMono) {
-        return shortUrlUserMono.map(shortUrlUser -> {
-            String plaintextPassword = shortUrlUser.getPassword();
-            if (plaintextPassword == null || plaintextPassword.isEmpty()) {
-                return ShortUrlUserStatus.MISSING_PASSWORD;
-            }
-            ShortUrlUser shortUrlUserCopy = new ShortUrlUser(
-                    shortUrlUser.getUsername(),
-                    shortUrlUser.getPassword(),
-                    USER_ROLE,
-                    shortUrlUser.getName(),
-                    shortUrlUser.getEmail(),
-                    passwordEncoder
-            );
-            try {
-                shortUrlUserTable.putItem(req -> req
-                        .item(shortUrlUserCopy)
-                        .conditionExpression(Expression.builder()
-                                .expression("attribute_not_exists(username)")
-                                .build())
-                        .returnConsumedCapacity(ReturnConsumedCapacity.TOTAL));
-                return ShortUrlUserStatus.SUCCESS;
-            } catch (ConditionalCheckFailedException e) {
-                return ShortUrlUserStatus.USER_ALREADY_EXISTS;
-            }
-        });
+    signup(@RequestBody ShortUrlUser shortUrlUser) {
+        String plaintextPassword = shortUrlUser.getPassword();
+        if (plaintextPassword == null || plaintextPassword.isEmpty()) {
+            return Mono.just(ShortUrlUserStatus.MISSING_PASSWORD);
+        }
+        ShortUrlUser shortUrlUserCopy = new ShortUrlUser(
+                shortUrlUser.getUsername(),
+                shortUrlUser.getPassword(),
+                USER_ROLE,
+                shortUrlUser.getName(),
+                shortUrlUser.getEmail(),
+                passwordEncoder
+        );
+        try {
+            shortUrlUserTable.putItem(req -> req
+                    .item(shortUrlUserCopy)
+                    .conditionExpression(Expression.builder()
+                            .expression("attribute_not_exists(username)")
+                            .build())
+                    .returnConsumedCapacity(ReturnConsumedCapacity.TOTAL));
+            return Mono.just(ShortUrlUserStatus.SUCCESS);
+        } catch (ConditionalCheckFailedException e) {
+            return Mono.just(ShortUrlUserStatus.USER_ALREADY_EXISTS);
+        }
     }
 
     @Override
     public Mono<StatusAndRole>
-    login(Mono<UsernameAndPassword> usernameAndPasswordMono) {
-        return usernameAndPasswordMono.flatMap(usernameAndPassword -> {
-            Mono<String> usernameMono = usernameAndPassword.getUsernameMono();
-            Mono<String> passwordMono = usernameAndPassword.getPasswordMono();
-            Mono<ShortUrlUser> userItemFromDbMono = getUserDetails(usernameMono);
+    login(UsernameAndPassword usernameAndPassword) {
+        String username = usernameAndPassword.getUsername();
+        String password = usernameAndPassword.getPassword();
 
-            return userItemFromDbMono.flatMap(userItemFromDb -> {
-                if (userItemFromDb == null) {
-                    return Mono.just(new StatusAndRole(
-                            Mono.just(ShortUrlUserStatus.NO_SUCH_USER),
-                            Mono.empty()));
-                }
-                return passwordMono.flatMap(password -> {
-                    if (!passwordEncoder.matches(password, userItemFromDb.getPassword())) {
-                        return Mono.just(new StatusAndRole(
-                                Mono.just(ShortUrlUserStatus.WRONG_PASSWORD),
-                                Mono.empty()));
-                    }
-                    userItemFromDb.setLastLogin(LocalDateTime.now().format(
-                            DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
-                    shortUrlUserTable.putItem(userItemFromDb);
-                    return Mono.just(new StatusAndRole(
-                            Mono.just(ShortUrlUserStatus.SUCCESS),
-                            Mono.just(userItemFromDb.getRole())));
-                });
-            });
+        return getUserDetails(username).map(shortUrlUser -> {
+            if (shortUrlUser == null) {
+                return new StatusAndRole(ShortUrlUserStatus.NO_SUCH_USER, null);
+            }
+            if (!passwordEncoder.matches(password, shortUrlUser.getPassword())) {
+                return new StatusAndRole(ShortUrlUserStatus.WRONG_PASSWORD, null);
+            }
+            shortUrlUser.setLastLogin(LocalDateTime.now().format(
+                    DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
+            shortUrlUserTable.putItem(shortUrlUser);
+            return new StatusAndRole(
+                    ShortUrlUserStatus.SUCCESS, shortUrlUser.getRole());
         });
     }
 
     @Override
     public Mono<ShortUrlUser>
-    getUserDetails(Mono<String> usernameMono) {
-        return usernameMono.map(username -> {
-            ShortUrlUser key = new ShortUrlUser();
-            key.setUsername(username);
-            return shortUrlUserTable.getItem(key);
-        });
+    getUserDetails(String username) {
+        ShortUrlUser key = new ShortUrlUser();
+        key.setUsername(username);
+        return Mono.just(shortUrlUserTable.getItem(key));
     }
 
     // ------------------------------------------------------------------------
