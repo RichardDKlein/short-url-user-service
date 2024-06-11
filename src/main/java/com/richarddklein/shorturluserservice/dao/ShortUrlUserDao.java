@@ -28,11 +28,11 @@ public interface ShortUrlUserDao {
     void initializeShortUrlUserRepository();
 
     Mono<ShortUrlUserStatus>
-    signup(Mono<ShortUrlUser> shortUrlUserMono);
+    signup(ShortUrlUser shortUrlUser);
 
     Mono<StatusAndRole>
-    login(Mono<UsernameAndPassword> usernameAndPasswordMono);
+    login(UsernameAndPassword usernameAndPassword);
 
     Mono<ShortUrlUser>
-    getUserDetails(Mono<String> usernameMono);
+    getUserDetails(String username);
 }

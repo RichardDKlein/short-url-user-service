@@ -7,9 +7,9 @@ package com.richarddklein.shorturluserservice.service;
 
 import java.security.Principal;
 
+import com.richarddklein.shorturlcommonlibrary.security.dto.UsernameAndRole;
 import com.richarddklein.shorturlcommonlibrary.security.util.JwtUtils;
 import com.richarddklein.shorturluserservice.dto.StatusAndJwtToken;
-import com.richarddklein.shorturluserservice.dto.StatusAndRole;
 import com.richarddklein.shorturluserservice.dto.StatusAndShortUrlUser;
 import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
@@ -60,42 +60,47 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
 
     @Override
     public Mono<ShortUrlUserStatus>
-    signup(Mono<ShortUrlUser> shortUrlUserMono) {
-        return shortUrlUserDao.signup(shortUrlUserMono);
+    signup(ShortUrlUser shortUrlUser) {
+        return shortUrlUserDao.signup(shortUrlUser);
     }
 
     @Override
     public Mono<StatusAndJwtToken>
-    login(Mono<UsernameAndPassword> usernameAndPasswordDtoMono) {
-        Mono<StatusAndRole> statusAndRoleDtoMono =
-                shortUrlUserDao.login(usernameAndPasswordDtoMono);
-        return statusAndRoleDtoMono.map(statusAndRole -> {
-            if (statusAndRole.getStatus() != ShortUrlUserStatus.SUCCESS) {
-                return new StatusAndJwtToken(statusAndRole.getStatus(), null);
+    login(UsernameAndPassword usernameAndPassword) {
+        return shortUrlUserDao.login(usernameAndPassword)
+        .map(statusAndRole -> {
+            if (statusAndRole.getStatus() !=
+                    ShortUrlUserStatus.SUCCESS) {
+                return new StatusAndJwtToken(
+                        statusAndRole.getStatus(), null);
             }
-            Mono<String> usernameMono =
-                    usernameAndPasswordDtoMono.map(UsernameAndPassword::getUsername);
-            Mono<String> roleMono = Mono.just(statusAndRole.getRole());
-            Mono<String> jwtTokenMono = jwtUtils.generateToken(usernameMono, roleMono);
-            return new StatusAndJwtToken(ShortUrlUserStatus.SUCCESS, jwtTokenMono);
+            String jwtToken = jwtUtils.generateToken(
+                    new UsernameAndRole(
+                            usernameAndPassword.getUsername(),
+                            statusAndRole.getRole()));
+            return new StatusAndJwtToken(
+                    ShortUrlUserStatus.SUCCESS, jwtToken);
         });
     }
 
     @Override
     public Mono<StatusAndShortUrlUser>
     getUserDetails(Mono<Principal> principalMono) {
-        return principalMono.map(auth -> {
+        return principalMono.flatMap(auth -> {
             Authentication authentication = (Authentication)auth;
             String username = authentication.getName();
-            ShortUrlUser shortUrlUser = shortUrlUserDao.getUserDetails(username);
-            ShortUrlUserStatus shortUrlUserStatus;
-            if (shortUrlUser == null) {
-                shortUrlUserStatus = ShortUrlUserStatus.NO_SUCH_USER;
-            } else {
-                shortUrlUserStatus = ShortUrlUserStatus.SUCCESS;
-                shortUrlUser.setPassword(null);
-            }
-            return new StatusAndShortUrlUser(ShortUrlUserStatus.SUCCESS, shortUrlUser);
+            return shortUrlUserDao.getUserDetails(username)
+            .map(shortUrlUser -> {
+                ShortUrlUserStatus shortUrlUserStatus;
+                if (shortUrlUser == null) {
+                    shortUrlUserStatus = ShortUrlUserStatus.NO_SUCH_USER;
+                } else {
+                    shortUrlUserStatus = ShortUrlUserStatus.SUCCESS;
+                    shortUrlUser.setPassword(null);
+                }
+                return new StatusAndShortUrlUser(
+                        shortUrlUserStatus, shortUrlUser);
+            });
         });
     }
 
