@@ -7,6 +7,7 @@ package com.richarddklein.shorturluserservice.dao;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.concurrent.CompletableFuture;
 
 import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
 import com.richarddklein.shorturluserservice.dto.StatusAndRole;
@@ -18,7 +19,7 @@ import org.springframework.stereotype.Repository;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import reactor.core.publisher.Mono;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.model.CreateTableEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
@@ -101,7 +102,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     private final ParameterStoreReader parameterStoreReader;
     private final PasswordEncoder passwordEncoder;
     private final DynamoDbClient dynamoDbClient;
-    private final DynamoDbTable<ShortUrlUser> shortUrlUserTable;
+    private final DynamoDbAsyncTable<ShortUrlUser> shortUrlUserTable;
 
     // ------------------------------------------------------------------------
     // PUBLIC METHODS
@@ -125,7 +126,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
             ParameterStoreReader parameterStoreReader,
             PasswordEncoder passwordEncoder,
             DynamoDbClient dynamoDbClient,
-            DynamoDbTable<ShortUrlUser> shortUrlUserTable) {
+            DynamoDbAsyncTable<ShortUrlUser> shortUrlUserTable) {
 
         this.parameterStoreReader = parameterStoreReader;
         this.passwordEncoder = passwordEncoder;
@@ -199,8 +200,10 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     getUserDetails(String username) {
         ShortUrlUser key = new ShortUrlUser();
         key.setUsername(username);
-        ShortUrlUser shortUrlUser = shortUrlUserTable.getItem(key);
-        return (shortUrlUser == null) ? Mono.empty() : Mono.just(shortUrlUser);
+        CompletableFuture<ShortUrlUser> shortUrlUserFuture =
+                shortUrlUserTable.getItem(key);
+        return Mono.fromFuture(shortUrlUserFuture)
+                .switchIfEmpty(Mono.empty());
     }
 
     // ------------------------------------------------------------------------

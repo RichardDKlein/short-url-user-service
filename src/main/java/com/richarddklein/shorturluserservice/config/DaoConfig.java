@@ -17,9 +17,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.*;
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 
 import com.richarddklein.shorturluserservice.dao.ShortUrlUserDaoImpl;
@@ -60,17 +59,24 @@ public class DaoConfig {
     }
 
     @Bean
-    public DynamoDbEnhancedClient
-    dynamoDbEnhancedClient() {
-        return DynamoDbEnhancedClient.builder()
-                .dynamoDbClient(dynamoDbClient())
+    public DynamoDbAsyncClient
+    dynamoDbAsyncClient() {
+        return DynamoDbAsyncClient.builder()
                 .build();
     }
 
     @Bean
-    public DynamoDbTable<ShortUrlUser>
+    public DynamoDbEnhancedAsyncClient
+    dynamoDbEnhancedAsyncClient() {
+        return DynamoDbEnhancedAsyncClient.builder()
+                .dynamoDbClient(dynamoDbAsyncClient())
+                .build();
+    }
+
+    @Bean
+    public DynamoDbAsyncTable<ShortUrlUser>
     shortUrlUserTable() {
-        return dynamoDbEnhancedClient().table(
+        return dynamoDbEnhancedAsyncClient().table(
                 parameterStoreReader.getShortUrlUserTableName(),
                 TableSchema.fromBean(ShortUrlUser.class));
     }
