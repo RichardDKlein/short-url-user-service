@@ -181,9 +181,6 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         String password = usernameAndPassword.getPassword();
 
         return getUserDetails(username).map(shortUrlUser -> {
-            if (shortUrlUser == null) {
-                return new StatusAndRole(ShortUrlUserStatus.NO_SUCH_USER, null);
-            }
             if (!passwordEncoder.matches(password, shortUrlUser.getPassword())) {
                 return new StatusAndRole(ShortUrlUserStatus.WRONG_PASSWORD, null);
             }
@@ -192,7 +189,9 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
             shortUrlUserTable.putItem(shortUrlUser);
             return new StatusAndRole(
                     ShortUrlUserStatus.SUCCESS, shortUrlUser.getRole());
-        });
+        })
+        .switchIfEmpty(Mono.just(new StatusAndRole(
+                ShortUrlUserStatus.NO_SUCH_USER, null)));
     }
 
     @Override
@@ -200,7 +199,8 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     getUserDetails(String username) {
         ShortUrlUser key = new ShortUrlUser();
         key.setUsername(username);
-        return Mono.just(shortUrlUserTable.getItem(key));
+        ShortUrlUser shortUrlUser = shortUrlUserTable.getItem(key);
+        return (shortUrlUser == null) ? Mono.empty() : Mono.just(shortUrlUser);
     }
 
     // ------------------------------------------------------------------------
