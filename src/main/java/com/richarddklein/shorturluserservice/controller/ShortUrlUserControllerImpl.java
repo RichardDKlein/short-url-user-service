@@ -9,7 +9,6 @@ import java.security.Principal;
 
 import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
-import com.richarddklein.shorturluserservice.dto.StatusAndJwtToken;
 import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.StatusAndJwtTokenResponse;
@@ -75,88 +74,93 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     }
 
     @Override
-    public ResponseEntity<StatusResponse>
+    public Mono<ResponseEntity<StatusResponse>>
     signup(ShortUrlUser shortUrlUser) {
-        ShortUrlUserStatus shortUrlUserStatus =
-                shortUrlUserService.signup(shortUrlUser);
-
-        HttpStatus httpStatus;
-        StatusResponse statusResponse;
-
-        if (shortUrlUserStatus == ShortUrlUserStatus.USER_ALREADY_EXISTS) {
-            httpStatus = HttpStatus.CONFLICT;
-            statusResponse = new StatusResponse(
-                    ShortUrlUserStatus.USER_ALREADY_EXISTS,
-                    String.format("User '%s' already exists",
-                            shortUrlUser.getUsername())
-            );
-        } else if (shortUrlUserStatus ==
-                ShortUrlUserStatus.MISSING_PASSWORD) {
-            httpStatus = HttpStatus.BAD_REQUEST;
-            statusResponse = new StatusResponse(
-                    ShortUrlUserStatus.MISSING_PASSWORD,
-                    "A non-empty password must be specified"
-            );
-        } else {
-            httpStatus = HttpStatus.OK;
-            statusResponse = new StatusResponse(
-                    ShortUrlUserStatus.SUCCESS,
-                    String.format("User '%s' successfully created",
-                            shortUrlUser.getUsername())
-            );
-        }
-        return new ResponseEntity<>(statusResponse, httpStatus);
+        return shortUrlUserService.signup(shortUrlUser)
+        .map(shortUrlUserStatus -> {
+            HttpStatus httpStatus;
+            StatusResponse statusResponse;
+            if (shortUrlUserStatus ==
+                    ShortUrlUserStatus.USER_ALREADY_EXISTS) {
+                httpStatus = HttpStatus.CONFLICT;
+                statusResponse = new StatusResponse(
+                        ShortUrlUserStatus.USER_ALREADY_EXISTS,
+                        String.format("User '%s' already exists",
+                                shortUrlUser.getUsername())
+                );
+            } else if (shortUrlUserStatus ==
+                    ShortUrlUserStatus.MISSING_PASSWORD) {
+                httpStatus = HttpStatus.BAD_REQUEST;
+                statusResponse = new StatusResponse(
+                        ShortUrlUserStatus.MISSING_PASSWORD,
+                        "A non-empty password must be specified"
+                );
+            } else {
+                httpStatus = HttpStatus.OK;
+                statusResponse = new StatusResponse(
+                        ShortUrlUserStatus.SUCCESS,
+                        String.format("User '%s' successfully created",
+                                shortUrlUser.getUsername())
+                );
+            }
+            return new ResponseEntity<>(statusResponse, httpStatus);
+        });
     }
 
     @Override
-    public ResponseEntity<StatusAndJwtTokenResponse>
-    login(UsernameAndPassword usernameAndPasswordDto) {
-        StatusAndJwtToken statusAndJwtToken =
-                shortUrlUserService.login(usernameAndPasswordDto);
+    public Mono<ResponseEntity<StatusAndJwtTokenResponse>>
+    login(UsernameAndPassword usernameAndPassword) {
+        return shortUrlUserService.login(usernameAndPassword)
+        .map(statusAndJwtToken -> {
+            HttpStatus httpStatus;
+            StatusResponse statusResponse;
+            ShortUrlUserStatus shortUrlUserStatus =
+                    statusAndJwtToken.getStatus();
+            String jwtToken = statusAndJwtToken.getJwtToken();
 
-        HttpStatus httpStatus;
-        StatusResponse statusResponse;
-        ShortUrlUserStatus shortUrlUserStatus = statusAndJwtToken.getStatus();
-        String jwtToken = statusAndJwtToken.getJwtToken();
+            if (shortUrlUserStatus == ShortUrlUserStatus.NO_SUCH_USER) {
+                httpStatus = HttpStatus.UNAUTHORIZED;
+                statusResponse = new StatusResponse(
+                        ShortUrlUserStatus.NO_SUCH_USER,
+                        String.format(
+                                "User '%s' does not exist",
+                                usernameAndPassword.getUsername())
+                );
+            } else if (shortUrlUserStatus ==
+                    ShortUrlUserStatus.WRONG_PASSWORD) {
+                httpStatus = HttpStatus.UNAUTHORIZED;
+                statusResponse = new StatusResponse(
+                        ShortUrlUserStatus.WRONG_PASSWORD,
+                        "The supplied password is not correct"
+                );
+            } else {
+                httpStatus = HttpStatus.OK;
+                statusResponse = new StatusResponse(
+                        ShortUrlUserStatus.SUCCESS,
+                        String.format(
+                                "User '%s' successfully logged in",
+                                usernameAndPassword.getUsername())
+                );
+            }
+            StatusAndJwtTokenResponse statusAndJwtTokenResponse =
+                    new StatusAndJwtTokenResponse(
+                            statusResponse, jwtToken);
 
-        if (shortUrlUserStatus == ShortUrlUserStatus.NO_SUCH_USER) {
-            httpStatus = HttpStatus.UNAUTHORIZED;
-            statusResponse = new StatusResponse(
-                    ShortUrlUserStatus.NO_SUCH_USER,
-                    String.format("User '%s' does not exist",
-                            usernameAndPasswordDto.getUsername())
-            );
-        } else if (shortUrlUserStatus ==
-                ShortUrlUserStatus.WRONG_PASSWORD) {
-            httpStatus = HttpStatus.UNAUTHORIZED;
-            statusResponse = new StatusResponse(
-                    ShortUrlUserStatus.WRONG_PASSWORD,
-                    "The supplied password is not correct"
-            );
-        } else {
-            httpStatus = HttpStatus.OK;
-            statusResponse = new StatusResponse(
-                    ShortUrlUserStatus.SUCCESS,
-                    String.format("User '%s' successfully logged in",
-                            usernameAndPasswordDto.getUsername())
-            );
-        }
-
-        StatusAndJwtTokenResponse statusAndJwtTokenResponse =
-                new StatusAndJwtTokenResponse(statusResponse, jwtToken);
-
-        return new ResponseEntity<>(statusAndJwtTokenResponse, httpStatus);
+            return new ResponseEntity<>(
+                    statusAndJwtTokenResponse, httpStatus);
+        });
     }
 
     @Override
     public Mono<ResponseEntity<StatusAndShortUrlUserResponse>>
-    getUserDetails(Mono<Principal> principal) {
-        Object[] statusAndShortUrlUser = shortUrlUserService.getUserDetails(principal);
+    getUserDetails(Mono<Principal> principalMono) {
+        return shortUrlUserService.getUserDetails(principalMono)
+        .map(statusAndShortUrlUser -> {
+            ShortUrlUserStatus shortUrlUserStatus =
+                    statusAndShortUrlUser.getStatus();
+            ShortUrlUser shortUrlUser =
+                    statusAndShortUrlUser.getShortUrlUser();
 
-        ShortUrlUserStatus shortUrlUserStatus = (ShortUrlUserStatus)statusAndShortUrlUser[0];
-        Mono<ShortUrlUser> shortUrlUserMono = (Mono<ShortUrlUser>)statusAndShortUrlUser[1];
-
-        return shortUrlUserMono.map(shortUrlUser -> {
             HttpStatus httpStatus;
             StatusResponse statusResponse;
 
@@ -173,11 +177,12 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                         "User details successfully retrieved"
                 );
             }
-
             StatusAndShortUrlUserResponse statusAndShortUrlUserResponse =
-                    new StatusAndShortUrlUserResponse(statusResponse, shortUrlUser);
+                    new StatusAndShortUrlUserResponse(
+                            statusResponse, shortUrlUser);
 
-            return new ResponseEntity<>(statusAndShortUrlUserResponse, httpStatus);
+            return new ResponseEntity<>(
+                    statusAndShortUrlUserResponse, httpStatus);
         });
     }
 

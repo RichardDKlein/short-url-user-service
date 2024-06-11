@@ -30,10 +30,10 @@ public interface ShortUrlUserService {
     void initializeShortUrlUserRepository();
 
     Mono<ShortUrlUserStatus>
-    signup(Mono<ShortUrlUser> shortUrlUserMono);
+    signup(ShortUrlUser shortUrlUser);
 
     Mono<StatusAndJwtToken>
-    login(Mono<UsernameAndPassword> usernameAndPasswordDtoMono);
+    login(UsernameAndPassword usernameAndPassword);
 
     Mono<StatusAndShortUrlUser>
     getUserDetails(Mono<Principal> principalMono);

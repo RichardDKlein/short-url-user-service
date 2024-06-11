@@ -46,14 +46,14 @@ public interface ShortUrlUserController {
     initializeShortUrlUserRepository(ServerHttpRequest request);
 
     @PostMapping("/signup")
-    ResponseEntity<StatusResponse>
+    Mono<ResponseEntity<StatusResponse>>
     signup(@RequestBody ShortUrlUser shortUrlUser);
 
     @PostMapping("/login")
-    ResponseEntity<StatusAndJwtTokenResponse>
+    Mono<ResponseEntity<StatusAndJwtTokenResponse>>
     login(@RequestBody UsernameAndPassword usernameAndPasswordDto);
 
     @GetMapping("/details")
     Mono<ResponseEntity<StatusAndShortUrlUserResponse>>
-    getUserDetails(Mono<Principal> principal);
+    getUserDetails(Mono<Principal> principalMono);
 }

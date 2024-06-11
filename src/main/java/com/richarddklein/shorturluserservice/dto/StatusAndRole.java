@@ -6,34 +6,38 @@
 package com.richarddklein.shorturluserservice.dto;
 
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
-import reactor.core.publisher.Mono;
 
+@SuppressWarnings("unused")
 public class StatusAndRole {
-    private Mono<ShortUrlUserStatus> statusMono;
-    private Mono<String> roleMono;
+    private ShortUrlUserStatus status;
+    private String role;
 
-    @SuppressWarnings("unused")
-    public StatusAndRole(
-            Mono<ShortUrlUserStatus> statusMono,
-            Mono<String> roleMono) {
-
-        this.statusMono = statusMono;
-        this.roleMono = roleMono;
+    public StatusAndRole(ShortUrlUserStatus status, String role) {
+        this.status = status;
+        this.role = role;
     }
 
-    public Mono<ShortUrlUserStatus> getStatusMono() {
-        return statusMono;
+    public ShortUrlUserStatus getStatus() {
+        return status;
     }
 
-    public void setStatusMono(Mono<ShortUrlUserStatus> statusMono) {
-        this.statusMono = statusMono;
+    public void setStatus(ShortUrlUserStatus status) {
+        this.status = status;
     }
 
-    public Mono<String> getRoleMono() {
-        return roleMono;
+    public String getRole() {
+        return role;
     }
 
-    public void setRoleMono(Mono<String> roleMono) {
-        this.roleMono = roleMono;
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    @Override
+    public String toString() {
+        return "StatusAndRole{" +
+                "status=" + status +
+                ", role='" + role + '\'' +
+                '}';
     }
 }

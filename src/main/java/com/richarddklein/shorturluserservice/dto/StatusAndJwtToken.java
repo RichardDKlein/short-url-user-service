@@ -6,34 +6,38 @@
 package com.richarddklein.shorturluserservice.dto;
 
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
-import reactor.core.publisher.Mono;
 
 @SuppressWarnings("unused")
 public class StatusAndJwtToken {
-    private Mono<ShortUrlUserStatus> statusMono;
-    private Mono<String> jwtTokenMono;
+    private ShortUrlUserStatus status;
+    private String jwtToken;
 
-    public StatusAndJwtToken(
-            Mono<ShortUrlUserStatus> statusMono,
-            Mono<String> jwtTokenMono) {
-
-        this.statusMono = statusMono;
-        this.jwtTokenMono = jwtTokenMono;
+    public StatusAndJwtToken(ShortUrlUserStatus status, String jwtToken) {
+        this.status = status;
+        this.jwtToken = jwtToken;
     }
 
-    public Mono<ShortUrlUserStatus> getStatusMono() {
-        return statusMono;
+    public ShortUrlUserStatus getStatus() {
+        return status;
     }
 
-    public void setStatusMono(Mono<ShortUrlUserStatus> statusMono) {
-        this.statusMono = statusMono;
+    public void setStatus(ShortUrlUserStatus status) {
+        this.status = status;
     }
 
-    public Mono<String> getJwtTokenMono() {
-        return jwtTokenMono;
+    public String getJwtToken() {
+        return jwtToken;
     }
 
-    public void setJwtTokenMono(Mono<String> jwtTokenMono) {
-        this.jwtTokenMono = jwtTokenMono;
+    public void setJwtToken(String jwtToken) {
+        this.jwtToken = jwtToken;
+    }
+
+    @Override
+    public String toString() {
+        return "StatusAndJwtToken{" +
+                "status=" + status +
+                ", jwtToken='" + jwtToken + '\'' +
+                '}';
     }
 }

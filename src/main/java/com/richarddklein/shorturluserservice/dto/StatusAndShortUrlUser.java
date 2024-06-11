@@ -7,34 +7,30 @@ package com.richarddklein.shorturluserservice.dto;
 
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
-import reactor.core.publisher.Mono;
 
 @SuppressWarnings("unused")
 public class StatusAndShortUrlUser {
-    private Mono<ShortUrlUserStatus> statusMono;
-    private Mono<ShortUrlUser> shortUrlUserMono;
+    private ShortUrlUserStatus status;
+    private ShortUrlUser shortUrlUser;
 
-    public StatusAndShortUrlUser(
-            Mono<ShortUrlUserStatus> statusMono,
-            Mono<ShortUrlUser> shortUrlUserMono) {
-
-        this.statusMono = statusMono;
-        this.shortUrlUserMono = shortUrlUserMono;
+    public StatusAndShortUrlUser(ShortUrlUserStatus status, ShortUrlUser shortUrlUser) {
+        this.status = status;
+        this.shortUrlUser = shortUrlUser;
     }
 
-    public Mono<ShortUrlUserStatus> getStatusMono() {
-        return statusMono;
+    public ShortUrlUserStatus getStatus() {
+        return status;
     }
 
-    public void setStatusMono(Mono<ShortUrlUserStatus> statusMono) {
-        this.statusMono = statusMono;
+    public void setStatus(ShortUrlUserStatus status) {
+        this.status = status;
     }
 
-    public Mono<ShortUrlUser> getShortUrlUserMono() {
-        return shortUrlUserMono;
+    public ShortUrlUser getShortUrlUser() {
+        return shortUrlUser;
     }
 
-    public void setShortUrlUserMono(Mono<ShortUrlUser> shortUrlUserMono) {
-        this.shortUrlUserMono = shortUrlUserMono;
+    public void setShortUrlUser(ShortUrlUser shortUrlUser) {
+        this.shortUrlUser = shortUrlUser;
     }
 }

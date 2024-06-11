@@ -5,34 +5,37 @@
 
 package com.richarddklein.shorturluserservice.dto;
 
-import reactor.core.publisher.Mono;
-
 @SuppressWarnings("unused")
 public class UsernameAndPassword {
-    private Mono<String> usernameMono;
-    private Mono<String> passwordMono;
+    private String username;
+    private String password;
 
-    public UsernameAndPassword(
-            Mono<String> usernameMono,
-            Mono<String> passwordMono) {
-
-        this.usernameMono = usernameMono;
-        this.passwordMono = passwordMono;
+    public UsernameAndPassword(String username, String password) {
+        this.username = username;
+        this.password = password;
     }
 
-    public Mono<String> getUsernameMono() {
-        return usernameMono;
+    public String getUsername() {
+        return username;
     }
 
-    public void setUsernameMono(Mono<String> usernameMono) {
-        this.usernameMono = usernameMono;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public Mono<String> getPasswordMono() {
-        return passwordMono;
+    public String getPassword() {
+        return password;
     }
 
-    public void setPasswordMono(Mono<String> passwordMono) {
-        this.passwordMono = passwordMono;
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @Override
+    public String toString() {
+        return "UsernameAndPassword{" +
+                "username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                '}';
     }
 }
