@@ -8,12 +8,12 @@ package com.richarddklein.shorturluserservice.dto;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
 import reactor.core.publisher.Mono;
 
-public class StatusAndRoleMono {
+public class StatusAndRole {
     private Mono<ShortUrlUserStatus> statusMono;
     private Mono<String> roleMono;
 
     @SuppressWarnings("unused")
-    public StatusAndRoleMono(
+    public StatusAndRole(
             Mono<ShortUrlUserStatus> statusMono,
             Mono<String> roleMono) {
 

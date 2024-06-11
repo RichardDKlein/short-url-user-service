@@ -7,9 +7,9 @@ package com.richarddklein.shorturluserservice.service;
 
 import java.security.Principal;
 
-import com.richarddklein.shorturluserservice.dto.StatusAndJwtTokenMono;
-import com.richarddklein.shorturluserservice.dto.StatusAndShortUrlUserMono;
-import com.richarddklein.shorturluserservice.dto.UsernameAndPasswordMono;
+import com.richarddklein.shorturluserservice.dto.StatusAndJwtToken;
+import com.richarddklein.shorturluserservice.dto.StatusAndShortUrlUser;
+import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
 import reactor.core.publisher.Mono;
@@ -32,9 +32,9 @@ public interface ShortUrlUserService {
     Mono<ShortUrlUserStatus>
     signup(Mono<ShortUrlUser> shortUrlUserMono);
 
-    Mono<StatusAndJwtTokenMono>
-    login(Mono<UsernameAndPasswordMono> usernameAndPasswordDtoMono);
+    Mono<StatusAndJwtToken>
+    login(Mono<UsernameAndPassword> usernameAndPasswordDtoMono);
 
-    Mono<StatusAndShortUrlUserMono>
+    Mono<StatusAndShortUrlUser>
     getUserDetails(Mono<Principal> principalMono);
 }

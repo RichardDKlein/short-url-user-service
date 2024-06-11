@@ -8,10 +8,10 @@ package com.richarddklein.shorturluserservice.service;
 import java.security.Principal;
 
 import com.richarddklein.shorturlcommonlibrary.security.util.JwtUtils;
-import com.richarddklein.shorturluserservice.dto.StatusAndJwtTokenMono;
-import com.richarddklein.shorturluserservice.dto.StatusAndRoleMono;
-import com.richarddklein.shorturluserservice.dto.StatusAndShortUrlUserMono;
-import com.richarddklein.shorturluserservice.dto.UsernameAndPasswordMono;
+import com.richarddklein.shorturluserservice.dto.StatusAndJwtToken;
+import com.richarddklein.shorturluserservice.dto.StatusAndRole;
+import com.richarddklein.shorturluserservice.dto.StatusAndShortUrlUser;
+import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
 import org.springframework.security.core.Authentication;
@@ -65,24 +65,24 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
     }
 
     @Override
-    public Mono<StatusAndJwtTokenMono>
-    login(Mono<UsernameAndPasswordMono> usernameAndPasswordDtoMono) {
-        Mono<StatusAndRoleMono> statusAndRoleDtoMono =
+    public Mono<StatusAndJwtToken>
+    login(Mono<UsernameAndPassword> usernameAndPasswordDtoMono) {
+        Mono<StatusAndRole> statusAndRoleDtoMono =
                 shortUrlUserDao.login(usernameAndPasswordDtoMono);
-        return statusAndRoleDtoMono.map(statusAndRoleMono -> {
-            if (statusAndRoleMono.getStatus() != ShortUrlUserStatus.SUCCESS) {
-                return new StatusAndJwtTokenMono(statusAndRoleMono.getStatus(), null);
+        return statusAndRoleDtoMono.map(statusAndRole -> {
+            if (statusAndRole.getStatus() != ShortUrlUserStatus.SUCCESS) {
+                return new StatusAndJwtToken(statusAndRole.getStatus(), null);
             }
             Mono<String> usernameMono =
-                    usernameAndPasswordDtoMono.map(UsernameAndPasswordMono::getUsername);
-            Mono<String> roleMono = Mono.just(statusAndRoleMono.getRole());
+                    usernameAndPasswordDtoMono.map(UsernameAndPassword::getUsername);
+            Mono<String> roleMono = Mono.just(statusAndRole.getRole());
             Mono<String> jwtTokenMono = jwtUtils.generateToken(usernameMono, roleMono);
-            return new StatusAndJwtTokenMono(ShortUrlUserStatus.SUCCESS, jwtTokenMono);
+            return new StatusAndJwtToken(ShortUrlUserStatus.SUCCESS, jwtTokenMono);
         });
     }
 
     @Override
-    public Mono<StatusAndShortUrlUserMono>
+    public Mono<StatusAndShortUrlUser>
     getUserDetails(Mono<Principal> principalMono) {
         return principalMono.map(auth -> {
             Authentication authentication = (Authentication)auth;
@@ -95,7 +95,7 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
                 shortUrlUserStatus = ShortUrlUserStatus.SUCCESS;
                 shortUrlUser.setPassword(null);
             }
-            return new StatusAndShortUrlUserMono(ShortUrlUserStatus.SUCCESS, shortUrlUser);
+            return new StatusAndShortUrlUser(ShortUrlUserStatus.SUCCESS, shortUrlUser);
         });
     }
 

@@ -9,11 +9,11 @@ import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserSta
 import reactor.core.publisher.Mono;
 
 @SuppressWarnings("unused")
-public class StatusAndJwtTokenMono {
+public class StatusAndJwtToken {
     private Mono<ShortUrlUserStatus> statusMono;
     private Mono<String> jwtTokenMono;
 
-    public StatusAndJwtTokenMono(
+    public StatusAndJwtToken(
             Mono<ShortUrlUserStatus> statusMono,
             Mono<String> jwtTokenMono) {
 

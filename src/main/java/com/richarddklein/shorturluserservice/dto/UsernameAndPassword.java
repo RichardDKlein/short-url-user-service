@@ -8,11 +8,11 @@ package com.richarddklein.shorturluserservice.dto;
 import reactor.core.publisher.Mono;
 
 @SuppressWarnings("unused")
-public class UsernameAndPasswordMono {
+public class UsernameAndPassword {
     private Mono<String> usernameMono;
     private Mono<String> passwordMono;
 
-    public UsernameAndPasswordMono(
+    public UsernameAndPassword(
             Mono<String> usernameMono,
             Mono<String> passwordMono) {
 

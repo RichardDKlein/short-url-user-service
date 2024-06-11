@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
-import com.richarddklein.shorturluserservice.dto.StatusAndRoleMono;
-import com.richarddklein.shorturluserservice.dto.UsernameAndPasswordMono;
+import com.richarddklein.shorturluserservice.dto.StatusAndRole;
+import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -177,24 +177,32 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     }
 
     @Override
-    public Mono<StatusAndRoleMono>
-    login(Mono<UsernameAndPasswordMono> usernameAndPasswordMono) {
+    public Mono<StatusAndRole>
+    login(Mono<UsernameAndPassword> usernameAndPasswordMono) {
         return usernameAndPasswordMono.flatMap(usernameAndPassword -> {
-            Mono<ShortUrlUser> userItemFromDbMono = getUserDetails(
-                    usernameAndPassword.getUsernameMono());
-            return userItemFromDbMono.map(item -> {
-                if (item == null) {
-                    return new StatusAndRoleMono(
-                            Mono.just(ShortUrlUserStatus.NO_SUCH_USER), null);
+            Mono<String> usernameMono = usernameAndPassword.getUsernameMono();
+            Mono<String> passwordMono = usernameAndPassword.getPasswordMono();
+            Mono<ShortUrlUser> userItemFromDbMono = getUserDetails(usernameMono);
+
+            return userItemFromDbMono.flatMap(userItemFromDb -> {
+                if (userItemFromDb == null) {
+                    return Mono.just(new StatusAndRole(
+                            Mono.just(ShortUrlUserStatus.NO_SUCH_USER),
+                            Mono.empty()));
                 }
-                if (!passwordEncoder.matches(
-                        usernameAndPassword.getPassword(), item.getPassword())) {
-                    return new StatusAndRoleMono(ShortUrlUserStatus.WRONG_PASSWORD, null);
-                }
-                item.setLastLogin(LocalDateTime.now().format(
-                        DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
-                shortUrlUserTable.putItem(item);
-                return new StatusAndRoleMono(ShortUrlUserStatus.SUCCESS, item.getRole());
+                return passwordMono.flatMap(password -> {
+                    if (!passwordEncoder.matches(password, userItemFromDb.getPassword())) {
+                        return Mono.just(new StatusAndRole(
+                                Mono.just(ShortUrlUserStatus.WRONG_PASSWORD),
+                                Mono.empty()));
+                    }
+                    userItemFromDb.setLastLogin(LocalDateTime.now().format(
+                            DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
+                    shortUrlUserTable.putItem(userItemFromDb);
+                    return Mono.just(new StatusAndRole(
+                            Mono.just(ShortUrlUserStatus.SUCCESS),
+                            Mono.just(userItemFromDb.getRole())));
+                });
             });
         });
     }

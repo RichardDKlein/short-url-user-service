@@ -10,11 +10,11 @@ import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import reactor.core.publisher.Mono;
 
 @SuppressWarnings("unused")
-public class StatusAndShortUrlUserMono {
+public class StatusAndShortUrlUser {
     private Mono<ShortUrlUserStatus> statusMono;
     private Mono<ShortUrlUser> shortUrlUserMono;
 
-    public StatusAndShortUrlUserMono(
+    public StatusAndShortUrlUser(
             Mono<ShortUrlUserStatus> statusMono,
             Mono<ShortUrlUser> shortUrlUserMono) {
 

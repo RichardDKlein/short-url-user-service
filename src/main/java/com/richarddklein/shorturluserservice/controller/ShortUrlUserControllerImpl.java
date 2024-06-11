@@ -9,8 +9,8 @@ import java.security.Principal;
 
 import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
-import com.richarddklein.shorturluserservice.dto.StatusAndJwtTokenMono;
-import com.richarddklein.shorturluserservice.dto.UsernameAndPasswordMono;
+import com.richarddklein.shorturluserservice.dto.StatusAndJwtToken;
+import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.StatusAndJwtTokenResponse;
 import com.richarddklein.shorturluserservice.controller.response.StatusAndShortUrlUserResponse;
@@ -110,8 +110,8 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
 
     @Override
     public ResponseEntity<StatusAndJwtTokenResponse>
-    login(UsernameAndPasswordMono usernameAndPasswordDto) {
-        StatusAndJwtTokenMono statusAndJwtToken =
+    login(UsernameAndPassword usernameAndPasswordDto) {
+        StatusAndJwtToken statusAndJwtToken =
                 shortUrlUserService.login(usernameAndPasswordDto);
 
         HttpStatus httpStatus;
