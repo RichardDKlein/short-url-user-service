@@ -59,7 +59,7 @@ import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
  * Short URL User service. The password is then salted and encoded before being
  * stored in the Short URL User table.</p>
  *
- * <p>The `role` attribute of each Short URL User item is specifies the user's role,
+ * <p>The `role` attribute of each Short URL User item specifies the user's role,
  * which in turn specifies the operations the user is permitted to perform. A user
  * with the "USER" role is an ordinary user, and can only perform operations that
  * pertain to his own account. A user with the "ADMIN" role can perform any operation
@@ -80,17 +80,18 @@ import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
  * of DynamoDB; the developer should not read or write it. DynamoDB uses the `version`
  * attribute for what it calls "optimistic locking".</p>
  *
- * <p>In the optimistic locking scheme, the code proceeds with a read-update-write transaction
- * under the assumption that most of the time the item will not be updated by another user
- * between the `read` and `write` operations. In the (hopefully rare) situations where this
- * is not the case, the `write` operation will fail, allowing the code to retry with a new
- * read-update-write transaction.</p>
+ * <p>In the optimistic locking scheme, the code proceeds with a read-update-write
+ * transaction under the assumption that most of the time the item will not be updated
+ * by another user between the `read` and `write` operations. In the (hopefully rare)
+ * situations where this is not the case, the `write` operation will fail, allowing the
+ * code to retry with a new read-update-write transaction.</p>
  *
- * <p>DynamoDB uses the `version` attribute to detect when another user has updated the same
- * item concurrently. Every time the item is written to the database, DynamoDB first checks
- * whether the `version` attribute in the item is the same as the `version` attribute in the
- * database. If so, DynamoDB lets the `write` proceed, and updates the `version` attribute
- * in the database. If not, DynamoDB announces that the `write` has failed.</p>
+ * <p>DynamoDB uses the `version` attribute to detect when another user has updated the
+ * same item concurrently. Every time the item is written to the database, DynamoDB first
+ * checks whether the `version` attribute in the item is the same as the `version` attribute
+ * in the database. If so, DynamoDB lets the `write` proceed, and updates the `version`
+ * attribute in the database. If not, DynamoDB throws an exception to indicate that the
+ * `write` has failed.</p>
  */
 @Repository
 public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
@@ -162,17 +163,16 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                 shortUrlUser.getEmail(),
                 passwordEncoder
         );
-        try {
-            shortUrlUserTable.putItem(req -> req
+        return Mono.fromFuture(
+                () -> shortUrlUserTable.putItem(req -> req
                     .item(shortUrlUserCopy)
                     .conditionExpression(Expression.builder()
                             .expression("attribute_not_exists(username)")
                             .build())
-                    .returnConsumedCapacity(ReturnConsumedCapacity.TOTAL));
-            return Mono.just(ShortUrlUserStatus.SUCCESS);
-        } catch (ConditionalCheckFailedException e) {
-            return Mono.just(ShortUrlUserStatus.USER_ALREADY_EXISTS);
-        }
+                    .returnConsumedCapacity(ReturnConsumedCapacity.TOTAL)))
+                .then(Mono.just(ShortUrlUserStatus.SUCCESS))
+                .onErrorResume(ConditionalCheckFailedException.class,
+                        e -> Mono.just(ShortUrlUserStatus.USER_ALREADY_EXISTS));
     }
 
     @Override
@@ -181,13 +181,13 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         String username = usernameAndPassword.getUsername();
         String password = usernameAndPassword.getPassword();
 
-        return getUserDetails(username).map(shortUrlUser -> {
+        return getUser(username).map(shortUrlUser -> {
             if (!passwordEncoder.matches(password, shortUrlUser.getPassword())) {
                 return new StatusAndRole(ShortUrlUserStatus.WRONG_PASSWORD, null);
             }
             shortUrlUser.setLastLogin(LocalDateTime.now().format(
                     DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
-            shortUrlUserTable.putItem(shortUrlUser);
+            shortUrlUserTable.updateItem(shortUrlUser);
             return new StatusAndRole(
                     ShortUrlUserStatus.SUCCESS, shortUrlUser.getRole());
         })
@@ -197,7 +197,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
 
     @Override
     public Mono<ShortUrlUser>
-    getUserDetails(String username) {
+    getUser(String username) {
         return Mono.fromFuture(shortUrlUserTable.getItem(
                 GetItemEnhancedRequest.builder()
                         .key(builder -> builder.partitionValue(username))
