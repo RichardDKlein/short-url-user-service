@@ -164,15 +164,15 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                 passwordEncoder
         );
         return Mono.fromFuture(
-                () -> shortUrlUserTable.putItem(req -> req
+                shortUrlUserTable.putItem(req -> req
                     .item(shortUrlUserCopy)
                     .conditionExpression(Expression.builder()
                             .expression("attribute_not_exists(username)")
                             .build())
                     .returnConsumedCapacity(ReturnConsumedCapacity.TOTAL)))
                 .then(Mono.just(ShortUrlUserStatus.SUCCESS))
-                .onErrorResume(ConditionalCheckFailedException.class,
-                        e -> Mono.just(ShortUrlUserStatus.USER_ALREADY_EXISTS));
+                .onErrorResume(ConditionalCheckFailedException.class, e ->
+                        Mono.just(ShortUrlUserStatus.USER_ALREADY_EXISTS));
     }
 
     @Override
@@ -181,23 +181,49 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         String username = usernameAndPassword.getUsername();
         String password = usernameAndPassword.getPassword();
 
-        return getUser(username).map(shortUrlUser -> {
-            if (!passwordEncoder.matches(password, shortUrlUser.getPassword())) {
-                return new StatusAndRole(ShortUrlUserStatus.WRONG_PASSWORD, null);
-            }
-            shortUrlUser.setLastLogin(LocalDateTime.now().format(
-                    DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
-            shortUrlUserTable.updateItem(shortUrlUser);
-            return new StatusAndRole(
-                    ShortUrlUserStatus.SUCCESS, shortUrlUser.getRole());
-        })
-        .switchIfEmpty(Mono.just(new StatusAndRole(
-                ShortUrlUserStatus.NO_SUCH_USER, null)));
+        return getShortUrlUser(username)
+            .flatMap(shortUrlUser -> {
+                if (shortUrlUser == null) {
+                    return Mono.just(new StatusAndRole(
+                            ShortUrlUserStatus.NO_SUCH_USER, null));
+                }
+                if (!passwordEncoder.matches(password, shortUrlUser.getPassword())) {
+                    return Mono.just(new StatusAndRole(
+                            ShortUrlUserStatus.WRONG_PASSWORD, null));
+                }
+                shortUrlUser.setLastLogin(LocalDateTime.now().format(
+                        DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
+                // We use `Mono.defer() to ensure that the database update
+                // is retried each time the subscriber re-subscribes to the
+                // `Mono.fromFuture()` on a retry.
+                return Mono.defer(() -> Mono.fromFuture(
+                    shortUrlUserTable.updateItem(shortUrlUser)))
+                    .retry()
+                    .flatMap(updatedShortUrlUser -> {
+                        if (updatedShortUrlUser == null) {
+                            return Mono.empty();
+                        }
+                        return Mono.just(new StatusAndRole(
+                                ShortUrlUserStatus.SUCCESS, updatedShortUrlUser.getRole()));
+                    })
+                    .onErrorResume(ConditionalCheckFailedException.class, e -> {
+                        // Version check failed. Someone updated the ShortUrlUser item in
+                        // the database after we read the item, so the item we just tried
+                        // to update contains stale data.
+                        System.out.println(e.getMessage());
+                        return Mono.empty();
+                    })
+                    .onErrorResume(e -> {
+                        // Some other exception occurred.
+                        // System.out.println(e.getMessage());
+                        return Mono.empty();
+                    });
+            });
     }
 
     @Override
     public Mono<ShortUrlUser>
-    getUser(String username) {
+    getShortUrlUser(String username) {
         return Mono.fromFuture(shortUrlUserTable.getItem(
                 GetItemEnhancedRequest.builder()
                         .key(builder -> builder.partitionValue(username))
