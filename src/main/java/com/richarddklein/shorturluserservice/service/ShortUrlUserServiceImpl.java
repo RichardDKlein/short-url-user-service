@@ -89,7 +89,7 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
         return principalMono.flatMap(auth -> {
             Authentication authentication = (Authentication)auth;
             String username = authentication.getName();
-            return shortUrlUserDao.getUser(username)
+            return shortUrlUserDao.getShortUrlUser(username)
             .map(shortUrlUser -> {
                 ShortUrlUserStatus shortUrlUserStatus;
                 if (shortUrlUser == null) {

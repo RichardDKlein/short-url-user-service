@@ -34,5 +34,5 @@ public interface ShortUrlUserDao {
     login(UsernameAndPassword usernameAndPassword);
 
     Mono<ShortUrlUser>
-    getUser(String username);
+    getShortUrlUser(String username);
 }
