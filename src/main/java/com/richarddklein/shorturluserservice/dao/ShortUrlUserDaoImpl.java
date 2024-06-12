@@ -7,7 +7,6 @@ package com.richarddklein.shorturluserservice.dao;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.CompletableFuture;
 
 import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
 import com.richarddklein.shorturluserservice.dto.StatusAndRole;
@@ -22,6 +21,7 @@ import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.model.CreateTableEnhancedRequest;
+import software.amazon.awssdk.enhanced.dynamodb.model.GetItemEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
@@ -198,11 +198,10 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     @Override
     public Mono<ShortUrlUser>
     getUserDetails(String username) {
-        ShortUrlUser key = new ShortUrlUser();
-        key.setUsername(username);
-        CompletableFuture<ShortUrlUser> shortUrlUserFuture =
-                shortUrlUserTable.getItem(key);
-        return Mono.fromFuture(shortUrlUserFuture)
+        return Mono.fromFuture(shortUrlUserTable.getItem(
+                GetItemEnhancedRequest.builder()
+                        .key(builder -> builder.partitionValue(username))
+                        .build()))
                 .switchIfEmpty(Mono.empty());
     }
 
@@ -266,7 +265,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                 ADMIN_EMAIL,
                 passwordEncoder
         );
-        shortUrlUserTable.putItem(admin);
+        Mono.fromFuture(shortUrlUserTable.putItem(admin)).block();
         System.out.println(" done!");
     }
 }
