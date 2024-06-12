@@ -183,16 +183,12 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
 
         return getShortUrlUser(username)
             .flatMap(shortUrlUser -> {
-                if (shortUrlUser == null) {
-                    return Mono.just(new StatusAndRole(
-                            ShortUrlUserStatus.NO_SUCH_USER, null));
-                }
                 if (!passwordEncoder.matches(password, shortUrlUser.getPassword())) {
                     return Mono.just(new StatusAndRole(
-                            ShortUrlUserStatus.WRONG_PASSWORD, null));
+                        ShortUrlUserStatus.WRONG_PASSWORD, null));
                 }
                 shortUrlUser.setLastLogin(LocalDateTime.now().format(
-                        DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
+                    DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
                 // We use `Mono.defer() to ensure that the database update
                 // is retried each time the subscriber re-subscribes to the
                 // `Mono.fromFuture()` on a retry.
@@ -204,7 +200,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                             return Mono.empty();
                         }
                         return Mono.just(new StatusAndRole(
-                                ShortUrlUserStatus.SUCCESS, updatedShortUrlUser.getRole()));
+                            ShortUrlUserStatus.SUCCESS, updatedShortUrlUser.getRole()));
                     })
                     .onErrorResume(ConditionalCheckFailedException.class, e -> {
                         // Version check failed. Someone updated the ShortUrlUser item in
@@ -218,16 +214,17 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                         // System.out.println(e.getMessage());
                         return Mono.empty();
                     });
-            });
+            })
+            .switchIfEmpty(Mono.just(new StatusAndRole(
+                ShortUrlUserStatus.NO_SUCH_USER, null)));
     }
 
     @Override
     public Mono<ShortUrlUser>
     getShortUrlUser(String username) {
-        return Mono.fromFuture(shortUrlUserTable.getItem(
-                GetItemEnhancedRequest.builder()
-                        .key(builder -> builder.partitionValue(username))
-                        .build()))
+        ShortUrlUser key = new ShortUrlUser();
+        key.setUsername(username);
+        return Mono.fromFuture(shortUrlUserTable.getItem(key))
                 .switchIfEmpty(Mono.empty());
     }
 
