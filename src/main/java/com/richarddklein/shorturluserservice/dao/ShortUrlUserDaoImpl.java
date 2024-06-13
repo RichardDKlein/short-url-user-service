@@ -180,8 +180,9 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         String username = usernameAndPassword.getUsername();
         String password = usernameAndPassword.getPassword();
 
-        // We use `Mono.defer()` to ensure that the database accesses
-        // are retried on each `Mono.retry()`.
+        // We use `Mono.defer()` to ensure that all the operations,
+        // including the database accesses, are retried on each
+        // `Mono.retry()`.
         return Mono.defer(() -> getShortUrlUser(username))
             .retry()
             .flatMap(shortUrlUser -> {
