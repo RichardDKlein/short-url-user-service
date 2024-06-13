@@ -10,7 +10,7 @@ Globals:
     EndpointConfiguration: REGIONAL
 
 Resources:
-  ShortUrlReservationService:
+  ShortUrlUserService:
     Type: AWS::Serverless::Function
     Properties:
       Handler: com.richarddklein.shorturluserservice.StreamLambdaHandler::handleRequest
@@ -33,6 +33,12 @@ Resources:
         - SSMParameterWithSlashPrefixReadPolicy:
             ParameterName:
               /shortUrl/users/adminPassword
+        - SSMParameterWithSlashPrefixReadPolicy:
+            ParameterName:
+              /shortUrl/users/jwtMinutesToLive
+        - SSMParameterWithSlashPrefixReadPolicy:
+            ParameterName:
+              /shortUrl/users/jwtSecretKey
       SnapStart:
         ApplyOn: "PublishedVersions"
 
@@ -68,7 +74,7 @@ Resources:
           Properties:
             Path: /shorturl/users/dbinit
             Method: POST
-        InitializeShortUrlReservationTableViaCustomDomain:
+        InitializeShortUrlUserTableViaCustomDomain:
           Type: Api
           Properties:
             Path: /dbinit
@@ -103,3 +109,13 @@ Resources:
           Properties:
             Path: /details
             Method: GET
+        ChangePasswordViaApiGatewayOrLocalHost:
+          Type: Api
+          Properties:
+            Path: /shorturl/users/changepassword
+            Method: PATCH
+        ChangePasswordViaCustomDomain:
+          Type: Api
+          Properties:
+            Path: /changepassword
+            Method: PATCH

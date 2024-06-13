@@ -6,10 +6,12 @@
 package com.richarddklein.shorturluserservice.controller;
 
 import java.security.Principal;
+import java.util.Objects;
 
 import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
 import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
+import com.richarddklein.shorturluserservice.dto.UsernameOldPasswordAndNewPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.StatusAndJwtTokenResponse;
 import com.richarddklein.shorturluserservice.controller.response.StatusAndShortUrlUserResponse;
@@ -29,7 +31,6 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequestMapping({"/shorturl/users", "/"})
 public class ShortUrlUserControllerImpl implements ShortUrlUserController {
-    private final ParameterStoreReader parameterStoreReader;
     private final ShortUrlUserService shortUrlUserService;
 
     // ------------------------------------------------------------------------
@@ -39,24 +40,21 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     /**
      * General constructor.
      *
-     * @param parameterStoreReader Dependency injection of a class instance
-     *                             that is able to read the AWS Parameter
-     *                             Store.
      * @param shortUrlUserService Dependency injection of a class instance
      *                            that is to play the role of the Short URL
      *                            User service layer.
      */
-    public ShortUrlUserControllerImpl(ParameterStoreReader parameterStoreReader,
-                                      ShortUrlUserService shortUrlUserService) {
+    public ShortUrlUserControllerImpl(
+            ShortUrlUserService shortUrlUserService) {
 
-        this.parameterStoreReader = parameterStoreReader;
         this.shortUrlUserService = shortUrlUserService;
     }
 
     @Override
     public ResponseEntity<StatusResponse>
     initializeShortUrlUserRepository(ServerHttpRequest request) {
-        if (isRunningLocally(request.getRemoteAddress().getHostString())) {
+        if (isRunningLocally(Objects.requireNonNull(
+                request.getRemoteAddress()).getHostString())) {
             shortUrlUserService.initializeShortUrlUserRepository();
             StatusResponse response = new StatusResponse(
                     ShortUrlUserStatus.SUCCESS,
@@ -183,6 +181,44 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
 
             return new ResponseEntity<>(
                     statusAndShortUrlUserResponse, httpStatus);
+        });
+    }
+
+    @Override
+    public Mono<ResponseEntity<StatusResponse>>
+    changePassword(UsernameOldPasswordAndNewPassword
+            usernameOldPasswordAndNewPassword) {
+        return shortUrlUserService.changePassword(
+                usernameOldPasswordAndNewPassword)
+        .map(shortUrlUserStatus -> {
+            HttpStatus httpStatus;
+            StatusResponse statusResponse;
+
+            if (shortUrlUserStatus == ShortUrlUserStatus.NO_SUCH_USER) {
+                httpStatus = HttpStatus.UNAUTHORIZED;
+                statusResponse = new StatusResponse(
+                    ShortUrlUserStatus.NO_SUCH_USER,
+                    String.format(
+                        "User '%s' does not exist",
+                        usernameOldPasswordAndNewPassword.getUsername())
+                );
+            } else if (shortUrlUserStatus ==
+                    ShortUrlUserStatus.WRONG_PASSWORD) {
+                httpStatus = HttpStatus.UNAUTHORIZED;
+                statusResponse = new StatusResponse(
+                    ShortUrlUserStatus.WRONG_PASSWORD,
+                    "The supplied password is not correct"
+                );
+            } else {
+                httpStatus = HttpStatus.OK;
+                statusResponse = new StatusResponse(
+                    ShortUrlUserStatus.SUCCESS,
+                    String.format(
+                        "Password successfully changed for user '%s'",
+                        usernameOldPasswordAndNewPassword.getUsername())
+                );
+            }
+            return new ResponseEntity<>(statusResponse, httpStatus);
         });
     }
 

@@ -8,6 +8,7 @@ package com.richarddklein.shorturluserservice.controller;
 import java.security.Principal;
 
 import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
+import com.richarddklein.shorturluserservice.dto.UsernameOldPasswordAndNewPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.StatusAndJwtTokenResponse;
 import com.richarddklein.shorturluserservice.controller.response.StatusAndShortUrlUserResponse;
@@ -24,6 +25,7 @@ import reactor.core.publisher.Mono;
  * <p>Specifies the REST API endpoints for the Short URL User
  * Service.</p>
  */
+@SuppressWarnings("unused")
 public interface ShortUrlUserController {
     /**
      * Initialize the Short URL User repository.
@@ -56,4 +58,9 @@ public interface ShortUrlUserController {
     @GetMapping("/details")
     Mono<ResponseEntity<StatusAndShortUrlUserResponse>>
     getUserDetails(Mono<Principal> principalMono);
+
+    @PatchMapping("/changepassword")
+    Mono<ResponseEntity<StatusResponse>>
+    changePassword(@RequestBody UsernameOldPasswordAndNewPassword
+            usernameOldPasswordAndNewPassword);
 }

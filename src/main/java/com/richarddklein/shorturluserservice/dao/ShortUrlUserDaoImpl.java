@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
 import com.richarddklein.shorturluserservice.dto.StatusAndRole;
 import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
+import com.richarddklein.shorturluserservice.dto.UsernameOldPasswordAndNewPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -209,6 +210,32 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         key.setUsername(username);
         return Mono.fromFuture(shortUrlUserTable.getItem(key))
                 .switchIfEmpty(Mono.empty());
+    }
+
+    @Override
+    public Mono<ShortUrlUserStatus>
+    changePassword(UsernameOldPasswordAndNewPassword
+            usernameOldPasswordAndNewPassword) {
+
+        String username = usernameOldPasswordAndNewPassword.getUsername();
+        String oldPassword = usernameOldPasswordAndNewPassword.getOldPassword();
+        String newPassword = usernameOldPasswordAndNewPassword.getNewPassword();
+
+        // We use `Mono.defer()` to ensure that all the operations, including
+        // the database accesses, are retried on each `Mono.retry()`.
+        return Mono.defer(() -> getShortUrlUser(username))
+            .retry()
+            .flatMap(shortUrlUser -> {
+                if (!passwordEncoder.matches(oldPassword, shortUrlUser.getPassword())) {
+                    return Mono.just(ShortUrlUserStatus.WRONG_PASSWORD);
+                }
+                shortUrlUser.setPassword(passwordEncoder.encode(newPassword));
+
+                return updateShortUrlUser(shortUrlUser).map(updatedShortUrlUser -> {
+                    return ShortUrlUserStatus.SUCCESS;
+                });
+            })
+            .switchIfEmpty(Mono.just(ShortUrlUserStatus.NO_SUCH_USER));
     }
 
     // ------------------------------------------------------------------------

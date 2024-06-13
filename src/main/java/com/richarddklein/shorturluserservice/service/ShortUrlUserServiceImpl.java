@@ -12,6 +12,7 @@ import com.richarddklein.shorturlcommonlibrary.security.util.JwtUtils;
 import com.richarddklein.shorturluserservice.dto.StatusAndJwtToken;
 import com.richarddklein.shorturluserservice.dto.StatusAndShortUrlUser;
 import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
+import com.richarddklein.shorturluserservice.dto.UsernameOldPasswordAndNewPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
 import org.springframework.security.core.Authentication;
@@ -102,6 +103,15 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
                         shortUrlUserStatus, shortUrlUser);
             });
         });
+    }
+
+    @Override
+    public Mono<ShortUrlUserStatus> changePassword(
+        UsernameOldPasswordAndNewPassword
+                usernameOldPasswordAndNewPassword) {
+
+        return shortUrlUserDao.changePassword(
+                usernameOldPasswordAndNewPassword);
     }
 
     // ------------------------------------------------------------------------

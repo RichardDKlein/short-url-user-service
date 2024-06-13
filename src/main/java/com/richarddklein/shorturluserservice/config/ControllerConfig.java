@@ -22,16 +22,12 @@ import com.richarddklein.shorturluserservice.controller.ShortUrlUserControllerIm
 @Configuration
 public class ControllerConfig {
     @Autowired
-    ParameterStoreReader parameterStoreReader;
-
-    @Autowired
     ServiceConfig serviceConfig;
 
     @Bean
     public ShortUrlUserController
     shortUrlReservationController() {
         return new ShortUrlUserControllerImpl(
-                parameterStoreReader,
                 serviceConfig.shortUrlUserService());
     }
 }
