@@ -286,7 +286,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                 })
                 .onErrorResume(e -> {
                     // Some other exception occurred.
-                    // System.out.println(e.getMessage());
+                    System.out.println(e.getMessage());
                     return Mono.empty();
                 });
     }
