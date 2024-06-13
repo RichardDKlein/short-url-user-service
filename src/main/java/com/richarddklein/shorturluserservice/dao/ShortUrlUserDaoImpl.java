@@ -21,7 +21,6 @@ import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.model.CreateTableEnhancedRequest;
-import software.amazon.awssdk.enhanced.dynamodb.model.GetItemEnhancedRequest;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
@@ -181,39 +180,22 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         String username = usernameAndPassword.getUsername();
         String password = usernameAndPassword.getPassword();
 
-        return getShortUrlUser(username)
+        // We use `Mono.defer()` to ensure that the database accesses
+        // are retried on each `Mono.retry()`.
+        return Mono.defer(() -> getShortUrlUser(username))
+            .retry()
             .flatMap(shortUrlUser -> {
                 if (!passwordEncoder.matches(password, shortUrlUser.getPassword())) {
                     return Mono.just(new StatusAndRole(
-                        ShortUrlUserStatus.WRONG_PASSWORD, null));
+                            ShortUrlUserStatus.WRONG_PASSWORD, null));
                 }
                 shortUrlUser.setLastLogin(LocalDateTime.now().format(
                     DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
-                // We use `Mono.defer() to ensure that the database update
-                // is retried each time the subscriber re-subscribes to the
-                // `Mono.fromFuture()` on a retry.
-                return Mono.defer(() -> Mono.fromFuture(
-                    shortUrlUserTable.updateItem(shortUrlUser)))
-                    .retry()
-                    .flatMap(updatedShortUrlUser -> {
-                        if (updatedShortUrlUser == null) {
-                            return Mono.empty();
-                        }
-                        return Mono.just(new StatusAndRole(
-                            ShortUrlUserStatus.SUCCESS, updatedShortUrlUser.getRole()));
-                    })
-                    .onErrorResume(ConditionalCheckFailedException.class, e -> {
-                        // Version check failed. Someone updated the ShortUrlUser item in
-                        // the database after we read the item, so the item we just tried
-                        // to update contains stale data.
-                        System.out.println(e.getMessage());
-                        return Mono.empty();
-                    })
-                    .onErrorResume(e -> {
-                        // Some other exception occurred.
-                        // System.out.println(e.getMessage());
-                        return Mono.empty();
-                    });
+
+                return updateShortUrlUser(shortUrlUser).map(updatedShortUrlUser -> {
+                    return new StatusAndRole(ShortUrlUserStatus.SUCCESS,
+                            updatedShortUrlUser.getRole());
+                });
             })
             .switchIfEmpty(Mono.just(new StatusAndRole(
                 ShortUrlUserStatus.NO_SUCH_USER, null)));
@@ -290,5 +272,22 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         );
         Mono.fromFuture(shortUrlUserTable.putItem(admin)).block();
         System.out.println(" done!");
+    }
+
+    private Mono<ShortUrlUser>
+    updateShortUrlUser(ShortUrlUser shortUrlUser) {
+        return Mono.fromFuture(shortUrlUserTable.updateItem(shortUrlUser))
+                .onErrorResume(ConditionalCheckFailedException.class, e -> {
+                    // Version check failed. Someone updated the ShortUrlUser item
+                    // in the database after we read the item, so the item we just
+                    // tried to update contains stale data.
+                    System.out.println(e.getMessage());
+                    return Mono.empty();
+                })
+                .onErrorResume(e -> {
+                    // Some other exception occurred.
+                    // System.out.println(e.getMessage());
+                    return Mono.empty();
+                });
     }
 }
