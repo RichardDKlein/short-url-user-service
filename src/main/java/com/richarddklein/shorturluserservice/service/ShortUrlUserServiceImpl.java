@@ -107,11 +107,29 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
 
     @Override
     public Mono<ShortUrlUserStatus>
-    changePassword(UsernameOldPasswordAndNewPassword
-            usernameOldPasswordAndNewPassword) {
+    changePassword(
+            Mono<Principal> principalMono,
+            UsernameOldPasswordAndNewPassword
+                usernameOldPasswordAndNewPassword) {
 
-        return shortUrlUserDao.changePassword(
-                usernameOldPasswordAndNewPassword);
+        return principalMono.flatMap(auth -> {
+            Authentication authentication = (Authentication)auth;
+            String usernameInAuthToken = authentication.getName();
+            String usernameInRequestBody =
+                usernameOldPasswordAndNewPassword.getUsername();
+
+            System.out.format("====> usernameInAuthToken = %s\n", usernameInAuthToken);
+            System.out.format("====> usernameInRequestBody = %s\n", usernameInRequestBody);
+
+            if (!usernameInAuthToken.equals(usernameInRequestBody)) {
+                return Mono.just(
+                    ShortUrlUserStatus.USER_CONFIRMATION_MISMATCH);
+            }
+
+            return shortUrlUserDao.getShortUrlUser(usernameInAuthToken)
+                .flatMap(shortUrlUser -> shortUrlUserDao.changePassword(
+                    usernameOldPasswordAndNewPassword));
+         });
     }
 
     @Override

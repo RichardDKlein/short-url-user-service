@@ -40,8 +40,10 @@ public interface ShortUrlUserService {
     getUserDetails(Mono<Principal> principalMono);
 
     Mono<ShortUrlUserStatus>
-    changePassword(UsernameOldPasswordAndNewPassword
-            usernameOldPasswordAndNewPassword);
+    changePassword(
+            Mono<Principal> principalMono,
+            UsernameOldPasswordAndNewPassword
+                    usernameOldPasswordAndNewPassword);
 
     Mono<ShortUrlUserStatus>
     deleteUser(UsernameAndPassword usernameAndPassword);

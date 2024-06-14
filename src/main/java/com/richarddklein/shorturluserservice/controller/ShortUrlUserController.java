@@ -61,8 +61,10 @@ public interface ShortUrlUserController {
 
     @PatchMapping("/changepassword")
     Mono<ResponseEntity<StatusResponse>>
-    changePassword(@RequestBody UsernameOldPasswordAndNewPassword
-            usernameOldPasswordAndNewPassword);
+    changePassword(
+            Mono<Principal> principalMono,
+            @RequestBody UsernameOldPasswordAndNewPassword
+                    usernameOldPasswordAndNewPassword);
 
     @DeleteMapping("/specific")
     Mono<ResponseEntity<StatusResponse>>

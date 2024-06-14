@@ -185,49 +185,52 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
 
     @Override
     public Mono<ResponseEntity<StatusResponse>>
-    changePassword(UsernameOldPasswordAndNewPassword
-            usernameOldPasswordAndNewPassword) {
+    changePassword(
+            Mono<Principal> principalMono,
+            UsernameOldPasswordAndNewPassword
+                    usernameOldPasswordAndNewPassword) {
 
         return shortUrlUserService.changePassword(
+                principalMono,
                 usernameOldPasswordAndNewPassword)
-        .map(shortUrlUserStatus -> {
-            HttpStatus httpStatus;
-            StatusResponse statusResponse;
 
-            if (shortUrlUserStatus == ShortUrlUserStatus.NO_SUCH_USER) {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-                statusResponse = new StatusResponse(
-                    ShortUrlUserStatus.NO_SUCH_USER,
-                    String.format(
-                        "User '%s' does not exist",
-                        usernameOldPasswordAndNewPassword.getUsername())
-                );
-            } else if (shortUrlUserStatus ==
-                    ShortUrlUserStatus.USER_NOT_LOGGED_IN) {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-                statusResponse = new StatusResponse(
-                    ShortUrlUserStatus.USER_NOT_LOGGED_IN,
-                    String.format(
-                        "User '%s' is not logged in",
-                        usernameOldPasswordAndNewPassword.getUsername())
-                );
-            } else if (shortUrlUserStatus ==
-                    ShortUrlUserStatus.WRONG_PASSWORD) {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-                statusResponse = new StatusResponse(
-                    ShortUrlUserStatus.WRONG_PASSWORD,
-                    "The supplied password is not correct"
-                );
-            } else {
-                httpStatus = HttpStatus.OK;
-                statusResponse = new StatusResponse(
-                    ShortUrlUserStatus.SUCCESS,
-                    String.format(
-                        "Password successfully changed for user '%s'",
-                        usernameOldPasswordAndNewPassword.getUsername())
-                );
-            }
-            return new ResponseEntity<>(statusResponse, httpStatus);
+        .map(shortUrlUserStatus -> {
+            String username =
+                    usernameOldPasswordAndNewPassword.getUsername();
+
+            HttpStatus httpStatus;
+            String message;
+
+            switch (shortUrlUserStatus) {
+                case NO_SUCH_USER:
+                    httpStatus = HttpStatus.UNAUTHORIZED;
+                    message = String.format(
+                            "User '%s' does not exist", username);
+                    break;
+
+                case USER_CONFIRMATION_MISMATCH:
+                    httpStatus = HttpStatus.UNAUTHORIZED;
+                    message = String.format(
+                            "User '%s' doesn't match the user in the auth token",
+                        username);
+                    break;
+
+                case WRONG_PASSWORD:
+                    httpStatus = HttpStatus.UNAUTHORIZED;
+                    message = "The supplied password is not correct";
+                    break;
+
+                default:
+                    httpStatus = HttpStatus.OK;
+                    message = String.format(
+                            "Password successfully changed for user '%s'",
+                            username);
+                    break;
+            };
+
+            return new ResponseEntity<>(
+                    new StatusResponse(shortUrlUserStatus, message),
+                    httpStatus);
         });
     }
 
