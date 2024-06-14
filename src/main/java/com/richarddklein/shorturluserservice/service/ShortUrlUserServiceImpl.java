@@ -118,9 +118,6 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
             String usernameInRequestBody =
                 usernameOldPasswordAndNewPassword.getUsername();
 
-            System.out.format("====> usernameInAuthToken = %s\n", usernameInAuthToken);
-            System.out.format("====> usernameInRequestBody = %s\n", usernameInRequestBody);
-
             if (!usernameInAuthToken.equals(usernameInRequestBody)) {
                 return Mono.just(
                     ShortUrlUserStatus.USER_CONFIRMATION_MISMATCH);
