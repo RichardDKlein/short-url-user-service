@@ -13,12 +13,10 @@ package com.richarddklein.shorturluserservice.controller.response;
  */
 public enum ShortUrlUserStatus {
     SUCCESS,
-    INVALID_ADMIN_CREDENTIALS,
-    INVALID_JWT_EXCEPTION,
-    MISSING_AUTHORIZATION_HEADER,
     MISSING_PASSWORD,
     NO_SUCH_USER,
     NOT_ON_LOCAL_MACHINE,
     USER_ALREADY_EXISTS,
+    USER_NOT_LOGGED_IN,
     WRONG_PASSWORD,
 }

@@ -238,6 +238,28 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
             .switchIfEmpty(Mono.just(ShortUrlUserStatus.NO_SUCH_USER));
     }
 
+    @Override
+    public Mono<ShortUrlUserStatus>
+    deleteUser(UsernameAndPassword usernameAndPassword) {
+        String username = usernameAndPassword.getUsername();
+        String password = usernameAndPassword.getPassword();
+
+        // We use `Mono.defer()` to ensure that all the operations, including
+        // the database accesses, are retried on each `Mono.retry()`.
+        return Mono.defer(() -> getShortUrlUser(username))
+            .retry()
+            .flatMap(shortUrlUser -> {
+                if (!passwordEncoder.matches(password, shortUrlUser.getPassword())) {
+                    return Mono.just(ShortUrlUserStatus.WRONG_PASSWORD);
+                }
+
+                return updateShortUrlUser(shortUrlUser).map(updatedShortUrlUser -> {
+                    return ShortUrlUserStatus.SUCCESS;
+                });
+            })
+            .switchIfEmpty(Mono.just(ShortUrlUserStatus.NO_SUCH_USER));
+    }
+
     // ------------------------------------------------------------------------
     // PRIVATE METHODS
     // ------------------------------------------------------------------------

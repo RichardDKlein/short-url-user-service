@@ -8,7 +8,6 @@ package com.richarddklein.shorturluserservice.controller;
 import java.security.Principal;
 import java.util.Objects;
 
-import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
 import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.dto.UsernameOldPasswordAndNewPassword;
@@ -188,6 +187,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     public Mono<ResponseEntity<StatusResponse>>
     changePassword(UsernameOldPasswordAndNewPassword
             usernameOldPasswordAndNewPassword) {
+
         return shortUrlUserService.changePassword(
                 usernameOldPasswordAndNewPassword)
         .map(shortUrlUserStatus -> {
@@ -200,6 +200,15 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                     ShortUrlUserStatus.NO_SUCH_USER,
                     String.format(
                         "User '%s' does not exist",
+                        usernameOldPasswordAndNewPassword.getUsername())
+                );
+            } else if (shortUrlUserStatus ==
+                    ShortUrlUserStatus.USER_NOT_LOGGED_IN) {
+                httpStatus = HttpStatus.UNAUTHORIZED;
+                statusResponse = new StatusResponse(
+                    ShortUrlUserStatus.USER_NOT_LOGGED_IN,
+                    String.format(
+                        "User '%s' is not logged in",
                         usernameOldPasswordAndNewPassword.getUsername())
                 );
             } else if (shortUrlUserStatus ==
@@ -216,6 +225,51 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                     String.format(
                         "Password successfully changed for user '%s'",
                         usernameOldPasswordAndNewPassword.getUsername())
+                );
+            }
+            return new ResponseEntity<>(statusResponse, httpStatus);
+        });
+    }
+
+    @Override
+    public Mono<ResponseEntity<StatusResponse>>
+    deleteUser(UsernameAndPassword usernameAndPassword) {
+        return shortUrlUserService.deleteUser(usernameAndPassword)
+        .map(shortUrlUserStatus -> {
+            HttpStatus httpStatus;
+            StatusResponse statusResponse;
+
+            if (shortUrlUserStatus == ShortUrlUserStatus.NO_SUCH_USER) {
+                httpStatus = HttpStatus.UNAUTHORIZED;
+                statusResponse = new StatusResponse(
+                    ShortUrlUserStatus.NO_SUCH_USER,
+                    String.format(
+                        "User '%s' does not exist",
+                        usernameAndPassword.getUsername())
+                );
+            } else if (shortUrlUserStatus ==
+                    ShortUrlUserStatus.USER_NOT_LOGGED_IN) {
+                httpStatus = HttpStatus.UNAUTHORIZED;
+                statusResponse = new StatusResponse(
+                    ShortUrlUserStatus.USER_NOT_LOGGED_IN,
+                    String.format(
+                        "User '%s' is not logged in",
+                        usernameAndPassword.getUsername())
+                );
+            } else if (shortUrlUserStatus ==
+                    ShortUrlUserStatus.WRONG_PASSWORD) {
+                httpStatus = HttpStatus.UNAUTHORIZED;
+                statusResponse = new StatusResponse(
+                    ShortUrlUserStatus.WRONG_PASSWORD,
+                    "The supplied password is not correct"
+                );
+            } else {
+                httpStatus = HttpStatus.OK;
+                statusResponse = new StatusResponse(
+                    ShortUrlUserStatus.SUCCESS,
+                    String.format(
+                        "User '%s' successfully deleted",
+                        usernameAndPassword.getUsername())
                 );
             }
             return new ResponseEntity<>(statusResponse, httpStatus);

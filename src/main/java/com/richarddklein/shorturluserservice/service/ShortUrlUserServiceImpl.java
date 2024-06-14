@@ -106,12 +106,18 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
     }
 
     @Override
-    public Mono<ShortUrlUserStatus> changePassword(
-        UsernameOldPasswordAndNewPassword
-                usernameOldPasswordAndNewPassword) {
+    public Mono<ShortUrlUserStatus>
+    changePassword(UsernameOldPasswordAndNewPassword
+            usernameOldPasswordAndNewPassword) {
 
         return shortUrlUserDao.changePassword(
                 usernameOldPasswordAndNewPassword);
+    }
+
+    @Override
+    public Mono<ShortUrlUserStatus>
+    deleteUser(UsernameAndPassword usernameAndPassword) {
+        return shortUrlUserDao.deleteUser(usernameAndPassword);
     }
 
     // ------------------------------------------------------------------------

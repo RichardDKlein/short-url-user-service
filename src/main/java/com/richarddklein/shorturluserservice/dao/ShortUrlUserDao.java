@@ -40,4 +40,7 @@ public interface ShortUrlUserDao {
     Mono<ShortUrlUserStatus>
     changePassword(UsernameOldPasswordAndNewPassword
             usernameOldPasswordAndNewPassword);
+
+    Mono<ShortUrlUserStatus>
+    deleteUser(UsernameAndPassword usernameAndPassword);
 }
