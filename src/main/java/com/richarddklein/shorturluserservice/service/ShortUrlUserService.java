@@ -46,5 +46,7 @@ public interface ShortUrlUserService {
                     usernameOldPasswordAndNewPassword);
 
     Mono<ShortUrlUserStatus>
-    deleteUser(UsernameAndPassword usernameAndPassword);
+    deleteUser(
+            Mono<Principal> principalMono,
+            UsernameAndPassword usernameAndPassword);
 }

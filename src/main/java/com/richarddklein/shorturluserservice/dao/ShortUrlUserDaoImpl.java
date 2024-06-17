@@ -155,6 +155,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         if (plaintextPassword == null || plaintextPassword.isEmpty()) {
             return Mono.just(ShortUrlUserStatus.MISSING_PASSWORD);
         }
+
         ShortUrlUser shortUrlUserCopy = new ShortUrlUser(
                 shortUrlUser.getUsername(),
                 shortUrlUser.getPassword(),
@@ -163,6 +164,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                 shortUrlUser.getEmail(),
                 passwordEncoder
         );
+
         return Mono.fromFuture(
                 shortUrlUserTable.putItem(req -> req
                     .item(shortUrlUserCopy)
@@ -252,8 +254,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                 if (!passwordEncoder.matches(password, shortUrlUser.getPassword())) {
                     return Mono.just(ShortUrlUserStatus.WRONG_PASSWORD);
                 }
-
-                return updateShortUrlUser(shortUrlUser).map(updatedShortUrlUser -> {
+                return deleteShortUrlUser(shortUrlUser).map(deletedShortUrlUser -> {
                     return ShortUrlUserStatus.SUCCESS;
                 });
             })
@@ -327,17 +328,26 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     private Mono<ShortUrlUser>
     updateShortUrlUser(ShortUrlUser shortUrlUser) {
         return Mono.fromFuture(shortUrlUserTable.updateItem(shortUrlUser))
-                .onErrorResume(ConditionalCheckFailedException.class, e -> {
-                    // Version check failed. Someone updated the ShortUrlUser item
-                    // in the database after we read the item, so the item we just
-                    // tried to update contains stale data.
-                    System.out.println(e.getMessage());
-                    return Mono.empty();
-                })
-                .onErrorResume(e -> {
-                    // Some other exception occurred.
-                    System.out.println(e.getMessage());
-                    return Mono.empty();
-                });
+        .onErrorResume(ConditionalCheckFailedException.class, e -> {
+            // Version check failed. Someone updated the ShortUrlUser item
+            // in the database after we read the item, so the item we just
+            // tried to update contains stale data.
+            System.out.println(e.getMessage());
+            return Mono.empty();
+        })
+        .onErrorResume(e -> {
+            // Some other exception occurred.
+            System.out.println(e.getMessage());
+            return Mono.empty();
+        });
+    }
+
+    private Mono<ShortUrlUser>
+    deleteShortUrlUser(ShortUrlUser shortUrlUser) {
+        return Mono.fromFuture(shortUrlUserTable.deleteItem(shortUrlUser))
+        .onErrorResume(e -> {
+            System.out.println(e.getMessage());
+            return Mono.empty();
+        });
     }
 }

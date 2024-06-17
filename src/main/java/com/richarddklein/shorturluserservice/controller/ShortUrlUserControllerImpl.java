@@ -52,22 +52,26 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     @Override
     public ResponseEntity<StatusResponse>
     initializeShortUrlUserRepository(ServerHttpRequest request) {
+        ShortUrlUserStatus shortUrlUserStatus;
+        HttpStatus httpStatus;
+        String message;
+
         if (isRunningLocally(Objects.requireNonNull(
                 request.getRemoteAddress()).getHostString())) {
             shortUrlUserService.initializeShortUrlUserRepository();
-            StatusResponse response = new StatusResponse(
-                    ShortUrlUserStatus.SUCCESS,
-                    "Initialization of Short URL User table "
-                            + "completed successfully");
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            shortUrlUserStatus = ShortUrlUserStatus.SUCCESS;
+            httpStatus = HttpStatus.OK;
+            message = "Initialization of Short URL User table "
+                    + "completed successfully";
         } else {
-            StatusResponse response = new StatusResponse(
-                    ShortUrlUserStatus.NOT_ON_LOCAL_MACHINE,
-                    "Initialization of the Short URL User "
-                            + "table can be done only when the service is "
-                            + "running on your local machine");
-            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+            shortUrlUserStatus = ShortUrlUserStatus.NOT_ON_LOCAL_MACHINE;
+            httpStatus = HttpStatus.FORBIDDEN;
+            message = "Initialization of the Short URL User "
+                    + "table can be done only when the service is "
+                    + "running on your local machine";
         }
+        return new ResponseEntity<>(new StatusResponse(
+                shortUrlUserStatus, message), httpStatus);
     }
 
     @Override
@@ -76,31 +80,28 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
         return shortUrlUserService.signup(shortUrlUser)
         .map(shortUrlUserStatus -> {
             HttpStatus httpStatus;
-            StatusResponse statusResponse;
-            if (shortUrlUserStatus ==
-                    ShortUrlUserStatus.USER_ALREADY_EXISTS) {
-                httpStatus = HttpStatus.CONFLICT;
-                statusResponse = new StatusResponse(
-                        ShortUrlUserStatus.USER_ALREADY_EXISTS,
-                        String.format("User '%s' already exists",
-                                shortUrlUser.getUsername())
-                );
-            } else if (shortUrlUserStatus ==
-                    ShortUrlUserStatus.MISSING_PASSWORD) {
-                httpStatus = HttpStatus.BAD_REQUEST;
-                statusResponse = new StatusResponse(
-                        ShortUrlUserStatus.MISSING_PASSWORD,
-                        "A non-empty password must be specified"
-                );
-            } else {
-                httpStatus = HttpStatus.OK;
-                statusResponse = new StatusResponse(
-                        ShortUrlUserStatus.SUCCESS,
-                        String.format("User '%s' successfully created",
-                                shortUrlUser.getUsername())
-                );
+            String message;
+
+            switch (shortUrlUserStatus) {
+                case USER_ALREADY_EXISTS:
+                    httpStatus = HttpStatus.CONFLICT;
+                    message = String.format(
+                            "User '%s' already exists",
+                            shortUrlUser.getUsername());
+                    break;
+                case MISSING_PASSWORD:
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    message = "A non-empty password must be specified";
+                    break;
+                default:
+                    httpStatus = HttpStatus.OK;
+                    message = String.format(
+                            "User '%s' successfully created",
+                            shortUrlUser.getUsername());
+                    break;
             }
-            return new ResponseEntity<>(statusResponse, httpStatus);
+            return new ResponseEntity<>(new StatusResponse(
+                    shortUrlUserStatus, message), httpStatus);
         });
     }
 
@@ -109,42 +110,36 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     login(UsernameAndPassword usernameAndPassword) {
         return shortUrlUserService.login(usernameAndPassword)
         .map(statusAndJwtToken -> {
-            HttpStatus httpStatus;
-            StatusResponse statusResponse;
             ShortUrlUserStatus shortUrlUserStatus =
                     statusAndJwtToken.getStatus();
             String jwtToken = statusAndJwtToken.getJwtToken();
 
-            if (shortUrlUserStatus == ShortUrlUserStatus.NO_SUCH_USER) {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-                statusResponse = new StatusResponse(
-                        ShortUrlUserStatus.NO_SUCH_USER,
-                        String.format(
-                                "User '%s' does not exist",
-                                usernameAndPassword.getUsername())
-                );
-            } else if (shortUrlUserStatus ==
-                    ShortUrlUserStatus.WRONG_PASSWORD) {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-                statusResponse = new StatusResponse(
-                        ShortUrlUserStatus.WRONG_PASSWORD,
-                        "The supplied password is not correct"
-                );
-            } else {
-                httpStatus = HttpStatus.OK;
-                statusResponse = new StatusResponse(
-                        ShortUrlUserStatus.SUCCESS,
-                        String.format(
-                                "User '%s' successfully logged in",
-                                usernameAndPassword.getUsername())
-                );
+            HttpStatus httpStatus;
+            String message;
+
+            switch (shortUrlUserStatus) {
+                case NO_SUCH_USER:
+                    httpStatus = HttpStatus.UNAUTHORIZED;
+                    message = String.format(
+                            "User '%s' does not exist",
+                            usernameAndPassword.getUsername());
+                    break;
+                case WRONG_PASSWORD:
+                    httpStatus = HttpStatus.UNAUTHORIZED;
+                    message = "The supplied password is not correct";
+                    break;
+                default:
+                    httpStatus = HttpStatus.OK;
+                    message = String.format(
+                            "User '%s' successfully logged in",
+                            usernameAndPassword.getUsername());
+                    break;
             }
-            StatusAndJwtTokenResponse statusAndJwtTokenResponse =
-                    new StatusAndJwtTokenResponse(
-                            statusResponse, jwtToken);
 
             return new ResponseEntity<>(
-                    statusAndJwtTokenResponse, httpStatus);
+                    new StatusAndJwtTokenResponse(new StatusResponse(
+                            shortUrlUserStatus, message), jwtToken),
+                    httpStatus);
         });
     }
 
@@ -159,27 +154,20 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                     statusAndShortUrlUser.getShortUrlUser();
 
             HttpStatus httpStatus;
-            StatusResponse statusResponse;
+            String message;
 
-            if (shortUrlUserStatus != ShortUrlUserStatus.SUCCESS) {
-                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                statusResponse = new StatusResponse(
-                        shortUrlUserStatus,
-                        "Internal server error"
-                );
-            } else {
+            if (Objects.requireNonNull(shortUrlUserStatus) ==
+                    ShortUrlUserStatus.SUCCESS) {
                 httpStatus = HttpStatus.OK;
-                statusResponse = new StatusResponse(
-                        ShortUrlUserStatus.SUCCESS,
-                        "User details successfully retrieved"
-                );
+                message = "User details successfully retrieved";
+            } else {
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                message = "Internal server error";
             }
-            StatusAndShortUrlUserResponse statusAndShortUrlUserResponse =
-                    new StatusAndShortUrlUserResponse(
-                            statusResponse, shortUrlUser);
 
-            return new ResponseEntity<>(
-                    statusAndShortUrlUserResponse, httpStatus);
+            return new ResponseEntity<>(new StatusAndShortUrlUserResponse(
+                    new StatusResponse(shortUrlUserStatus, message),
+                    shortUrlUser), httpStatus);
         });
     }
 
@@ -227,7 +215,6 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                             username);
                     break;
             };
-
             return new ResponseEntity<>(
                     new StatusResponse(shortUrlUserStatus, message),
                     httpStatus);
@@ -236,46 +223,48 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
 
     @Override
     public Mono<ResponseEntity<StatusResponse>>
-    deleteUser(UsernameAndPassword usernameAndPassword) {
-        return shortUrlUserService.deleteUser(usernameAndPassword)
-        .map(shortUrlUserStatus -> {
-            HttpStatus httpStatus;
-            StatusResponse statusResponse;
+    deleteUser(
+            Mono<Principal> principalMono,
+            UsernameAndPassword usernameAndPassword) {
 
-            if (shortUrlUserStatus == ShortUrlUserStatus.NO_SUCH_USER) {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-                statusResponse = new StatusResponse(
-                    ShortUrlUserStatus.NO_SUCH_USER,
-                    String.format(
-                        "User '%s' does not exist",
-                        usernameAndPassword.getUsername())
-                );
-            } else if (shortUrlUserStatus ==
-                    ShortUrlUserStatus.USER_NOT_LOGGED_IN) {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-                statusResponse = new StatusResponse(
-                    ShortUrlUserStatus.USER_NOT_LOGGED_IN,
-                    String.format(
-                        "User '%s' is not logged in",
-                        usernameAndPassword.getUsername())
-                );
-            } else if (shortUrlUserStatus ==
-                    ShortUrlUserStatus.WRONG_PASSWORD) {
-                httpStatus = HttpStatus.UNAUTHORIZED;
-                statusResponse = new StatusResponse(
-                    ShortUrlUserStatus.WRONG_PASSWORD,
-                    "The supplied password is not correct"
-                );
-            } else {
-                httpStatus = HttpStatus.OK;
-                statusResponse = new StatusResponse(
-                    ShortUrlUserStatus.SUCCESS,
-                    String.format(
-                        "User '%s' successfully deleted",
-                        usernameAndPassword.getUsername())
-                );
-            }
-            return new ResponseEntity<>(statusResponse, httpStatus);
+        return shortUrlUserService.deleteUser(
+                principalMono, usernameAndPassword)
+
+        .map(shortUrlUserStatus -> {
+            String username = usernameAndPassword.getUsername();
+
+            HttpStatus httpStatus;
+            String message;
+
+            switch (shortUrlUserStatus) {
+                case NO_SUCH_USER:
+                    httpStatus = HttpStatus.UNAUTHORIZED;
+                    message = String.format(
+                            "User '%s' does not exist", username);
+                    break;
+
+                case USER_CONFIRMATION_MISMATCH:
+                    httpStatus = HttpStatus.UNAUTHORIZED;
+                    message = String.format(
+                            "User '%s' doesn't match the user in the auth token",
+                            username);
+                    break;
+
+                case WRONG_PASSWORD:
+                    httpStatus = HttpStatus.UNAUTHORIZED;
+                    message = "The supplied password is not correct";
+                    break;
+
+                default:
+                    httpStatus = HttpStatus.OK;
+                    message = String.format(
+                            "User '%s' successfully deleted",
+                            username);
+                    break;
+            };
+            return new ResponseEntity<>(
+                    new StatusResponse(shortUrlUserStatus, message),
+                    httpStatus);
         });
     }
 
