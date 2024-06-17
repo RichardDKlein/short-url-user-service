@@ -66,7 +66,7 @@ public interface ShortUrlUserController {
             @RequestBody UsernameOldPasswordAndNewPassword
                     usernameOldPasswordAndNewPassword);
 
-    @DeleteMapping("/specific")
+    @DeleteMapping("/delete")
     Mono<ResponseEntity<StatusResponse>>
     deleteUser(
             Mono<Principal> principalMono,

@@ -119,3 +119,13 @@ Resources:
           Properties:
             Path: /changepassword
             Method: PATCH
+        DeleteUserViaApiGatewayOrLocalHost:
+          Type: Api
+          Properties:
+            Path: /shorturl/users/delete
+            Method: DELETE
+        DeleteUserViaCustomDomain:
+          Type: Api
+          Properties:
+            Path: /delete
+            Method: DELETE
