@@ -242,7 +242,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
 
     @Override
     public Mono<ShortUrlUserStatus>
-    deleteUser(UsernameAndPassword usernameAndPassword) {
+    deleteUser(UsernameAndPassword usernameAndPassword, String role) {
         String username = usernameAndPassword.getUsername();
         String password = usernameAndPassword.getPassword();
 
@@ -251,7 +251,8 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         return Mono.defer(() -> getShortUrlUser(username))
             .retry()
             .flatMap(shortUrlUser -> {
-                if (!passwordEncoder.matches(password, shortUrlUser.getPassword())) {
+                if (!role.equals("ADMIN") && !passwordEncoder.matches(
+                        password, shortUrlUser.getPassword())) {
                     return Mono.just(ShortUrlUserStatus.WRONG_PASSWORD);
                 }
                 return deleteShortUrlUser(shortUrlUser).map(deletedShortUrlUser -> {

@@ -16,6 +16,7 @@ import com.richarddklein.shorturluserservice.dto.UsernameOldPasswordAndNewPasswo
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import com.richarddklein.shorturluserservice.dao.ShortUrlUserDao;
@@ -140,15 +141,22 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
 
         return principalMono.flatMap(auth -> {
             Authentication authentication = (Authentication) auth;
+
             String usernameInAuthToken = authentication.getName();
             String usernameInRequestBody =
                     usernameAndPassword.getUsername();
 
-            if (!usernameInAuthToken.equals(usernameInRequestBody)) {
+            String role = "";
+            for (GrantedAuthority authority : authentication.getAuthorities()) {
+                role = authority.getAuthority();
+            }
+
+            if (!role.equals("ADMIN") &&
+                    !usernameInAuthToken.equals(usernameInRequestBody)) {
                 return Mono.just(
                         ShortUrlUserStatus.USER_CONFIRMATION_MISMATCH);
             }
-            return shortUrlUserDao.deleteUser(usernameAndPassword);
+            return shortUrlUserDao.deleteUser(usernameAndPassword, role);
         });
     }
 

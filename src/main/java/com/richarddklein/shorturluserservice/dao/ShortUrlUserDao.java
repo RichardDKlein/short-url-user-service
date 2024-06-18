@@ -38,9 +38,12 @@ public interface ShortUrlUserDao {
     getShortUrlUser(String username);
 
     Mono<ShortUrlUserStatus>
-    changePassword(UsernameOldPasswordAndNewPassword
+    changePassword(
+            UsernameOldPasswordAndNewPassword
             usernameOldPasswordAndNewPassword);
 
     Mono<ShortUrlUserStatus>
-    deleteUser(UsernameAndPassword usernameAndPassword);
+    deleteUser(
+            UsernameAndPassword usernameAndPassword,
+            String role);
 }
