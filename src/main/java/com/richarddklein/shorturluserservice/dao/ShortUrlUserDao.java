@@ -6,6 +6,7 @@
 package com.richarddklein.shorturluserservice.dao;
 
 import com.richarddklein.shorturluserservice.dto.StatusAndRole;
+import com.richarddklein.shorturluserservice.dto.StatusAndShortUrlUserArray;
 import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.dto.UsernameOldPasswordAndNewPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
@@ -27,6 +28,9 @@ public interface ShortUrlUserDao {
      * and create a new one, containing a single item for the admin.</p>
      */
     void initializeShortUrlUserRepository();
+
+    Mono<StatusAndShortUrlUserArray>
+    getAllUsers();
 
     Mono<ShortUrlUserStatus>
     signup(ShortUrlUser shortUrlUser);

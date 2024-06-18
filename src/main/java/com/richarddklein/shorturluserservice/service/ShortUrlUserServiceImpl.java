@@ -9,10 +9,7 @@ import java.security.Principal;
 
 import com.richarddklein.shorturlcommonlibrary.security.dto.UsernameAndRole;
 import com.richarddklein.shorturlcommonlibrary.security.util.JwtUtils;
-import com.richarddklein.shorturluserservice.dto.StatusAndJwtToken;
-import com.richarddklein.shorturluserservice.dto.StatusAndShortUrlUser;
-import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
-import com.richarddklein.shorturluserservice.dto.UsernameOldPasswordAndNewPassword;
+import com.richarddklein.shorturluserservice.dto.*;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
 import org.springframework.security.core.Authentication;
@@ -58,6 +55,25 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
     @Override
     public void initializeShortUrlUserRepository() {
         shortUrlUserDao.initializeShortUrlUserRepository();
+    }
+
+    @Override
+    public Mono<StatusAndShortUrlUserArray>
+    getAllUsers(Mono<Principal> principalMono) {
+        return principalMono.flatMap(auth -> {
+            Authentication authentication = (Authentication) auth;
+
+            String role = "";
+            for (GrantedAuthority authority : authentication.getAuthorities()) {
+                role = authority.getAuthority();
+            }
+
+            if (!role.equals("ADMIN")) {
+                return Mono.just(new StatusAndShortUrlUserArray(
+                        ShortUrlUserStatus.MUST_BE_ADMIN, null));
+            }
+            return shortUrlUserDao.getAllUsers();
+        });
     }
 
     @Override

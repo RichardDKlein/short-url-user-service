@@ -6,21 +6,19 @@
 package com.richarddklein.shorturluserservice.controller;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Objects;
 
-import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
+import com.richarddklein.shorturluserservice.controller.response.*;
 import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.dto.UsernameOldPasswordAndNewPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
-import com.richarddklein.shorturluserservice.controller.response.StatusAndJwtTokenResponse;
-import com.richarddklein.shorturluserservice.controller.response.StatusAndShortUrlUserResponse;
 import com.richarddklein.shorturluserservice.service.ShortUrlUserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 
-import com.richarddklein.shorturluserservice.controller.response.StatusResponse;
 import reactor.core.publisher.Mono;
 
 /**
@@ -72,6 +70,35 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
         }
         return new ResponseEntity<>(new StatusResponse(
                 shortUrlUserStatus, message), httpStatus);
+    }
+
+    @Override
+    public Mono<ResponseEntity<StatusAndShortUrlUserArrayResponse>>
+    getAllUsers(Mono<Principal> principalMono) {
+        return shortUrlUserService.getAllUsers(principalMono)
+            .map(statusAndShortUrlUserArray -> {
+                ShortUrlUserStatus shortUrlUserStatus = statusAndShortUrlUserArray.getStatus();
+                List<ShortUrlUser> users = statusAndShortUrlUserArray.getShortUrlUsers();
+
+                HttpStatus httpStatus;
+                String message;
+
+                switch (shortUrlUserStatus) {
+                    case MUST_BE_ADMIN:
+                        httpStatus = HttpStatus.UNAUTHORIZED;
+                        message = "Must be an admin to perform this operation";
+                    case UNKNOWN_ERROR:
+                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                        message = "An unknown error occurred";
+                    default:
+                        httpStatus = HttpStatus.OK;
+                        message = "All users successfully retrieved";
+                }
+
+                return new ResponseEntity<>(new StatusAndShortUrlUserArrayResponse(
+                        new StatusResponse(shortUrlUserStatus, message), users),
+                        httpStatus);
+            });
     }
 
     @Override
@@ -156,8 +183,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
             HttpStatus httpStatus;
             String message;
 
-            if (Objects.requireNonNull(shortUrlUserStatus) ==
-                    ShortUrlUserStatus.SUCCESS) {
+            if (shortUrlUserStatus == ShortUrlUserStatus.SUCCESS) {
                 httpStatus = HttpStatus.OK;
                 message = "User details successfully retrieved";
             } else {

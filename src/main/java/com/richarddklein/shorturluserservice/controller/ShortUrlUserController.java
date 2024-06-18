@@ -7,6 +7,7 @@ package com.richarddklein.shorturluserservice.controller;
 
 import java.security.Principal;
 
+import com.richarddklein.shorturluserservice.controller.response.StatusAndShortUrlUserArrayResponse;
 import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.dto.UsernameOldPasswordAndNewPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
@@ -46,6 +47,10 @@ public interface ShortUrlUserController {
     @PostMapping("/dbinit")
     ResponseEntity<StatusResponse>
     initializeShortUrlUserRepository(ServerHttpRequest request);
+
+    @GetMapping("/all")
+    Mono<ResponseEntity<StatusAndShortUrlUserArrayResponse>>
+    getAllUsers(Mono<Principal> principalMono);
 
     @PostMapping("/signup")
     Mono<ResponseEntity<StatusResponse>>

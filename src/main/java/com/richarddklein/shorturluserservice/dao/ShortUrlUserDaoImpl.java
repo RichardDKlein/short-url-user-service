@@ -7,9 +7,11 @@ package com.richarddklein.shorturluserservice.dao;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 
 import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
 import com.richarddklein.shorturluserservice.dto.StatusAndRole;
+import com.richarddklein.shorturluserservice.dto.StatusAndShortUrlUserArray;
 import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.dto.UsernameOldPasswordAndNewPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
@@ -18,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import org.springframework.web.bind.annotation.RequestBody;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.Expression;
@@ -146,6 +149,23 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         }
         createShortUrlUserTable();
         addAdminToShortUrlUserTable();
+    }
+
+    @Override
+    public Mono<StatusAndShortUrlUserArray> getAllUsers() {
+        return Flux.from(shortUrlUserTable.scan().items())
+            .collectList()
+            .map(users -> {
+                users.forEach(user -> user.setPassword(null));
+                return new StatusAndShortUrlUserArray(
+                    ShortUrlUserStatus.SUCCESS, users);
+            })
+            .onErrorResume(e -> {
+                System.out.println(e.getMessage());
+                return Mono.just(new StatusAndShortUrlUserArray(
+                        ShortUrlUserStatus.UNKNOWN_ERROR,
+                        Collections.emptyList()));
+            });
     }
 
     @Override
