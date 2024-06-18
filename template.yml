@@ -79,6 +79,16 @@ Resources:
           Properties:
             Path: /dbinit
             Method: POST
+        GetAllUsersViaApiGatewayOrLocalHost:
+          Type: Api
+          Properties:
+            Path: /shorturl/users/all
+            Method: GET
+        GetAllUsersViaCustomDomain:
+          Type: Api
+          Properties:
+            Path: /all
+            Method: GET
         SignupViaApiGatewayOrLocalHost:
           Type: Api
           Properties:

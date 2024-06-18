@@ -87,12 +87,15 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                     case MUST_BE_ADMIN:
                         httpStatus = HttpStatus.UNAUTHORIZED;
                         message = "Must be an admin to perform this operation";
+                        break;
                     case UNKNOWN_ERROR:
                         httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                         message = "An unknown error occurred";
+                        break;
                     default:
                         httpStatus = HttpStatus.OK;
                         message = "All users successfully retrieved";
+                        break;
                 }
 
                 return new ResponseEntity<>(new StatusAndShortUrlUserArrayResponse(
