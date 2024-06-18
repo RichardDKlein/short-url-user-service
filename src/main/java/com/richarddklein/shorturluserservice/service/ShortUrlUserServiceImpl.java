@@ -6,12 +6,15 @@
 package com.richarddklein.shorturluserservice.service;
 
 import java.security.Principal;
+import java.util.Objects;
 
 import com.richarddklein.shorturlcommonlibrary.security.dto.UsernameAndRole;
 import com.richarddklein.shorturlcommonlibrary.security.util.JwtUtils;
 import com.richarddklein.shorturluserservice.dto.*;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -53,8 +56,16 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
     // need to use reactive (asynchronous) programming techniques here. Simple
     // synchronous logic will work just fine.
     @Override
-    public void initializeShortUrlUserRepository() {
+    public ShortUrlUserStatus
+    initializeShortUrlUserRepository(ServerHttpRequest request) {
+        if (!isRunningLocally(Objects.requireNonNull(
+                request.getRemoteAddress()).getHostString())) {
+
+            return ShortUrlUserStatus.NOT_ON_LOCAL_MACHINE;
+        }
+
         shortUrlUserDao.initializeShortUrlUserRepository();
+        return ShortUrlUserStatus.SUCCESS;
     }
 
     @Override
@@ -179,4 +190,17 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
     // ------------------------------------------------------------------------
     // PRIVATE METHODS
     // ------------------------------------------------------------------------
+
+    /**
+     * Is the service running locally?
+     *
+     * <p>Determine whether the Short URL User Service is running on your local
+     * machine, or in the AWS cloud.</p>
+     *
+     * @param hostString The host that sent the HTTP request.
+     * @return 'true' if the service is running locally, 'false' otherwise.
+     */
+    private boolean isRunningLocally(String hostString) {
+        return hostString.contains("localhost");
+    }
 }

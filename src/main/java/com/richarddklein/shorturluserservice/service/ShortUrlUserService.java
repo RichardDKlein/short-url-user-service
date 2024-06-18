@@ -10,6 +10,7 @@ import java.security.Principal;
 import com.richarddklein.shorturluserservice.dto.*;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import reactor.core.publisher.Mono;
 
 /**
@@ -25,7 +26,8 @@ public interface ShortUrlUserService {
      * <p>This is a synchronous method. It will return only when the
      * initialization has completed successfully, or has failed.</p>
      */
-    void initializeShortUrlUserRepository();
+    ShortUrlUserStatus
+    initializeShortUrlUserRepository(ServerHttpRequest request);
 
     Mono<StatusAndShortUrlUserArray>
     getAllUsers(Mono<Principal> principalMono);
