@@ -90,12 +90,35 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
     @Override
     public Mono<ShortUrlUserStatus>
     signup(ShortUrlUser shortUrlUser) {
+        String username = shortUrlUser.getUsername();
+        String password = shortUrlUser.getPassword();
+
+        if (username == null || username.isBlank()) {
+            return Mono.just(ShortUrlUserStatus.MISSING_USERNAME);
+        }
+
+        if (password == null || password.isBlank()) {
+            return Mono.just(ShortUrlUserStatus.MISSING_PASSWORD);
+        }
         return shortUrlUserDao.signup(shortUrlUser);
     }
 
     @Override
     public Mono<StatusAndJwtToken>
     login(UsernameAndPassword usernameAndPassword) {
+        String username = usernameAndPassword.getUsername();
+        String password = usernameAndPassword.getPassword();
+
+        if (username == null || username.isBlank()) {
+            return Mono.just(new StatusAndJwtToken(
+                ShortUrlUserStatus.MISSING_USERNAME, null));
+        }
+
+        if (password == null || password.isBlank()) {
+            return Mono.just(new StatusAndJwtToken(
+                ShortUrlUserStatus.MISSING_PASSWORD, null));
+        }
+
         return shortUrlUserDao.login(usernameAndPassword)
         .map(statusAndRole -> {
             if (statusAndRole.getStatus() !=
@@ -145,6 +168,22 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
             UsernameOldPasswordAndNewPassword
                 usernameOldPasswordAndNewPassword) {
 
+        String username = usernameOldPasswordAndNewPassword.getUsername();
+        String oldPassword = usernameOldPasswordAndNewPassword.getOldPassword();
+        String newPassword = usernameOldPasswordAndNewPassword.getNewPassword();
+
+        if (username == null || username.isBlank()) {
+            return Mono.just(ShortUrlUserStatus.MISSING_USERNAME);
+        }
+
+        if (oldPassword == null || oldPassword.isBlank()) {
+            return Mono.just(ShortUrlUserStatus.MISSING_OLD_PASSWORD);
+        }
+
+        if (newPassword == null || newPassword.isBlank()) {
+            return Mono.just(ShortUrlUserStatus.MISSING_NEW_PASSWORD);
+        }
+
         return principalMono.flatMap(auth -> {
             Authentication authentication = (Authentication)auth;
             String usernameInAuthToken = authentication.getName();
@@ -170,18 +209,25 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
             Authentication authentication = (Authentication) auth;
 
             String usernameInAuthToken = authentication.getName();
-            String usernameInRequestBody =
-                    usernameAndPassword.getUsername();
+            String usernameInRequestBody = usernameAndPassword.getUsername();
+            String passwordInRequestBody = usernameAndPassword.getPassword();
 
             String role = "";
             for (GrantedAuthority authority : authentication.getAuthorities()) {
                 role = authority.getAuthority();
             }
 
-            if (!role.equals("ADMIN") &&
-                    !usernameInAuthToken.equals(usernameInRequestBody)) {
-                return Mono.just(
-                        ShortUrlUserStatus.USER_CONFIRMATION_MISMATCH);
+            if (usernameInRequestBody == null || usernameInRequestBody.isBlank()) {
+                return Mono.just(ShortUrlUserStatus.MISSING_USERNAME);
+            }
+
+            if (!role.equals("ADMIN")) {
+                if (passwordInRequestBody == null || passwordInRequestBody.isBlank()) {
+                    return Mono.just(ShortUrlUserStatus.MISSING_PASSWORD);
+                }
+                if (!usernameInAuthToken.equals(usernameInRequestBody)) {
+                    return Mono.just(ShortUrlUserStatus.USER_CONFIRMATION_MISMATCH);
+                }
             }
             return shortUrlUserDao.deleteUser(usernameAndPassword, role);
         });

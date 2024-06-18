@@ -61,12 +61,14 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                 message = "Initialization of Short URL User table "
                         + "completed successfully";
                 break;
+
             case NOT_ON_LOCAL_MACHINE:
                 httpStatus = HttpStatus.FORBIDDEN;
                 message = "Initialization of the Short URL User "
                         + "table can be done only when the service is "
                         + "running on your local machine";
                 break;
+
             default:
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                 message = "An unknown error occurred";
@@ -92,10 +94,12 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                         httpStatus = HttpStatus.OK;
                         message = "All users successfully retrieved";
                         break;
+
                     case MUST_BE_ADMIN:
                         httpStatus = HttpStatus.UNAUTHORIZED;
                         message = "Must be an admin to perform this operation";
                         break;
+
                     default:
                         httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                         message = "An unknown error occurred";
@@ -124,16 +128,21 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                             shortUrlUser.getUsername());
                     break;
 
+                case MISSING_PASSWORD:
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    message = "A non-empty password must be specified";
+                    break;
+
+                case MISSING_USERNAME:
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    message = "A non-empty username must be specified";
+                    break;
+
                 case USER_ALREADY_EXISTS:
                     httpStatus = HttpStatus.CONFLICT;
                     message = String.format(
                             "User '%s' already exists",
                             shortUrlUser.getUsername());
-                    break;
-
-                case MISSING_PASSWORD:
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                    message = "A non-empty password must be specified";
                     break;
 
                 default:
@@ -167,6 +176,16 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                             usernameAndPassword.getUsername());
                     break;
 
+                case MISSING_PASSWORD:
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    message = "A non-empty password must be specified";
+                    break;
+
+                case MISSING_USERNAME:
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    message = "A non-empty username must be specified";
+                    break;
+
                 case NO_SUCH_USER:
                     httpStatus = HttpStatus.UNAUTHORIZED;
                     message = String.format(
@@ -176,7 +195,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
 
                 case WRONG_PASSWORD:
                     httpStatus = HttpStatus.UNAUTHORIZED;
-                    message = "The supplied password is not correct";
+                    message = "The specified password is not correct";
                     break;
 
                 default:
@@ -245,6 +264,21 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                             username);
                     break;
 
+                case MISSING_NEW_PASSWORD:
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    message = "A non-empty new password must be specified";
+                    break;
+
+                case MISSING_OLD_PASSWORD:
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    message = "The old password must be specified";
+                    break;
+
+                case MISSING_USERNAME:
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    message = "A non-empty username must be specified";
+                    break;
+
                 case NO_SUCH_USER:
                     httpStatus = HttpStatus.UNAUTHORIZED;
                     message = String.format(
@@ -260,7 +294,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
 
                 case WRONG_PASSWORD:
                     httpStatus = HttpStatus.UNAUTHORIZED;
-                    message = "The supplied password is not correct";
+                    message = "The specified password is not correct";
                     break;
 
                 default:
@@ -298,6 +332,16 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                             username);
                     break;
 
+                case MISSING_PASSWORD:
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    message = "A non-empty password must be specified";
+                    break;
+
+                case MISSING_USERNAME:
+                    httpStatus = HttpStatus.BAD_REQUEST;
+                    message = "A non-empty username must be specified";
+                    break;
+
                 case NO_SUCH_USER:
                     httpStatus = HttpStatus.UNAUTHORIZED;
                     message = String.format(
@@ -313,7 +357,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
 
                 case WRONG_PASSWORD:
                     httpStatus = HttpStatus.UNAUTHORIZED;
-                    message = "The supplied password is not correct";
+                    message = "The specified password is not correct";
                     break;
 
                 default:

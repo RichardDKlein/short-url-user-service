@@ -13,7 +13,10 @@ package com.richarddklein.shorturluserservice.controller.response;
  */
 public enum ShortUrlUserStatus {
     SUCCESS,
+    MISSING_NEW_PASSWORD,
+    MISSING_OLD_PASSWORD,
     MISSING_PASSWORD,
+    MISSING_USERNAME,
     MUST_BE_ADMIN,
     NO_SUCH_USER,
     NOT_ON_LOCAL_MACHINE,
