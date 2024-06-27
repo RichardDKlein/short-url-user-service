@@ -132,10 +132,10 @@ Resources:
         DeleteUserViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /shorturl/users/delete
+            Path: /shorturl/users/specific
             Method: DELETE
         DeleteUserViaCustomDomain:
           Type: Api
           Properties:
-            Path: /delete
+            Path: /specific
             Method: DELETE
