@@ -39,8 +39,8 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
      * @param shortUrlUserDao Dependency injection of a class instance that is
      *                        to play the role of the Short URL User Data Access
      *                        Object (DAO).
-     * @param jwtUtils Dependency injection of a class instance that is to able
-     *                 to provide utilities to handle JWT authentication tokens.
+     * @param jwtUtils        Dependency injection of a class instance that is to able
+     *                        to provide utilities to handle JWT authentication tokens.
      */
     public ShortUrlUserServiceImpl(
             ShortUrlUserDao shortUrlUserDao,
@@ -69,21 +69,8 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
 
     @Override
     public Mono<StatusAndShortUrlUserArray>
-    getAllUsers(Mono<Principal> principalMono) {
-        return principalMono.flatMap(auth -> {
-            Authentication authentication = (Authentication) auth;
-
-            String role = "";
-            for (GrantedAuthority authority : authentication.getAuthorities()) {
-                role = authority.getAuthority();
-            }
-
-            if (!role.equals("ADMIN")) {
-                return Mono.just(new StatusAndShortUrlUserArray(
-                        ShortUrlUserStatus.MUST_BE_ADMIN, null));
-            }
-            return shortUrlUserDao.getAllUsers();
-        });
+    getAllUsers() {
+        return shortUrlUserDao.getAllUsers();
     }
 
     @Override
@@ -110,53 +97,53 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
 
         if (username == null || username.isBlank()) {
             return Mono.just(new StatusAndJwtToken(
-                ShortUrlUserStatus.MISSING_USERNAME, null));
+                    ShortUrlUserStatus.MISSING_USERNAME, null));
         }
 
         if (password == null || password.isBlank()) {
             return Mono.just(new StatusAndJwtToken(
-                ShortUrlUserStatus.MISSING_PASSWORD, null));
+                    ShortUrlUserStatus.MISSING_PASSWORD, null));
         }
 
         return shortUrlUserDao.login(usernameAndPassword)
-        .map(statusAndRole -> {
-            if (statusAndRole.getStatus() !=
-                    ShortUrlUserStatus.SUCCESS) {
-                return new StatusAndJwtToken(
-                        statusAndRole.getStatus(), null);
-            }
+                .map(statusAndRole -> {
+                    if (statusAndRole.getStatus() !=
+                            ShortUrlUserStatus.SUCCESS) {
+                        return new StatusAndJwtToken(
+                                statusAndRole.getStatus(), null);
+                    }
 
-            String jwtToken = jwtUtils.generateToken(
-                    new UsernameAndRole(
-                            usernameAndPassword.getUsername(),
-                            statusAndRole.getRole()));
+                    String jwtToken = jwtUtils.generateToken(
+                            new UsernameAndRole(
+                                    usernameAndPassword.getUsername(),
+                                    statusAndRole.getRole()));
 
-            return new StatusAndJwtToken(
-                    ShortUrlUserStatus.SUCCESS, jwtToken);
-        });
+                    return new StatusAndJwtToken(
+                            ShortUrlUserStatus.SUCCESS, jwtToken);
+                });
     }
 
     @Override
     public Mono<StatusAndShortUrlUser>
     getUserDetails(Mono<Principal> principalMono) {
         return principalMono.flatMap(auth -> {
-            Authentication authentication = (Authentication)auth;
+            Authentication authentication = (Authentication) auth;
             String username = authentication.getName();
 
             return shortUrlUserDao.getShortUrlUser(username)
-            .map(shortUrlUser -> {
-                ShortUrlUserStatus shortUrlUserStatus;
+                    .map(shortUrlUser -> {
+                        ShortUrlUserStatus shortUrlUserStatus;
 
-                if (shortUrlUser == null) {
-                    shortUrlUserStatus = ShortUrlUserStatus.NO_SUCH_USER;
-                } else {
-                    shortUrlUserStatus = ShortUrlUserStatus.SUCCESS;
-                    shortUrlUser.setPassword(null);
-                }
+                        if (shortUrlUser == null) {
+                            shortUrlUserStatus = ShortUrlUserStatus.NO_SUCH_USER;
+                        } else {
+                            shortUrlUserStatus = ShortUrlUserStatus.SUCCESS;
+                            shortUrlUser.setPassword(null);
+                        }
 
-                return new StatusAndShortUrlUser(
-                        shortUrlUserStatus, shortUrlUser);
-            });
+                        return new StatusAndShortUrlUser(
+                                shortUrlUserStatus, shortUrlUser);
+                    });
         });
     }
 
@@ -165,7 +152,7 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
     changePassword(
             Mono<Principal> principalMono,
             UsernameOldPasswordAndNewPassword
-                usernameOldPasswordAndNewPassword) {
+                    usernameOldPasswordAndNewPassword) {
 
         String username = usernameOldPasswordAndNewPassword.getUsername();
         String oldPassword = usernameOldPasswordAndNewPassword.getOldPassword();
@@ -184,10 +171,10 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
         }
 
         return principalMono.flatMap(auth -> {
-            Authentication authentication = (Authentication)auth;
+            Authentication authentication = (Authentication) auth;
             String usernameInAuthToken = authentication.getName();
             String usernameInRequestBody =
-                usernameOldPasswordAndNewPassword.getUsername();
+                    usernameOldPasswordAndNewPassword.getUsername();
 
             if (!usernameInAuthToken.equals(usernameInRequestBody)) {
                 return Mono.just(

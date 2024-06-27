@@ -30,7 +30,7 @@ public interface ShortUrlUserService {
     initializeShortUrlUserRepository(ServerHttpRequest request);
 
     Mono<StatusAndShortUrlUserArray>
-    getAllUsers(Mono<Principal> principalMono);
+    getAllUsers();
 
     Mono<ShortUrlUserStatus>
     signup(ShortUrlUser shortUrlUser);

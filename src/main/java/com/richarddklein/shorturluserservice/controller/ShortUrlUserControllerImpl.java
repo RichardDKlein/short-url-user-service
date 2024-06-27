@@ -7,6 +7,7 @@ package com.richarddklein.shorturluserservice.controller;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Objects;
 
 import com.richarddklein.shorturluserservice.controller.response.*;
 import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
@@ -80,8 +81,8 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
 
     @Override
     public Mono<ResponseEntity<StatusAndShortUrlUserArrayResponse>>
-    getAllUsers(Mono<Principal> principalMono) {
-        return shortUrlUserService.getAllUsers(principalMono)
+    getAllUsers() {
+        return shortUrlUserService.getAllUsers()
             .map(statusAndShortUrlUserArray -> {
                 ShortUrlUserStatus shortUrlUserStatus = statusAndShortUrlUserArray.getStatus();
                 List<ShortUrlUser> users = statusAndShortUrlUserArray.getShortUrlUsers();
@@ -89,16 +90,12 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                 HttpStatus httpStatus;
                 String message;
 
-                switch (shortUrlUserStatus) {
-                    case SUCCESS:
-                        httpStatus = HttpStatus.OK;
-                        message = "All users successfully retrieved";
-                        break;
-
-                    default:
-                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                        message = "An unknown error occurred";
-                        break;
+                if (Objects.requireNonNull(shortUrlUserStatus) == ShortUrlUserStatus.SUCCESS) {
+                    httpStatus = HttpStatus.OK;
+                    message = "All users successfully retrieved";
+                } else {
+                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                    message = "An unknown error occurred";
                 }
 
                 return new ResponseEntity<>(new StatusAndShortUrlUserArrayResponse(

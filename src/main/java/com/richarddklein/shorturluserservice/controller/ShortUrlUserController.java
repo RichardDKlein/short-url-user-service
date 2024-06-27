@@ -50,7 +50,7 @@ public interface ShortUrlUserController {
 
     @GetMapping("/all")
     Mono<ResponseEntity<StatusAndShortUrlUserArrayResponse>>
-    getAllUsers(Mono<Principal> principalMono);
+    getAllUsers();
 
     @PostMapping("/signup")
     Mono<ResponseEntity<StatusResponse>>
