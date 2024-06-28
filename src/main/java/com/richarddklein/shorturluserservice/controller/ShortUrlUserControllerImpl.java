@@ -325,11 +325,6 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                             username);
                     break;
 
-                case MISSING_PASSWORD:
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                    message = "A non-empty password must be specified";
-                    break;
-
                 case MISSING_USERNAME:
                     httpStatus = HttpStatus.BAD_REQUEST;
                     message = "A non-empty username must be specified";
@@ -339,18 +334,6 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                     httpStatus = HttpStatus.UNAUTHORIZED;
                     message = String.format(
                             "User '%s' does not exist", username);
-                    break;
-
-                case USER_CONFIRMATION_MISMATCH:
-                    httpStatus = HttpStatus.UNAUTHORIZED;
-                    message = String.format(
-                            "User '%s' doesn't match the user in the auth token",
-                            username);
-                    break;
-
-                case WRONG_PASSWORD:
-                    httpStatus = HttpStatus.UNAUTHORIZED;
-                    message = "The specified password is not correct";
                     break;
 
                 default:
