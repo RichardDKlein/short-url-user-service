@@ -47,4 +47,7 @@ public interface ShortUrlUserService {
 
     Mono<ShortUrlUserStatus>
     deleteUser(Username username);
+
+    Mono<ShortUrlUserStatus>
+    deleteAllUsers();
 }

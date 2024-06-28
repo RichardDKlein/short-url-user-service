@@ -73,4 +73,8 @@ public interface ShortUrlUserController {
     @DeleteMapping("/specific")
     Mono<ResponseEntity<StatusResponse>>
     deleteUser(@RequestBody Username username);
+
+    @DeleteMapping("/all")
+    Mono<ResponseEntity<StatusResponse>>
+    deleteAllUsers();
 }

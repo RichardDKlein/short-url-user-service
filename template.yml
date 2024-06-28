@@ -139,3 +139,13 @@ Resources:
           Properties:
             Path: /specific
             Method: DELETE
+        DeleteAllUsersViaApiGatewayOrLocalHost:
+          Type: Api
+          Properties:
+            Path: /shorturl/users/all
+            Method: DELETE
+        DeleteAllUsersViaCustomDomain:
+          Type: Api
+          Properties:
+            Path: /all
+            Method: DELETE

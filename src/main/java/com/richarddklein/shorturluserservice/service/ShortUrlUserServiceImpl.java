@@ -173,6 +173,12 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
         return shortUrlUserDao.deleteUser(theUsername);
     }
 
+    @Override
+    public Mono<ShortUrlUserStatus>
+    deleteAllUsers() {
+        return shortUrlUserDao.deleteAllUsers();
+    }
+
     // ------------------------------------------------------------------------
     // PRIVATE METHODS
     // ------------------------------------------------------------------------

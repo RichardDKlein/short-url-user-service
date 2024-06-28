@@ -154,18 +154,18 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     @Override
     public Mono<StatusAndShortUrlUserArray> getAllUsers() {
         return Flux.from(shortUrlUserTable.scan().items())
-            .collectList()
-            .map(users -> {
-                users.forEach(user -> user.setPassword(null));
-                return new StatusAndShortUrlUserArray(
-                    ShortUrlUserStatus.SUCCESS, users);
-            })
-            .onErrorResume(e -> {
-                System.out.println(e.getMessage());
-                return Mono.just(new StatusAndShortUrlUserArray(
-                        ShortUrlUserStatus.UNKNOWN_ERROR,
-                        Collections.emptyList()));
-            });
+        .collectList()
+        .map(users -> {
+            users.forEach(user -> user.setPassword(null));
+            return new StatusAndShortUrlUserArray(
+                ShortUrlUserStatus.SUCCESS, users);
+        })
+        .onErrorResume(e -> {
+            System.out.println(e.getMessage());
+            return Mono.just(new StatusAndShortUrlUserArray(
+                    ShortUrlUserStatus.UNKNOWN_ERROR,
+                    Collections.emptyList()));
+        });
     }
 
     @Override
@@ -272,6 +272,25 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
             .switchIfEmpty(Mono.just(ShortUrlUserStatus.NO_SUCH_USER));
     }
 
+    @Override
+    public Mono<ShortUrlUserStatus>
+    deleteAllUsers() {
+        return Flux.from(shortUrlUserTable.scan().items())
+        .collectList()
+        .map(users -> {
+            users.forEach(user -> {
+                if (user.getRole() != "ADMIN") {
+                    deleteShortUrlUser(user);
+                }
+            });
+            return ShortUrlUserStatus.SUCCESS;
+        })
+        .onErrorResume(e -> {
+            System.out.println(e.getMessage());
+            return Mono.just(ShortUrlUserStatus.UNKNOWN_ERROR);
+        });
+    }
+
     // ------------------------------------------------------------------------
     // PRIVATE METHODS
     // ------------------------------------------------------------------------
@@ -360,5 +379,11 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
             System.out.println(e.getMessage());
             return Mono.empty();
         });
+    }
+
+    private Mono<ShortUrlUserStatus>
+    deleteAllShortUrlUsers() {
+        // your code goes here
+        return Mono.empty();
     }
 }

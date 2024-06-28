@@ -48,4 +48,7 @@ public interface ShortUrlUserDao {
 
     Mono<ShortUrlUserStatus>
     deleteUser(String username);
+
+    Mono<ShortUrlUserStatus>
+    deleteAllUsers();
 }

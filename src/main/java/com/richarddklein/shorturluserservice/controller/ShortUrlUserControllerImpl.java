@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import static com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus.MISSING_USERNAME;
+import static com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus.SUCCESS;
 
 /**
  * The production implementation of the Short URL User Controller
@@ -93,7 +94,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                 HttpStatus httpStatus;
                 String message;
 
-                if (Objects.requireNonNull(shortUrlUserStatus) == ShortUrlUserStatus.SUCCESS) {
+                if (Objects.requireNonNull(shortUrlUserStatus) == SUCCESS) {
                     httpStatus = HttpStatus.OK;
                     message = "All users successfully retrieved";
                 } else {
@@ -341,6 +342,29 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                     message = "An unknown error occurred";
                     break;
             };
+
+            return new ResponseEntity<>(
+                    new StatusResponse(shortUrlUserStatus, message),
+                    httpStatus);
+        });
+    }
+
+    @Override
+    public Mono<ResponseEntity<StatusResponse>>
+    deleteAllUsers() {
+        return shortUrlUserService.deleteAllUsers()
+        .map(shortUrlUserStatus -> {
+
+            HttpStatus httpStatus;
+            String message;
+
+            if (Objects.requireNonNull(shortUrlUserStatus) == SUCCESS) {
+                httpStatus = HttpStatus.OK;
+                message = "All users successfully deleted";
+            } else {
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                message = "An unknown error occurred";
+            }
 
             return new ResponseEntity<>(
                     new StatusResponse(shortUrlUserStatus, message),
