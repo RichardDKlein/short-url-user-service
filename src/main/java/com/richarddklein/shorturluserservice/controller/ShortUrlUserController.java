@@ -8,6 +8,7 @@ package com.richarddklein.shorturluserservice.controller;
 import java.security.Principal;
 
 import com.richarddklein.shorturluserservice.controller.response.StatusAndShortUrlUserArrayResponse;
+import com.richarddklein.shorturluserservice.dto.Username;
 import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.dto.UsernameOldPasswordAndNewPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
@@ -62,18 +63,14 @@ public interface ShortUrlUserController {
 
     @GetMapping("/details")
     Mono<ResponseEntity<StatusAndShortUrlUserResponse>>
-    getUserDetails(Mono<Principal> principalMono);
+    getUserDetails(@RequestBody Username username);
 
     @PatchMapping("/changepassword")
     Mono<ResponseEntity<StatusResponse>>
-    changePassword(
-            Mono<Principal> principalMono,
-            @RequestBody UsernameOldPasswordAndNewPassword
-                    usernameOldPasswordAndNewPassword);
+    changePassword(@RequestBody UsernameOldPasswordAndNewPassword
+                                usernameOldPasswordAndNewPassword);
 
     @DeleteMapping("/specific")
     Mono<ResponseEntity<StatusResponse>>
-    deleteUser(
-            Mono<Principal> principalMono,
-            @RequestBody UsernameAndPassword usernameAndPassword);
+    deleteUser(@RequestBody Username username);
 }

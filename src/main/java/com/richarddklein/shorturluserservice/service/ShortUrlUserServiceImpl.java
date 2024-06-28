@@ -97,62 +97,53 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
 
         if (username == null || username.isBlank()) {
             return Mono.just(new StatusAndJwtToken(
-                    ShortUrlUserStatus.MISSING_USERNAME, null));
+                ShortUrlUserStatus.MISSING_USERNAME, null));
         }
 
         if (password == null || password.isBlank()) {
             return Mono.just(new StatusAndJwtToken(
-                    ShortUrlUserStatus.MISSING_PASSWORD, null));
+                ShortUrlUserStatus.MISSING_PASSWORD, null));
         }
 
         return shortUrlUserDao.login(usernameAndPassword)
-                .map(statusAndRole -> {
-                    if (statusAndRole.getStatus() !=
-                            ShortUrlUserStatus.SUCCESS) {
-                        return new StatusAndJwtToken(
-                                statusAndRole.getStatus(), null);
-                    }
+        .map(statusAndRole -> {
+            if (statusAndRole.getStatus() != ShortUrlUserStatus.SUCCESS) {
+                return new StatusAndJwtToken(statusAndRole.getStatus(), null);
+            }
 
-                    String jwtToken = jwtUtils.generateToken(
-                            new UsernameAndRole(
-                                    usernameAndPassword.getUsername(),
-                                    statusAndRole.getRole()));
+            String jwtToken = jwtUtils.generateToken(new UsernameAndRole(
+                usernameAndPassword.getUsername(),
+                statusAndRole.getRole()));
 
-                    return new StatusAndJwtToken(
-                            ShortUrlUserStatus.SUCCESS, jwtToken);
-                });
+            return new StatusAndJwtToken(ShortUrlUserStatus.SUCCESS, jwtToken);
+        });
     }
 
     @Override
     public Mono<StatusAndShortUrlUser>
-    getUserDetails(Mono<Principal> principalMono) {
-        return principalMono.flatMap(auth -> {
-            Authentication authentication = (Authentication) auth;
-            String username = authentication.getName();
+    getUserDetails(String username) {
+        if (username == null || username.isBlank()) {
+            return Mono.just(new StatusAndShortUrlUser(
+                    ShortUrlUserStatus.MISSING_USERNAME, null));
+        }
+        return shortUrlUserDao.getShortUrlUser(username)
+        .map(shortUrlUser -> {
+            ShortUrlUserStatus shortUrlUserStatus;
 
-            return shortUrlUserDao.getShortUrlUser(username)
-                    .map(shortUrlUser -> {
-                        ShortUrlUserStatus shortUrlUserStatus;
-
-                        if (shortUrlUser == null) {
-                            shortUrlUserStatus = ShortUrlUserStatus.NO_SUCH_USER;
-                        } else {
-                            shortUrlUserStatus = ShortUrlUserStatus.SUCCESS;
-                            shortUrlUser.setPassword(null);
-                        }
-
-                        return new StatusAndShortUrlUser(
-                                shortUrlUserStatus, shortUrlUser);
-                    });
+            if (shortUrlUser == null) {
+                shortUrlUserStatus = ShortUrlUserStatus.NO_SUCH_USER;
+            } else {
+                shortUrlUserStatus = ShortUrlUserStatus.SUCCESS;
+                shortUrlUser.setPassword(null);
+            }
+            return new StatusAndShortUrlUser(shortUrlUserStatus, shortUrlUser);
         });
     }
 
     @Override
     public Mono<ShortUrlUserStatus>
-    changePassword(
-            Mono<Principal> principalMono,
-            UsernameOldPasswordAndNewPassword
-                    usernameOldPasswordAndNewPassword) {
+    changePassword(UsernameOldPasswordAndNewPassword
+                   usernameOldPasswordAndNewPassword) {
 
         String username = usernameOldPasswordAndNewPassword.getUsername();
         String oldPassword = usernameOldPasswordAndNewPassword.getOldPassword();
@@ -169,54 +160,17 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
         if (newPassword == null || newPassword.isBlank()) {
             return Mono.just(ShortUrlUserStatus.MISSING_NEW_PASSWORD);
         }
-
-        return principalMono.flatMap(auth -> {
-            Authentication authentication = (Authentication) auth;
-            String usernameInAuthToken = authentication.getName();
-            String usernameInRequestBody =
-                    usernameOldPasswordAndNewPassword.getUsername();
-
-            if (!usernameInAuthToken.equals(usernameInRequestBody)) {
-                return Mono.just(
-                        ShortUrlUserStatus.USER_CONFIRMATION_MISMATCH);
-            }
-            return shortUrlUserDao.changePassword(
-                    usernameOldPasswordAndNewPassword);
-        });
+        return shortUrlUserDao.changePassword(usernameOldPasswordAndNewPassword);
     }
 
     @Override
     public Mono<ShortUrlUserStatus>
-    deleteUser(
-            Mono<Principal> principalMono,
-            UsernameAndPassword usernameAndPassword) {
-
-        return principalMono.flatMap(auth -> {
-            Authentication authentication = (Authentication) auth;
-
-            String usernameInAuthToken = authentication.getName();
-            String usernameInRequestBody = usernameAndPassword.getUsername();
-            String passwordInRequestBody = usernameAndPassword.getPassword();
-
-            String role = "";
-            for (GrantedAuthority authority : authentication.getAuthorities()) {
-                role = authority.getAuthority();
-            }
-
-            if (usernameInRequestBody == null || usernameInRequestBody.isBlank()) {
-                return Mono.just(ShortUrlUserStatus.MISSING_USERNAME);
-            }
-
-            if (!role.equals("ADMIN")) {
-                if (passwordInRequestBody == null || passwordInRequestBody.isBlank()) {
-                    return Mono.just(ShortUrlUserStatus.MISSING_PASSWORD);
-                }
-                if (!usernameInAuthToken.equals(usernameInRequestBody)) {
-                    return Mono.just(ShortUrlUserStatus.USER_CONFIRMATION_MISMATCH);
-                }
-            }
-            return shortUrlUserDao.deleteUser(usernameAndPassword, role);
-        });
+    deleteUser(Username username) {
+        String theUsername = username.getUsername();
+        if (theUsername == null || theUsername.isBlank()) {
+            return Mono.just(ShortUrlUserStatus.MISSING_USERNAME);
+        }
+        return shortUrlUserDao.deleteUser(theUsername);
     }
 
     // ------------------------------------------------------------------------

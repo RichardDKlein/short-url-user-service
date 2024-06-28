@@ -39,16 +39,12 @@ public interface ShortUrlUserService {
     login(UsernameAndPassword usernameAndPassword);
 
     Mono<StatusAndShortUrlUser>
-    getUserDetails(Mono<Principal> principalMono);
+    getUserDetails(String username);
 
     Mono<ShortUrlUserStatus>
-    changePassword(
-            Mono<Principal> principalMono,
-            UsernameOldPasswordAndNewPassword
-                    usernameOldPasswordAndNewPassword);
+    changePassword(UsernameOldPasswordAndNewPassword
+                   usernameOldPasswordAndNewPassword);
 
     Mono<ShortUrlUserStatus>
-    deleteUser(
-            Mono<Principal> principalMono,
-            UsernameAndPassword usernameAndPassword);
+    deleteUser(Username username);
 }
