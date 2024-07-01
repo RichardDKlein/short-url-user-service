@@ -5,6 +5,7 @@
 
 package com.richarddklein.shorturluserservice.config;
 
+import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
 import com.richarddklein.shorturlcommonlibrary.security.util.JwtUtils;
 import com.richarddklein.shorturluserservice.dao.ShortUrlUserDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,11 +27,17 @@ public class ServiceConfig {
     ShortUrlUserDao shortUrlUserDao;
 
     @Autowired
+    ParameterStoreReader parameterStoreReader;
+
+    @Autowired
     JwtUtils jwtUtils;
 
     @Bean
     public ShortUrlUserService
     shortUrlUserService() {
-        return new ShortUrlUserServiceImpl(shortUrlUserDao, jwtUtils);
+        return new ShortUrlUserServiceImpl(
+                shortUrlUserDao,
+                parameterStoreReader,
+                jwtUtils);
     }
 }

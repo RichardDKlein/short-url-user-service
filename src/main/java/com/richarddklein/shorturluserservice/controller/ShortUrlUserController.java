@@ -49,6 +49,10 @@ public interface ShortUrlUserController {
     ResponseEntity<StatusResponse>
     initializeShortUrlUserRepository(ServerHttpRequest request);
 
+    @GetMapping("/adminjwt")
+    Mono<ResponseEntity<StatusAndJwtTokenResponse>>
+    getAdminJwtToken();
+
     @GetMapping("/all")
     Mono<ResponseEntity<StatusAndShortUrlUserArrayResponse>>
     getAllUsers();

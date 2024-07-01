@@ -84,28 +84,55 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     }
 
     @Override
+    public Mono<ResponseEntity<StatusAndJwtTokenResponse>>
+    getAdminJwtToken() {
+        return shortUrlUserService.getAdminJwtToken()
+        .map(statusAndJwtToken -> {
+            ShortUrlUserStatus shortUrlUserStatus =
+                    statusAndJwtToken.getStatus();
+            String jwtToken = statusAndJwtToken.getJwtToken();
+
+            HttpStatus httpStatus;
+            String message;
+
+            if (Objects.requireNonNull(shortUrlUserStatus) == SUCCESS) {
+                httpStatus = HttpStatus.OK;
+                message = "Admin JWT token successfully generated";
+            } else {
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                message = "An unknown error occurred";
+            }
+
+            return new ResponseEntity<>(
+                    new StatusAndJwtTokenResponse(new StatusResponse(
+                            shortUrlUserStatus, message), jwtToken),
+                    httpStatus);
+        });
+    }
+
+    @Override
     public Mono<ResponseEntity<StatusAndShortUrlUserArrayResponse>>
     getAllUsers() {
         return shortUrlUserService.getAllUsers()
-            .map(statusAndShortUrlUserArray -> {
-                ShortUrlUserStatus shortUrlUserStatus = statusAndShortUrlUserArray.getStatus();
-                List<ShortUrlUser> users = statusAndShortUrlUserArray.getShortUrlUsers();
+        .map(statusAndShortUrlUserArray -> {
+            ShortUrlUserStatus shortUrlUserStatus = statusAndShortUrlUserArray.getStatus();
+            List<ShortUrlUser> users = statusAndShortUrlUserArray.getShortUrlUsers();
 
-                HttpStatus httpStatus;
-                String message;
+            HttpStatus httpStatus;
+            String message;
 
-                if (Objects.requireNonNull(shortUrlUserStatus) == SUCCESS) {
-                    httpStatus = HttpStatus.OK;
-                    message = "All users successfully retrieved";
-                } else {
-                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                    message = "An unknown error occurred";
-                }
+            if (Objects.requireNonNull(shortUrlUserStatus) == SUCCESS) {
+                httpStatus = HttpStatus.OK;
+                message = "All users successfully retrieved";
+            } else {
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                message = "An unknown error occurred";
+            }
 
-                return new ResponseEntity<>(new StatusAndShortUrlUserArrayResponse(
-                        new StatusResponse(shortUrlUserStatus, message), users),
-                        httpStatus);
-            });
+            return new ResponseEntity<>(new StatusAndShortUrlUserArrayResponse(
+                    new StatusResponse(shortUrlUserStatus, message), users),
+                    httpStatus);
+        });
     }
 
     @Override

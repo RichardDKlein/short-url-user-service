@@ -29,6 +29,9 @@ public interface ShortUrlUserService {
     ShortUrlUserStatus
     initializeShortUrlUserRepository(ServerHttpRequest request);
 
+    Mono<StatusAndJwtToken>
+    getAdminJwtToken();
+
     Mono<StatusAndShortUrlUserArray>
     getAllUsers();
 

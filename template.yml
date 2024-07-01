@@ -79,6 +79,16 @@ Resources:
           Properties:
             Path: /dbinit
             Method: POST
+        GetAdminJwtTokenViaApiGatewayOrLocalHost:
+          Type: Api
+          Properties:
+            Path: /shorturl/users/adminjwt
+            Method: GET
+        GetAdminJwtTokenViaCustomDomain:
+          Type: Api
+          Properties:
+            Path: /adminjwt
+            Method: GET
         GetAllUsersViaApiGatewayOrLocalHost:
           Type: Api
           Properties:

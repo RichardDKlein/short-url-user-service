@@ -5,17 +5,15 @@
 
 package com.richarddklein.shorturluserservice.service;
 
-import java.security.Principal;
 import java.util.Objects;
 
+import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
 import com.richarddklein.shorturlcommonlibrary.security.dto.UsernameAndRole;
 import com.richarddklein.shorturlcommonlibrary.security.util.JwtUtils;
 import com.richarddklein.shorturluserservice.dto.*;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import com.richarddklein.shorturluserservice.dao.ShortUrlUserDao;
@@ -27,6 +25,7 @@ import reactor.core.publisher.Mono;
 @Service
 public class ShortUrlUserServiceImpl implements ShortUrlUserService {
     private final ShortUrlUserDao shortUrlUserDao;
+    private final ParameterStoreReader parameterStoreReader;
     private final JwtUtils jwtUtils;
 
     // ------------------------------------------------------------------------
@@ -44,9 +43,11 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
      */
     public ShortUrlUserServiceImpl(
             ShortUrlUserDao shortUrlUserDao,
+            ParameterStoreReader parameterStoreReader,
             JwtUtils jwtUtils) {
 
         this.shortUrlUserDao = shortUrlUserDao;
+        this.parameterStoreReader = parameterStoreReader;
         this.jwtUtils = jwtUtils;
     }
 
@@ -65,6 +66,16 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
 
         shortUrlUserDao.initializeShortUrlUserRepository();
         return ShortUrlUserStatus.SUCCESS;
+    }
+
+    @Override
+    public Mono<StatusAndJwtToken> getAdminJwtToken() {
+        String adminUsername = parameterStoreReader.getAdminUsername();
+        String jwtToken = jwtUtils.generateToken(
+                new UsernameAndRole(adminUsername, "ADMIN"));
+
+        return Mono.just(new StatusAndJwtToken(
+                ShortUrlUserStatus.SUCCESS, jwtToken));
     }
 
     @Override
