@@ -10,6 +10,9 @@ public class UsernameAndPassword {
     private String username;
     private String password;
 
+    public UsernameAndPassword() {
+    }
+
     public UsernameAndPassword(String username, String password) {
         this.username = username;
         this.password = password;

@@ -11,6 +11,9 @@ public class UsernameOldPasswordAndNewPassword {
     private String oldPassword;
     private String newPassword;
 
+    public UsernameOldPasswordAndNewPassword() {
+    }
+
     public UsernameOldPasswordAndNewPassword(
             String username,
             String oldPassword,

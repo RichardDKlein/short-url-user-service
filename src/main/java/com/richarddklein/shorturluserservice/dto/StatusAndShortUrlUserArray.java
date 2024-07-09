@@ -15,6 +15,9 @@ public class StatusAndShortUrlUserArray {
     private ShortUrlUserStatus status;
     private List<ShortUrlUser> shortUrlUsers;
 
+    public StatusAndShortUrlUserArray() {
+    }
+
     public StatusAndShortUrlUserArray
             (ShortUrlUserStatus status,
              List<ShortUrlUser> shortUrlUsers) {

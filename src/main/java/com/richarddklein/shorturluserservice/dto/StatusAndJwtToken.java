@@ -12,6 +12,9 @@ public class StatusAndJwtToken {
     private ShortUrlUserStatus status;
     private String jwtToken;
 
+    public StatusAndJwtToken() {
+    }
+
     public StatusAndJwtToken(ShortUrlUserStatus status, String jwtToken) {
         this.status = status;
         this.jwtToken = jwtToken;

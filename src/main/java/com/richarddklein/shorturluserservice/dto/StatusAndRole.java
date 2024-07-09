@@ -12,6 +12,9 @@ public class StatusAndRole {
     private ShortUrlUserStatus status;
     private String role;
 
+    public StatusAndRole() {
+    }
+
     public StatusAndRole(ShortUrlUserStatus status, String role) {
         this.status = status;
         this.role = role;

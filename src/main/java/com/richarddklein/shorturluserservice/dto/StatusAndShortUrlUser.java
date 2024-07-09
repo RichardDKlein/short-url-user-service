@@ -13,6 +13,9 @@ public class StatusAndShortUrlUser {
     private ShortUrlUserStatus status;
     private ShortUrlUser shortUrlUser;
 
+    public StatusAndShortUrlUser() {
+    }
+
     public StatusAndShortUrlUser(ShortUrlUserStatus status, ShortUrlUser shortUrlUser) {
         this.status = status;
         this.shortUrlUser = shortUrlUser;
