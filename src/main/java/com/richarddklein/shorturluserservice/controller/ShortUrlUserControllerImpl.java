@@ -350,7 +350,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                     httpStatus = HttpStatus.OK;
                     message = String.format(
                             "User '%s' successfully deleted",
-                            username);
+                            username.getUsername());
                     break;
 
                 case MISSING_USERNAME:
@@ -361,7 +361,8 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                 case NO_SUCH_USER:
                     httpStatus = HttpStatus.UNAUTHORIZED;
                     message = String.format(
-                            "User '%s' does not exist", username);
+                            "User '%s' does not exist",
+                            username.getUsername());
                     break;
 
                 default:
