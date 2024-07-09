@@ -359,7 +359,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                     break;
 
                 case NO_SUCH_USER:
-                    httpStatus = HttpStatus.UNAUTHORIZED;
+                    httpStatus = HttpStatus.NOT_FOUND;
                     message = String.format(
                             "User '%s' does not exist",
                             username.getUsername());
