@@ -260,7 +260,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                     httpStatus = HttpStatus.NOT_FOUND;
                     message = String.format(
                             "User '%s' does not exist",
-                            shortUrlUser.getUsername());
+                            username.getUsername());
                     break;
                 default:
                     httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
