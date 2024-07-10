@@ -139,16 +139,11 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
         }
         return shortUrlUserDao.getShortUrlUser(username)
         .map(shortUrlUser -> {
-            ShortUrlUserStatus shortUrlUserStatus;
-
-            if (shortUrlUser == null) {
-                shortUrlUserStatus = ShortUrlUserStatus.NO_SUCH_USER;
-            } else {
-                shortUrlUserStatus = ShortUrlUserStatus.SUCCESS;
-                shortUrlUser.setPassword(null);
-            }
-            return new StatusAndShortUrlUser(shortUrlUserStatus, shortUrlUser);
-        });
+            shortUrlUser.setPassword(null);
+            return new StatusAndShortUrlUser(ShortUrlUserStatus.SUCCESS, shortUrlUser);
+        })
+        .switchIfEmpty(Mono.just(new StatusAndShortUrlUser(
+                ShortUrlUserStatus.NO_SUCH_USER, null)));
     }
 
     @Override
