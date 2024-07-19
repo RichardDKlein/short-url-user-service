@@ -10,6 +10,7 @@ Globals:
     EndpointConfiguration: REGIONAL
 
 Resources:
+  # Define the Lambda function
   ShortUrlUserService:
     Type: AWS::Serverless::Function
     Properties:
@@ -18,27 +19,7 @@ Resources:
       CodeUri: .
       MemorySize: 512
       Timeout: 90
-      Policies:
-        # Write permission for CloudWatch logs
-        - AWSLambdaBasicExecutionRole
-        # Read/write permission for DynamoDB
-        - AmazonDynamoDBFullAccess
-        # Read permission for SSM Parameter Store.
-        - SSMParameterWithSlashPrefixReadPolicy:
-            ParameterName:
-              /shortUrl/users/tableName
-        - SSMParameterWithSlashPrefixReadPolicy:
-            ParameterName:
-              /shortUrl/users/adminUsername
-        - SSMParameterWithSlashPrefixReadPolicy:
-            ParameterName:
-              /shortUrl/users/adminPassword
-        - SSMParameterWithSlashPrefixReadPolicy:
-            ParameterName:
-              /shortUrl/users/jwtMinutesToLive
-        - SSMParameterWithSlashPrefixReadPolicy:
-            ParameterName:
-              /shortUrl/users/jwtSecretKey
+      Role: !GetAtt LambdaExecutionRole.Arn
       SnapStart:
         ApplyOn: "PublishedVersions"
 
@@ -152,3 +133,52 @@ Resources:
           Properties:
             Path: /all
             Method: DELETE
+
+  # Define the IAM Role for the Lambda function
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaExecutionPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # Write permission for CloudWatch logs
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+              # Read/write permission for DynamoDB
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:GetItem
+                  - dynamodb:Scan
+                  - dynamodb:Query
+                Resource: "*"
+              # Custom read/write policy for SSM parameter `adminPassword`
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:PutParameter
+                Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/shortUrl/users/adminPassword
+              # Read policy for other SSM parameters
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                Resource:
+                  - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/shortUrl/users/tableName
+                  - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/shortUrl/users/adminUsername
+                  - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/shortUrl/users/jwtMinutesToLive
+                  - !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/shortUrl/users/jwtSecretKey

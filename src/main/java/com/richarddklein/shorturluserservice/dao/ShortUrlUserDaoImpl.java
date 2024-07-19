@@ -216,10 +216,9 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                 shortUrlUser.setLastLogin(LocalDateTime.now().format(
                     DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
 
-                return updateShortUrlUser(shortUrlUser).map(updatedShortUrlUser -> {
-                    return new StatusAndRole(ShortUrlUserStatus.SUCCESS,
-                            updatedShortUrlUser.getRole());
-                });
+                return updateShortUrlUser(shortUrlUser).map(updatedShortUrlUser ->
+                        new StatusAndRole(ShortUrlUserStatus.SUCCESS,
+                                updatedShortUrlUser.getRole()));
             })
             .switchIfEmpty(Mono.just(new StatusAndRole(
                 ShortUrlUserStatus.NO_SUCH_USER, null)));
@@ -254,6 +253,12 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                 shortUrlUser.setPassword(passwordEncoder.encode(newPassword));
 
                 return updateShortUrlUser(shortUrlUser).map(updatedShortUrlUser -> {
+                    // If the user is Admin, save his new password in the
+                    // AWS Parameter Store.
+                    System.out.printf("====> updatedShortUrlUser.getRole() = %s\n", updatedShortUrlUser.getRole());
+                    if (updatedShortUrlUser.getRole() == "ADMIN") {
+                        parameterStoreReader.setAdminPassword(newPassword);
+                    }
                     return ShortUrlUserStatus.SUCCESS;
                 });
             })
