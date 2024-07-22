@@ -70,12 +70,11 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
 
     @Override
     public Mono<StatusAndJwtToken> getAdminJwtToken() {
-        String adminUsername = parameterStoreReader.getAdminUsername();
-        String jwtToken = jwtUtils.generateToken(
-                new UsernameAndRole(adminUsername, "ADMIN"));
-
-        return Mono.just(new StatusAndJwtToken(
-                ShortUrlUserStatus.SUCCESS, jwtToken));
+        return parameterStoreReader.getAdminUsername()
+                .flatMap(adminUsername -> jwtUtils.generateToken(
+                        new UsernameAndRole(adminUsername, "ADMIN"))
+                        .map(jwtToken -> new StatusAndJwtToken(
+                                ShortUrlUserStatus.SUCCESS, jwtToken)));
     }
 
     @Override
@@ -116,17 +115,16 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
                 ShortUrlUserStatus.MISSING_PASSWORD, null));
         }
 
-        return shortUrlUserDao.login(usernameAndPassword)
-        .map(statusAndRole -> {
+        return shortUrlUserDao.login(usernameAndPassword).flatMap(statusAndRole -> {
             if (statusAndRole.getStatus() != ShortUrlUserStatus.SUCCESS) {
-                return new StatusAndJwtToken(statusAndRole.getStatus(), null);
+                return Mono.just(new StatusAndJwtToken(
+                        statusAndRole.getStatus(), null));
             }
 
-            String jwtToken = jwtUtils.generateToken(new UsernameAndRole(
-                usernameAndPassword.getUsername(),
-                statusAndRole.getRole()));
-
-            return new StatusAndJwtToken(ShortUrlUserStatus.SUCCESS, jwtToken);
+            return jwtUtils.generateToken(new UsernameAndRole(
+                usernameAndPassword.getUsername(), statusAndRole.getRole()))
+                    .map(jwtToken -> new StatusAndJwtToken(
+                            ShortUrlUserStatus.SUCCESS, jwtToken));
         });
     }
 

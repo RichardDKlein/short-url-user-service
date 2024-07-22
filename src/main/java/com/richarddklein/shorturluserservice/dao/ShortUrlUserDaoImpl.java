@@ -315,7 +315,8 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         shortUrlUserTable.deleteTable();
         DynamoDbWaiter waiter = DynamoDbWaiter.builder().client(dynamoDbClient).build();
         waiter.waitUntilTableNotExists(builder -> builder
-                .tableName(parameterStoreReader.getShortUrlUserTableName())
+                // synchronous logic ok here
+                .tableName(parameterStoreReader.getShortUrlUserTableName().block())
                 .build());
         waiter.close();
         System.out.println(" done!");
@@ -331,7 +332,8 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         shortUrlUserTable.createTable(createTableRequest);
         DynamoDbWaiter waiter = DynamoDbWaiter.builder().client(dynamoDbClient).build();
         waiter.waitUntilTableExists(builder -> builder
-                .tableName(parameterStoreReader.getShortUrlUserTableName()).build());
+                // synchronous logic ok here
+                .tableName(parameterStoreReader.getShortUrlUserTableName().block()).build());
         waiter.close();
         System.out.println(" done!");
     }
@@ -342,8 +344,9 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     private void addAdminToShortUrlUserTable() {
         System.out.print("Adding the Admin to the Short URL User table ...");
         ShortUrlUser admin = new ShortUrlUser(
-                parameterStoreReader.getAdminUsername(),
-                parameterStoreReader.getAdminPassword(),
+                // synchronous logic ok here
+                parameterStoreReader.getAdminUsername().block(),
+                parameterStoreReader.getAdminPassword().block(),
                 ADMIN_ROLE,
                 ADMIN_NAME,
                 ADMIN_EMAIL,

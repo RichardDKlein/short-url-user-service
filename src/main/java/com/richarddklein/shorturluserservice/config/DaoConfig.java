@@ -77,7 +77,7 @@ public class DaoConfig {
     public DynamoDbAsyncTable<ShortUrlUser>
     shortUrlUserTable() {
         return dynamoDbEnhancedAsyncClient().table(
-                parameterStoreReader.getShortUrlUserTableName(),
+                parameterStoreReader.getShortUrlUserTableName().block(),
                 TableSchema.fromBean(ShortUrlUser.class));
     }
 }
