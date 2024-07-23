@@ -252,14 +252,14 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                 }
                 shortUrlUser.setPassword(passwordEncoder.encode(newPassword));
 
-                return updateShortUrlUser(shortUrlUser).map(updatedShortUrlUser -> {
+                return updateShortUrlUser(shortUrlUser).flatMap(updatedShortUrlUser -> {
                     // If the user is Admin, save his new password in the
                     // AWS Parameter Store.
-                    System.out.printf("====> updatedShortUrlUser.getRole() = %s\n", updatedShortUrlUser.getRole());
-                    if (updatedShortUrlUser.getRole() == "ADMIN") {
-                        parameterStoreReader.setAdminPassword(newPassword);
+                    if (updatedShortUrlUser.getRole().equals("ADMIN")) {
+                        return parameterStoreReader.setAdminPassword(newPassword)
+                                .thenReturn(ShortUrlUserStatus.SUCCESS);
                     }
-                    return ShortUrlUserStatus.SUCCESS;
+                    return Mono.just(ShortUrlUserStatus.SUCCESS);
                 });
             })
             .switchIfEmpty(Mono.just(ShortUrlUserStatus.NO_SUCH_USER));
