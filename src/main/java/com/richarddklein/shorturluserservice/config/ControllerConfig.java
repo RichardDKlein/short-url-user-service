@@ -5,7 +5,7 @@
 
 package com.richarddklein.shorturluserservice.config;
 
-import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
+import com.richarddklein.shorturluserservice.service.ShortUrlUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,12 +22,11 @@ import com.richarddklein.shorturluserservice.controller.ShortUrlUserControllerIm
 @Configuration
 public class ControllerConfig {
     @Autowired
-    ServiceConfig serviceConfig;
+    ShortUrlUserService shortUrlUserService;
 
     @Bean
     public ShortUrlUserController
     shortUrlReservationController() {
-        return new ShortUrlUserControllerImpl(
-                serviceConfig.shortUrlUserService());
+        return new ShortUrlUserControllerImpl(shortUrlUserService);
     }
 }
