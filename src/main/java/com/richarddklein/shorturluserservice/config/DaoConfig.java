@@ -53,8 +53,7 @@ public class DaoConfig {
     public DynamoDbClient
     dynamoDbClient() {
         return DynamoDbClient.builder()
-                .credentialsProvider(DefaultCredentialsProvider
-                        .create())
+                .credentialsProvider(DefaultCredentialsProvider.create())
                 .build();
     }
 
