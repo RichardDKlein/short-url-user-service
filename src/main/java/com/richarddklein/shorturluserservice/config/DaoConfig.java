@@ -60,8 +60,7 @@ public class DaoConfig {
     @Bean
     public DynamoDbAsyncClient
     dynamoDbAsyncClient() {
-        return DynamoDbAsyncClient.builder()
-                .build();
+        return DynamoDbAsyncClient.builder().build();
     }
 
     @Bean
