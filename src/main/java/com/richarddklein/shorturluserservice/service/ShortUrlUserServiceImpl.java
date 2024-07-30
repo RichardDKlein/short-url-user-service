@@ -13,6 +13,7 @@ import com.richarddklein.shorturlcommonlibrary.security.util.JwtUtils;
 import com.richarddklein.shorturluserservice.dto.*;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
+import com.richarddklein.shorturluserservice.exception.NoSuchUserException;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Service;
 
@@ -140,7 +141,7 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
             shortUrlUser.setPassword(null);
             return new StatusAndShortUrlUser(ShortUrlUserStatus.SUCCESS, shortUrlUser);
         })
-        .switchIfEmpty(Mono.just(new StatusAndShortUrlUser(
+        .onErrorResume(e -> Mono.just(new StatusAndShortUrlUser(
                 ShortUrlUserStatus.NO_SUCH_USER, null)));
     }
 

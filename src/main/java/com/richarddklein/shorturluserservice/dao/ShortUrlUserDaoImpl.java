@@ -5,6 +5,7 @@
 
 package com.richarddklein.shorturluserservice.dao;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -16,12 +17,14 @@ import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.dto.UsernameOldPasswordAndNewPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
+import com.richarddklein.shorturluserservice.exception.NoSuchUserException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import org.springframework.web.bind.annotation.RequestBody;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.model.CreateTableEnhancedRequest;
@@ -161,7 +164,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                 ShortUrlUserStatus.SUCCESS, users);
         })
         .onErrorResume(e -> {
-            System.out.println(e.getMessage());
+            System.out.println("====> " + e.getMessage());
             return Mono.just(new StatusAndShortUrlUserArray(
                     ShortUrlUserStatus.UNKNOWN_ERROR,
                     Collections.emptyList()));
@@ -203,11 +206,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         String username = usernameAndPassword.getUsername();
         String password = usernameAndPassword.getPassword();
 
-        // We use `Mono.defer()` to ensure that all the operations,
-        // including the database accesses, are retried on each
-        // `Mono.retry()`.
-        return Mono.defer(() -> getShortUrlUser(username))
-        .retry()
+        return getShortUrlUser(username)
         .flatMap(shortUrlUser -> {
             if (!passwordEncoder.matches(password, shortUrlUser.getPassword())) {
                 return Mono.just(new StatusAndRole(
@@ -216,12 +215,20 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
             shortUrlUser.setLastLogin(LocalDateTime.now().format(
                 DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
 
-            return updateShortUrlUser(shortUrlUser).map(updatedShortUrlUser ->
-                    new StatusAndRole(ShortUrlUserStatus.SUCCESS,
-                            updatedShortUrlUser.getRole()));
+            return updateShortUrlUser(shortUrlUser)
+            .map(updatedShortUrlUser -> new StatusAndRole(ShortUrlUserStatus.SUCCESS,
+                    updatedShortUrlUser.getRole()))
+            .onErrorResume(e -> {
+                System.err.println("====> " + e.getMessage());
+                return Mono.just(new StatusAndRole(ShortUrlUserStatus.UNKNOWN_ERROR,
+                        null));
+            });
         })
-        .switchIfEmpty(Mono.just(new StatusAndRole(
-            ShortUrlUserStatus.NO_SUCH_USER, null)));
+        .onErrorResume(e -> {
+            System.out.printf("====> No such user: %s\n", username);
+            return Mono.just(new StatusAndRole(ShortUrlUserStatus.NO_SUCH_USER,
+                    null));
+        });
     }
 
     @Override
@@ -230,7 +237,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         ShortUrlUser key = new ShortUrlUser();
         key.setUsername(username);
         return Mono.fromFuture(shortUrlUserTable.getItem(key))
-        .switchIfEmpty(Mono.empty());
+        .switchIfEmpty(Mono.error(new NoSuchUserException()));
     }
 
     @Override
@@ -242,17 +249,15 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         String oldPassword = usernameOldPasswordAndNewPassword.getOldPassword();
         String newPassword = usernameOldPasswordAndNewPassword.getNewPassword();
 
-        // We use `Mono.defer()` to ensure that all the operations, including
-        // the database accesses, are retried on each `Mono.retry()`.
-        return Mono.defer(() -> getShortUrlUser(username))
-        .retry()
+        return getShortUrlUser(username)
         .flatMap(shortUrlUser -> {
             if (!passwordEncoder.matches(oldPassword, shortUrlUser.getPassword())) {
                 return Mono.just(ShortUrlUserStatus.WRONG_PASSWORD);
             }
             shortUrlUser.setPassword(passwordEncoder.encode(newPassword));
 
-            return updateShortUrlUser(shortUrlUser).flatMap(updatedShortUrlUser -> {
+            return updateShortUrlUser(shortUrlUser)
+            .flatMap(updatedShortUrlUser -> {
                 // If the user is Admin, save his new password in the
                 // AWS Parameter Store.
                 if (updatedShortUrlUser.getRole().equals("ADMIN")) {
@@ -260,21 +265,33 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                     .thenReturn(ShortUrlUserStatus.SUCCESS);
                 }
                 return Mono.just(ShortUrlUserStatus.SUCCESS);
+            })
+            .onErrorResume(e -> {
+                System.err.println("====> " + e.getMessage());
+                return Mono.just(ShortUrlUserStatus.UNKNOWN_ERROR);
             });
         })
-        .switchIfEmpty(Mono.just(ShortUrlUserStatus.NO_SUCH_USER));
+        .onErrorResume(e -> {
+            System.out.printf("====> No such user: %s\n", username);
+            return Mono.just(ShortUrlUserStatus.NO_SUCH_USER);
+        });
     }
 
     @Override
     public Mono<ShortUrlUserStatus>
     deleteUser(String username) {
-        // We use `Mono.defer()` to ensure that all the operations, including
-        // the database accesses, are retried on each `Mono.retry()`.
-        return Mono.defer(() -> getShortUrlUser(username))
-        .retry()
-        .flatMap(shortUrlUser -> deleteShortUrlUser(shortUrlUser)
-            .map(deletedShortUrlUser -> ShortUrlUserStatus.SUCCESS))
-        .switchIfEmpty(Mono.just(ShortUrlUserStatus.NO_SUCH_USER));
+        return getShortUrlUser(username)
+        .flatMap(shortUrlUser ->
+                deleteShortUrlUser(shortUrlUser)
+                .map(deletedShortUrlUser -> ShortUrlUserStatus.SUCCESS)
+                .onErrorResume(e -> {
+                    System.out.println("====> " + e.getMessage());
+                    return Mono.just(ShortUrlUserStatus.UNKNOWN_ERROR);
+                }))
+        .onErrorResume(e -> {
+            System.out.printf("====> " + e.getMessage());
+            return Mono.just(ShortUrlUserStatus.NO_SUCH_USER);
+        });
     }
 
     @Override
@@ -285,7 +302,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         .collectList()
         .map(deletedUsers -> ShortUrlUserStatus.SUCCESS)
         .onErrorResume(e -> {
-            System.out.println(e.getMessage());
+            System.out.println("====> " + e.getMessage());
             return Mono.just(ShortUrlUserStatus.UNKNOWN_ERROR);
         });
     }
@@ -311,7 +328,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
      * Delete the Short URL User table from DynamoDB.
      */
     private void deleteShortUrlUserTable() {
-        System.out.print("Deleting the Short URL User table ...");
+        System.out.print("====> Deleting the Short URL User table ...");
         shortUrlUserTable.deleteTable();
         DynamoDbWaiter waiter = DynamoDbWaiter.builder().client(dynamoDbClient).build();
         waiter.waitUntilTableNotExists(builder -> builder
@@ -326,7 +343,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
      * Create the Short URL User table in DynamoDB.
      */
     private void createShortUrlUserTable() {
-        System.out.print("Creating the Short URL User table ...");
+        System.out.print("====> Creating the Short URL User table ...");
         CreateTableEnhancedRequest createTableRequest =
                 CreateTableEnhancedRequest.builder().build();
         shortUrlUserTable.createTable(createTableRequest);
@@ -342,7 +359,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
      * Add the Admin to the Short URL User table in DynamoDB.
      */
     private void addAdminToShortUrlUserTable() {
-        System.out.print("Adding the Admin to the Short URL User table ...");
+        System.out.print("====> Adding the Admin to the Short URL User table ...");
         ShortUrlUser admin = new ShortUrlUser(
                 // synchronous logic ok here
                 parameterStoreReader.getAdminUsername().block(),
@@ -363,22 +380,27 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
             // Version check failed. Someone updated the ShortUrlUser item
             // in the database after we read the item, so the item we just
             // tried to update contains stale data.
-            System.out.println(e.getMessage());
-            return Mono.empty();
+            System.out.println("====> Version check failed: " + e.getMessage());
+            return Mono.error(e);
         })
         .onErrorResume(e -> {
             // Some other exception occurred.
-            System.out.println(e.getMessage());
-            return Mono.empty();
-        });
+            System.out.println("====> Unexpected exception: " + e.getMessage());
+            return Mono.error(e);
+        })
+        .retryWhen(Retry.backoff(5, Duration.ofSeconds(1))
+                .filter(throwable ->
+                        throwable instanceof ConditionalCheckFailedException)
+        );
+
     }
 
     private Mono<ShortUrlUser>
     deleteShortUrlUser(ShortUrlUser shortUrlUser) {
         return Mono.fromFuture(shortUrlUserTable.deleteItem(shortUrlUser))
         .onErrorResume(e -> {
-            System.out.println(e.getMessage());
-            return Mono.empty();
+            System.out.println("====> Deletion error: " + e.getMessage());
+            return Mono.error(e);
         });
     }
 }
