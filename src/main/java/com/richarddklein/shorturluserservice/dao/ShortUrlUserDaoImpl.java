@@ -299,13 +299,13 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         return Flux.from(shortUrlUserTable.scan().items())
         .filter(user -> !ADMIN_ROLE.equals(user.getRole()))
         .flatMap(this::deleteShortUrlUser)
-        .collectList()
-        .map(deletedUsers -> ShortUrlUserStatus.SUCCESS)
+        .then(Mono.just(ShortUrlUserStatus.SUCCESS))
         .onErrorResume(e -> {
             System.out.println("====> " + e.getMessage());
             return Mono.just(ShortUrlUserStatus.UNKNOWN_ERROR);
         });
     }
+
     // ------------------------------------------------------------------------
     // PRIVATE METHODS
     // ------------------------------------------------------------------------
