@@ -186,15 +186,15 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         );
 
         return Mono.fromFuture(
-                shortUrlUserTable.putItem(req -> req
-                    .item(shortUrlUserCopy)
-                    .conditionExpression(Expression.builder()
-                            .expression("attribute_not_exists(username)")
-                            .build())
-                    .returnConsumedCapacity(ReturnConsumedCapacity.TOTAL)))
-                .then(Mono.just(ShortUrlUserStatus.SUCCESS))
-                .onErrorResume(ConditionalCheckFailedException.class, e ->
-                        Mono.just(ShortUrlUserStatus.USER_ALREADY_EXISTS));
+        shortUrlUserTable.putItem(req -> req
+            .item(shortUrlUserCopy)
+            .conditionExpression(Expression.builder()
+                    .expression("attribute_not_exists(username)")
+                    .build())
+            .returnConsumedCapacity(ReturnConsumedCapacity.TOTAL)))
+        .then(Mono.just(ShortUrlUserStatus.SUCCESS))
+        .onErrorResume(ConditionalCheckFailedException.class, e ->
+                Mono.just(ShortUrlUserStatus.USER_ALREADY_EXISTS));
     }
 
     @Override
@@ -207,21 +207,21 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         // including the database accesses, are retried on each
         // `Mono.retry()`.
         return Mono.defer(() -> getShortUrlUser(username))
-            .retry()
-            .flatMap(shortUrlUser -> {
-                if (!passwordEncoder.matches(password, shortUrlUser.getPassword())) {
-                    return Mono.just(new StatusAndRole(
-                            ShortUrlUserStatus.WRONG_PASSWORD, null));
-                }
-                shortUrlUser.setLastLogin(LocalDateTime.now().format(
-                    DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
+        .retry()
+        .flatMap(shortUrlUser -> {
+            if (!passwordEncoder.matches(password, shortUrlUser.getPassword())) {
+                return Mono.just(new StatusAndRole(
+                        ShortUrlUserStatus.WRONG_PASSWORD, null));
+            }
+            shortUrlUser.setLastLogin(LocalDateTime.now().format(
+                DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
 
-                return updateShortUrlUser(shortUrlUser).map(updatedShortUrlUser ->
-                        new StatusAndRole(ShortUrlUserStatus.SUCCESS,
-                                updatedShortUrlUser.getRole()));
-            })
-            .switchIfEmpty(Mono.just(new StatusAndRole(
-                ShortUrlUserStatus.NO_SUCH_USER, null)));
+            return updateShortUrlUser(shortUrlUser).map(updatedShortUrlUser ->
+                    new StatusAndRole(ShortUrlUserStatus.SUCCESS,
+                            updatedShortUrlUser.getRole()));
+        })
+        .switchIfEmpty(Mono.just(new StatusAndRole(
+            ShortUrlUserStatus.NO_SUCH_USER, null)));
     }
 
     @Override
@@ -230,7 +230,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         ShortUrlUser key = new ShortUrlUser();
         key.setUsername(username);
         return Mono.fromFuture(shortUrlUserTable.getItem(key))
-                .switchIfEmpty(Mono.empty());
+        .switchIfEmpty(Mono.empty());
     }
 
     @Override
@@ -245,24 +245,24 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         // We use `Mono.defer()` to ensure that all the operations, including
         // the database accesses, are retried on each `Mono.retry()`.
         return Mono.defer(() -> getShortUrlUser(username))
-            .retry()
-            .flatMap(shortUrlUser -> {
-                if (!passwordEncoder.matches(oldPassword, shortUrlUser.getPassword())) {
-                    return Mono.just(ShortUrlUserStatus.WRONG_PASSWORD);
-                }
-                shortUrlUser.setPassword(passwordEncoder.encode(newPassword));
+        .retry()
+        .flatMap(shortUrlUser -> {
+            if (!passwordEncoder.matches(oldPassword, shortUrlUser.getPassword())) {
+                return Mono.just(ShortUrlUserStatus.WRONG_PASSWORD);
+            }
+            shortUrlUser.setPassword(passwordEncoder.encode(newPassword));
 
-                return updateShortUrlUser(shortUrlUser).flatMap(updatedShortUrlUser -> {
-                    // If the user is Admin, save his new password in the
-                    // AWS Parameter Store.
-                    if (updatedShortUrlUser.getRole().equals("ADMIN")) {
-                        return parameterStoreReader.setAdminPassword(newPassword)
-                                .thenReturn(ShortUrlUserStatus.SUCCESS);
-                    }
-                    return Mono.just(ShortUrlUserStatus.SUCCESS);
-                });
-            })
-            .switchIfEmpty(Mono.just(ShortUrlUserStatus.NO_SUCH_USER));
+            return updateShortUrlUser(shortUrlUser).flatMap(updatedShortUrlUser -> {
+                // If the user is Admin, save his new password in the
+                // AWS Parameter Store.
+                if (updatedShortUrlUser.getRole().equals("ADMIN")) {
+                    return parameterStoreReader.setAdminPassword(newPassword)
+                    .thenReturn(ShortUrlUserStatus.SUCCESS);
+                }
+                return Mono.just(ShortUrlUserStatus.SUCCESS);
+            });
+        })
+        .switchIfEmpty(Mono.just(ShortUrlUserStatus.NO_SUCH_USER));
     }
 
     @Override
@@ -271,10 +271,10 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         // We use `Mono.defer()` to ensure that all the operations, including
         // the database accesses, are retried on each `Mono.retry()`.
         return Mono.defer(() -> getShortUrlUser(username))
-            .retry()
-            .flatMap(shortUrlUser -> deleteShortUrlUser(shortUrlUser)
-                .map(deletedShortUrlUser -> ShortUrlUserStatus.SUCCESS))
-            .switchIfEmpty(Mono.just(ShortUrlUserStatus.NO_SUCH_USER));
+        .retry()
+        .flatMap(shortUrlUser -> deleteShortUrlUser(shortUrlUser)
+            .map(deletedShortUrlUser -> ShortUrlUserStatus.SUCCESS))
+        .switchIfEmpty(Mono.just(ShortUrlUserStatus.NO_SUCH_USER));
     }
 
     @Override
