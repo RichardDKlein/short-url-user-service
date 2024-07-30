@@ -329,13 +329,16 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
      */
     private void deleteShortUrlUserTable() {
         System.out.print("====> Deleting the Short URL User table ...");
+
         shortUrlUserTable.deleteTable();
+
         DynamoDbWaiter waiter = DynamoDbWaiter.builder().client(dynamoDbClient).build();
         waiter.waitUntilTableNotExists(builder -> builder
                 // synchronous logic ok here
                 .tableName(parameterStoreReader.getShortUrlUserTableName().block())
                 .build());
         waiter.close();
+
         System.out.println(" done!");
     }
 
@@ -344,14 +347,17 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
      */
     private void createShortUrlUserTable() {
         System.out.print("====> Creating the Short URL User table ...");
+
         CreateTableEnhancedRequest createTableRequest =
                 CreateTableEnhancedRequest.builder().build();
         shortUrlUserTable.createTable(createTableRequest);
+
         DynamoDbWaiter waiter = DynamoDbWaiter.builder().client(dynamoDbClient).build();
         waiter.waitUntilTableExists(builder -> builder
                 // synchronous logic ok here
                 .tableName(parameterStoreReader.getShortUrlUserTableName().block()).build());
         waiter.close();
+
         System.out.println(" done!");
     }
 
@@ -360,6 +366,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
      */
     private void addAdminToShortUrlUserTable() {
         System.out.print("====> Adding the Admin to the Short URL User table ...");
+
         ShortUrlUser admin = new ShortUrlUser(
                 // synchronous logic ok here
                 parameterStoreReader.getAdminUsername().block(),
@@ -370,6 +377,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                 passwordEncoder
         );
         Mono.fromFuture(shortUrlUserTable.putItem(admin)).block();
+
         System.out.println(" done!");
     }
 
@@ -392,7 +400,6 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                 .filter(throwable ->
                         throwable instanceof ConditionalCheckFailedException)
         );
-
     }
 
     private Mono<ShortUrlUser>
