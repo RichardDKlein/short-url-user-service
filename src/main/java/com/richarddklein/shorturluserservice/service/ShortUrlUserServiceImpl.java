@@ -7,7 +7,7 @@ package com.richarddklein.shorturluserservice.service;
 
 import java.util.Objects;
 
-import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
+import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreAccessor;
 import com.richarddklein.shorturlcommonlibrary.security.dto.UsernameAndRole;
 import com.richarddklein.shorturlcommonlibrary.security.util.JwtUtils;
 import com.richarddklein.shorturluserservice.dto.*;
@@ -26,7 +26,7 @@ import reactor.core.publisher.Mono;
 @Service
 public class ShortUrlUserServiceImpl implements ShortUrlUserService {
     private final ShortUrlUserDao shortUrlUserDao;
-    private final ParameterStoreReader parameterStoreReader;
+    private final ParameterStoreAccessor parameterStoreAccessor;
     private final JwtUtils jwtUtils;
 
     // ------------------------------------------------------------------------
@@ -44,11 +44,11 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
      */
     public ShortUrlUserServiceImpl(
             ShortUrlUserDao shortUrlUserDao,
-            ParameterStoreReader parameterStoreReader,
+            ParameterStoreAccessor parameterStoreAccessor,
             JwtUtils jwtUtils) {
 
         this.shortUrlUserDao = shortUrlUserDao;
-        this.parameterStoreReader = parameterStoreReader;
+        this.parameterStoreAccessor = parameterStoreAccessor;
         this.jwtUtils = jwtUtils;
     }
 
@@ -71,7 +71,7 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
 
     @Override
     public Mono<StatusAndJwtToken> getAdminJwtToken() {
-        return parameterStoreReader.getAdminUsername()
+        return parameterStoreAccessor.getAdminUsername()
                 .flatMap(adminUsername -> jwtUtils.generateToken(
                         new UsernameAndRole(adminUsername, "ADMIN"))
                         .map(jwtToken -> new StatusAndJwtToken(

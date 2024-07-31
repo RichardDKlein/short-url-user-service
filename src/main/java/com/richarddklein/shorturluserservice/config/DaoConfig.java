@@ -5,7 +5,7 @@
 
 package com.richarddklein.shorturluserservice.config;
 
-import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
+import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreAccessor;
 import com.richarddklein.shorturlcommonlibrary.config.AwsConfig;
 import com.richarddklein.shorturlcommonlibrary.config.SecurityConfig;
 import com.richarddklein.shorturluserservice.dao.ShortUrlUserDao;
@@ -33,7 +33,7 @@ import com.richarddklein.shorturluserservice.dao.ShortUrlUserDaoImpl;
 @Import({AwsConfig.class, SecurityConfig.class})
 public class DaoConfig {
     @Autowired
-    ParameterStoreReader parameterStoreReader;
+    ParameterStoreAccessor parameterStoreAccessor;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -42,7 +42,7 @@ public class DaoConfig {
     public ShortUrlUserDao
     shortUrlUserDao() {
         return new ShortUrlUserDaoImpl(
-                parameterStoreReader,
+                parameterStoreAccessor,
                 passwordEncoder,
                 dynamoDbClient(),
                 shortUrlUserTable()
@@ -75,7 +75,7 @@ public class DaoConfig {
     public DynamoDbAsyncTable<ShortUrlUser>
     shortUrlUserTable() {
         return dynamoDbEnhancedAsyncClient().table(
-                parameterStoreReader.getShortUrlUserTableName().block(),
+                parameterStoreAccessor.getShortUrlUserTableName().block(),
                 TableSchema.fromBean(ShortUrlUser.class));
     }
 }

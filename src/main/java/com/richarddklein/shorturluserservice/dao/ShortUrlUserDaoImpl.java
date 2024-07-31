@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 
-import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreReader;
+import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreAccessor;
 import com.richarddklein.shorturluserservice.dto.StatusAndRole;
 import com.richarddklein.shorturluserservice.dto.StatusAndShortUrlUserArray;
 import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
@@ -106,7 +106,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     private static final String ADMIN_EMAIL = "RichardDKlein@gmail.com";
     private static final String USER_ROLE = "USER";
 
-    private final ParameterStoreReader parameterStoreReader;
+    private final ParameterStoreAccessor parameterStoreAccessor;
     private final PasswordEncoder passwordEncoder;
     private final DynamoDbClient dynamoDbClient;
     private final DynamoDbAsyncTable<ShortUrlUser> shortUrlUserTable;
@@ -118,10 +118,11 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     /**
      * General constructor.
      *
-     * @param parameterStoreReader Dependency injection of a class instance that
-     *                             is to play the role of reading parameters from
-     *                             the Parameter Store component of the AWS Simple
-     *                             System Manager (SSM).
+     * @param parameterStoreAcccessor Dependency injection of a class instance that
+     *                                is to play the role of getting and setting
+     *                                parameters residing in the Parameter Store
+     *                                component of the AWS Simple System Manager
+     *                                (SSM).
      * @param passwordEncoder Dependency injection of a class instance that is
      *                        able to encode (encrypt) passwords.
      * @param dynamoDbClient Dependency injection of a class instance that is to
@@ -130,12 +131,12 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
      *                          to model the Short URL User table in DynamoDB.
      */
     public ShortUrlUserDaoImpl(
-            ParameterStoreReader parameterStoreReader,
+            ParameterStoreAccessor parameterStoreAccessor,
             PasswordEncoder passwordEncoder,
             DynamoDbClient dynamoDbClient,
             DynamoDbAsyncTable<ShortUrlUser> shortUrlUserTable) {
 
-        this.parameterStoreReader = parameterStoreReader;
+        this.parameterStoreAccessor = parameterStoreAccessor;
         this.passwordEncoder = passwordEncoder;
         this.dynamoDbClient = dynamoDbClient;
         this.shortUrlUserTable = shortUrlUserTable;
@@ -261,7 +262,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                 // If the user is Admin, save his new password in the
                 // AWS Parameter Store.
                 if (updatedShortUrlUser.getRole().equals("ADMIN")) {
-                    return parameterStoreReader.setAdminPassword(newPassword)
+                    return parameterStoreAccessor.setAdminPassword(newPassword)
                     .thenReturn(ShortUrlUserStatus.SUCCESS);
                 }
                 return Mono.just(ShortUrlUserStatus.SUCCESS);
@@ -335,7 +336,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         DynamoDbWaiter waiter = DynamoDbWaiter.builder().client(dynamoDbClient).build();
         waiter.waitUntilTableNotExists(builder -> builder
                 // synchronous logic ok here
-                .tableName(parameterStoreReader.getShortUrlUserTableName().block())
+                .tableName(parameterStoreAccessor.getShortUrlUserTableName().block())
                 .build());
         waiter.close();
 
@@ -355,7 +356,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         DynamoDbWaiter waiter = DynamoDbWaiter.builder().client(dynamoDbClient).build();
         waiter.waitUntilTableExists(builder -> builder
                 // synchronous logic ok here
-                .tableName(parameterStoreReader.getShortUrlUserTableName().block()).build());
+                .tableName(parameterStoreAccessor.getShortUrlUserTableName().block()).build());
         waiter.close();
 
         System.out.println(" done!");
@@ -369,8 +370,8 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
 
         ShortUrlUser admin = new ShortUrlUser(
                 // synchronous logic ok here
-                parameterStoreReader.getAdminUsername().block(),
-                parameterStoreReader.getAdminPassword().block(),
+                parameterStoreAccessor.getAdminUsername().block(),
+                parameterStoreAccessor.getAdminPassword().block(),
                 ADMIN_ROLE,
                 ADMIN_NAME,
                 ADMIN_EMAIL,

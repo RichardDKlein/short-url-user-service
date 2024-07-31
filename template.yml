@@ -30,8 +30,8 @@ Resources:
       # Gateway. Thus, an endpoint URL can have one of three possible values:
       #
       # API Gateway:   <aws-api-ID>.execute-api.us-east-2.amazonaws.com/Prod/shorturl/users/<endpoint>
-      # localhost:     localhost:6000/shorturl/users/<endpoint>
-      # Custom Domain: api.richarddklein.com/shorturl/users/<endpoint>
+      # localhost:     localhost:6000/short-url/users/<endpoint>
+      # Custom Domain: api.richarddklein.com/short-url/users/<endpoint>
       #
       # When the service is running on your local machine, via the command
       # `sam local start-api`, use the above `localhost` URL.
@@ -46,27 +46,27 @@ Resources:
         InitializeShortUrlUserTableViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /shorturl/users/dbinit
+            Path: /short-url/users/db-init
             Method: POST
         InitializeShortUrlUserTableViaCustomDomain:
           Type: Api
           Properties:
-            Path: /dbinit
+            Path: /db-init
             Method: POST
         GetAdminJwtTokenViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /shorturl/users/adminjwt
+            Path: /short-url/users/admin-jwt
             Method: GET
         GetAdminJwtTokenViaCustomDomain:
           Type: Api
           Properties:
-            Path: /adminjwt
+            Path: /admin-jwt
             Method: GET
         GetAllUsersViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /shorturl/users/all
+            Path: /short-url/users/all
             Method: GET
         GetAllUsersViaCustomDomain:
           Type: Api
@@ -76,7 +76,7 @@ Resources:
         SignupViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /shorturl/users/signup
+            Path: /short-url/users/signup
             Method: POST
         SignupViaCustomDomain:
           Type: Api
@@ -86,7 +86,7 @@ Resources:
         LoginViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /shorturl/users/login
+            Path: /short-url/users/login
             Method: POST
         LoginViaCustomDomain:
           Type: Api
@@ -96,7 +96,7 @@ Resources:
         GetUserDetailsViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /shorturl/users/details
+            Path: /short-url/users/details
             Method: GET
         GetUserDetailsViaCustomDomain:
           Type: Api
@@ -106,17 +106,17 @@ Resources:
         ChangePasswordViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /shorturl/users/changepassword
+            Path: /short-url/users/change-password
             Method: PATCH
         ChangePasswordViaCustomDomain:
           Type: Api
           Properties:
-            Path: /changepassword
+            Path: /change-password
             Method: PATCH
         DeleteUserViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /shorturl/users/specific
+            Path: /short-url/users/specific
             Method: DELETE
         DeleteUserViaCustomDomain:
           Type: Api
@@ -126,7 +126,7 @@ Resources:
         DeleteAllUsersViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /shorturl/users/all
+            Path: /short-url/users/all
             Method: DELETE
         DeleteAllUsersViaCustomDomain:
           Type: Api

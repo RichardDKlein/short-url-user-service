@@ -30,7 +30,7 @@ import static com.richarddklein.shorturluserservice.controller.response.ShortUrl
  * interface.
  */
 @RestController
-@RequestMapping({"/shorturl/users", "/"})
+@RequestMapping({"/short-url/users", "/"})
 public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     private final ShortUrlUserService shortUrlUserService;
 

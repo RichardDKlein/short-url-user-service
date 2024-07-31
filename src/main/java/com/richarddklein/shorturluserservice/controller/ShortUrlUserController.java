@@ -45,11 +45,11 @@ public interface ShortUrlUserController {
      * @return An HTTP Response Entity containing the status (success
      * or failure) of the database initialization operation.
      */
-    @PostMapping("/dbinit")
+    @PostMapping("/db-init")
     ResponseEntity<StatusResponse>
     initializeShortUrlUserRepository(ServerHttpRequest request);
 
-    @GetMapping("/adminjwt")
+    @GetMapping("/admin-jwt")
     Mono<ResponseEntity<StatusAndJwtTokenResponse>>
     getAdminJwtToken();
 
@@ -69,7 +69,7 @@ public interface ShortUrlUserController {
     Mono<ResponseEntity<StatusAndShortUrlUserResponse>>
     getUserDetails(@RequestBody Username username);
 
-    @PatchMapping("/changepassword")
+    @PatchMapping("/change-password")
     Mono<ResponseEntity<StatusResponse>>
     changePassword(@RequestBody UsernameOldPasswordAndNewPassword
                                 usernameOldPasswordAndNewPassword);
