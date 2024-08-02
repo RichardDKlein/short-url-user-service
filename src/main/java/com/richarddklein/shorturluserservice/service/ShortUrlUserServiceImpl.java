@@ -13,7 +13,6 @@ import com.richarddklein.shorturlcommonlibrary.security.util.JwtUtils;
 import com.richarddklein.shorturluserservice.dto.*;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
-import com.richarddklein.shorturluserservice.exception.NoSuchUserException;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Service;
 
@@ -79,6 +78,18 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
     }
 
     @Override
+    public Mono<StatusAndShortUrlUser>
+    getSpecificUser(String username) {
+        return shortUrlUserDao.getSpecificUser(username)
+                .map(shortUrlUser -> {
+                    shortUrlUser.setPassword(null);
+                    return new StatusAndShortUrlUser(ShortUrlUserStatus.SUCCESS, shortUrlUser);
+                })
+                .onErrorResume(e -> Mono.just(new StatusAndShortUrlUser(
+                        ShortUrlUserStatus.NO_SUCH_USER, null)));
+    }
+
+    @Override
     public Mono<StatusAndShortUrlUserArray>
     getAllUsers() {
         return shortUrlUserDao.getAllUsers();
@@ -130,22 +141,6 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
     }
 
     @Override
-    public Mono<StatusAndShortUrlUser>
-    getUserDetails(String username) {
-        if (username == null || username.isBlank()) {
-            return Mono.just(new StatusAndShortUrlUser(
-                    ShortUrlUserStatus.MISSING_USERNAME, null));
-        }
-        return shortUrlUserDao.getShortUrlUser(username)
-        .map(shortUrlUser -> {
-            shortUrlUser.setPassword(null);
-            return new StatusAndShortUrlUser(ShortUrlUserStatus.SUCCESS, shortUrlUser);
-        })
-        .onErrorResume(e -> Mono.just(new StatusAndShortUrlUser(
-                ShortUrlUserStatus.NO_SUCH_USER, null)));
-    }
-
-    @Override
     public Mono<ShortUrlUserStatus>
     changePassword(UsernameOldPasswordAndNewPassword
                    usernameOldPasswordAndNewPassword) {
@@ -170,12 +165,8 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
 
     @Override
     public Mono<ShortUrlUserStatus>
-    deleteUser(Username username) {
-        String theUsername = username.getUsername();
-        if (theUsername == null || theUsername.isBlank()) {
-            return Mono.just(ShortUrlUserStatus.MISSING_USERNAME);
-        }
-        return shortUrlUserDao.deleteUser(theUsername);
+    deleteSpecificUser(String username) {
+        return shortUrlUserDao.deleteSpecificUser(username);
     }
 
     @Override

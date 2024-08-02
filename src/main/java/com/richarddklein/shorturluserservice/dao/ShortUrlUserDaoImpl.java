@@ -156,6 +156,15 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     }
 
     @Override
+    public Mono<ShortUrlUser>
+    getSpecificUser(String username) {
+        ShortUrlUser key = new ShortUrlUser();
+        key.setUsername(username);
+        return Mono.fromFuture(shortUrlUserTable.getItem(key))
+                .switchIfEmpty(Mono.error(new NoSuchUserException()));
+    }
+
+    @Override
     public Mono<StatusAndShortUrlUserArray> getAllUsers() {
         return Flux.from(shortUrlUserTable.scan().items())
         .collectList()
@@ -207,7 +216,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         String username = usernameAndPassword.getUsername();
         String password = usernameAndPassword.getPassword();
 
-        return getShortUrlUser(username)
+        return getSpecificUser(username)
         .flatMap(shortUrlUser -> {
             if (!passwordEncoder.matches(password, shortUrlUser.getPassword())) {
                 return Mono.just(new StatusAndRole(
@@ -233,15 +242,6 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     }
 
     @Override
-    public Mono<ShortUrlUser>
-    getShortUrlUser(String username) {
-        ShortUrlUser key = new ShortUrlUser();
-        key.setUsername(username);
-        return Mono.fromFuture(shortUrlUserTable.getItem(key))
-        .switchIfEmpty(Mono.error(new NoSuchUserException()));
-    }
-
-    @Override
     public Mono<ShortUrlUserStatus>
     changePassword(UsernameOldPasswordAndNewPassword
             usernameOldPasswordAndNewPassword) {
@@ -250,7 +250,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         String oldPassword = usernameOldPasswordAndNewPassword.getOldPassword();
         String newPassword = usernameOldPasswordAndNewPassword.getNewPassword();
 
-        return getShortUrlUser(username)
+        return getSpecificUser(username)
         .flatMap(shortUrlUser -> {
             if (!passwordEncoder.matches(oldPassword, shortUrlUser.getPassword())) {
                 return Mono.just(ShortUrlUserStatus.WRONG_PASSWORD);
@@ -280,8 +280,8 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
 
     @Override
     public Mono<ShortUrlUserStatus>
-    deleteUser(String username) {
-        return getShortUrlUser(username)
+    deleteSpecificUser(String username) {
+        return getSpecificUser(username)
         .flatMap(shortUrlUser ->
                 deleteShortUrlUser(shortUrlUser)
                 .map(deletedShortUrlUser -> ShortUrlUserStatus.SUCCESS)

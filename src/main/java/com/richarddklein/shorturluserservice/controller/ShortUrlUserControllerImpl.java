@@ -5,12 +5,10 @@
 
 package com.richarddklein.shorturluserservice.controller;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
 
 import com.richarddklein.shorturluserservice.controller.response.*;
-import com.richarddklein.shorturluserservice.dto.Username;
 import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.dto.UsernameOldPasswordAndNewPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
@@ -22,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 import reactor.core.publisher.Mono;
 
-import static com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus.MISSING_USERNAME;
 import static com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus.SUCCESS;
 
 /**
@@ -88,6 +85,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     getAdminJwtToken() {
         return shortUrlUserService.getAdminJwtToken()
         .map(statusAndJwtToken -> {
+
             ShortUrlUserStatus shortUrlUserStatus =
                     statusAndJwtToken.getStatus();
             String jwtToken = statusAndJwtToken.getJwtToken();
@@ -111,10 +109,47 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     }
 
     @Override
+    public Mono<ResponseEntity<StatusAndShortUrlUserResponse>>
+    getSpecificUser(@PathVariable String username) {
+        return shortUrlUserService.getSpecificUser(username)
+        .map(statusAndShortUrlUser -> {
+
+            ShortUrlUserStatus shortUrlUserStatus =
+                    statusAndShortUrlUser.getStatus();
+            ShortUrlUser shortUrlUser =
+                    statusAndShortUrlUser.getShortUrlUser();
+
+            HttpStatus httpStatus;
+            String message;
+
+            switch (shortUrlUserStatus) {
+                case SUCCESS:
+                    httpStatus = HttpStatus.OK;
+                    message = "User successfully retrieved";
+                    break;
+                case NO_SUCH_USER:
+                    httpStatus = HttpStatus.NOT_FOUND;
+                    message = String.format("User '%s' does not exist",
+                            username);
+                    break;
+                default:
+                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                    message = "An unknown error occurred";
+                    break;
+            }
+
+            return new ResponseEntity<>(new StatusAndShortUrlUserResponse(
+                    new StatusResponse(shortUrlUserStatus, message),
+                    shortUrlUser), httpStatus);
+        });
+    }
+
+    @Override
     public Mono<ResponseEntity<StatusAndShortUrlUserArrayResponse>>
     getAllUsers() {
         return shortUrlUserService.getAllUsers()
         .map(statusAndShortUrlUserArray -> {
+
             ShortUrlUserStatus shortUrlUserStatus = statusAndShortUrlUserArray.getStatus();
             List<ShortUrlUser> users = statusAndShortUrlUserArray.getShortUrlUsers();
 
@@ -140,6 +175,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     signup(ShortUrlUser shortUrlUser) {
         return shortUrlUserService.signup(shortUrlUser)
         .map(shortUrlUserStatus -> {
+
             HttpStatus httpStatus;
             String message;
 
@@ -184,6 +220,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     login(UsernameAndPassword usernameAndPassword) {
         return shortUrlUserService.login(usernameAndPassword)
         .map(statusAndJwtToken -> {
+
             ShortUrlUserStatus shortUrlUserStatus =
                     statusAndJwtToken.getStatus();
             String jwtToken = statusAndJwtToken.getJwtToken();
@@ -235,46 +272,6 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     }
 
     @Override
-    public Mono<ResponseEntity<StatusAndShortUrlUserResponse>>
-    getUserDetails(Username username) {
-        return shortUrlUserService.getUserDetails(username.getUsername())
-        .map(statusAndShortUrlUser -> {
-            ShortUrlUserStatus shortUrlUserStatus =
-                    statusAndShortUrlUser.getStatus();
-            ShortUrlUser shortUrlUser =
-                    statusAndShortUrlUser.getShortUrlUser();
-
-            HttpStatus httpStatus;
-            String message;
-
-            switch (shortUrlUserStatus) {
-                case SUCCESS:
-                    httpStatus = HttpStatus.OK;
-                    message = "User details successfully retrieved";
-                    break;
-                case MISSING_USERNAME:
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                    message = "A non-empty username must be specified";
-                    break;
-                case NO_SUCH_USER:
-                    httpStatus = HttpStatus.NOT_FOUND;
-                    message = String.format(
-                            "User '%s' does not exist",
-                            username.getUsername());
-                    break;
-                default:
-                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                    message = "An unknown error occurred";
-                    break;
-            }
-
-            return new ResponseEntity<>(new StatusAndShortUrlUserResponse(
-                    new StatusResponse(shortUrlUserStatus, message),
-                    shortUrlUser), httpStatus);
-        });
-    }
-
-    @Override
     public Mono<ResponseEntity<StatusResponse>>
     changePassword(UsernameOldPasswordAndNewPassword
                    usernameOldPasswordAndNewPassword) {
@@ -283,6 +280,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                 usernameOldPasswordAndNewPassword)
 
         .map(shortUrlUserStatus -> {
+
             String username =
                     usernameOldPasswordAndNewPassword.getUsername();
 
@@ -337,10 +335,9 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
 
     @Override
     public Mono<ResponseEntity<StatusResponse>>
-    deleteUser(Username username) {
-        return shortUrlUserService.deleteUser(username)
+    deleteSpecificUser(@PathVariable String username) {
+        return shortUrlUserService.deleteSpecificUser(username)
         .map(shortUrlUserStatus -> {
-            String theUsername = username.getUsername();
 
             HttpStatus httpStatus;
             String message;
@@ -350,19 +347,14 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                     httpStatus = HttpStatus.OK;
                     message = String.format(
                             "User '%s' successfully deleted",
-                            username.getUsername());
-                    break;
-
-                case MISSING_USERNAME:
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                    message = "A non-empty username must be specified";
+                            username);
                     break;
 
                 case NO_SUCH_USER:
                     httpStatus = HttpStatus.NOT_FOUND;
                     message = String.format(
                             "User '%s' does not exist",
-                            username.getUsername());
+                            username);
                     break;
 
                 default:

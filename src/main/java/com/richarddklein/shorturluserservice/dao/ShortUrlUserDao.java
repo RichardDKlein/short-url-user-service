@@ -29,6 +29,9 @@ public interface ShortUrlUserDao {
      */
     void initializeShortUrlUserRepository();
 
+    Mono<ShortUrlUser>
+    getSpecificUser(String username);
+
     Mono<StatusAndShortUrlUserArray>
     getAllUsers();
 
@@ -38,16 +41,13 @@ public interface ShortUrlUserDao {
     Mono<StatusAndRole>
     login(UsernameAndPassword usernameAndPassword);
 
-    Mono<ShortUrlUser>
-    getShortUrlUser(String username);
-
     Mono<ShortUrlUserStatus>
     changePassword(
             UsernameOldPasswordAndNewPassword
             usernameOldPasswordAndNewPassword);
 
     Mono<ShortUrlUserStatus>
-    deleteUser(String username);
+    deleteSpecificUser(String username);
 
     Mono<ShortUrlUserStatus>
     deleteAllUsers();

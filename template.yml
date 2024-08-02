@@ -43,15 +43,15 @@ Resources:
       # For a description of the functionality provided by the REST endpoints,
       # see the comments in the `ShortUrlUserController` interface.
       Events:
-        InitializeShortUrlUserTableViaApiGatewayOrLocalHost:
+        InitializeShortUrlUserRepositoryViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /short-url/users/db-init
+            Path: /short-url/users/initialize-repository
             Method: POST
-        InitializeShortUrlUserTableViaCustomDomain:
+        InitializeShortUrlUserRepositoryViaCustomDomain:
           Type: Api
           Properties:
-            Path: /db-init
+            Path: /initialize-repository
             Method: POST
         GetAdminJwtTokenViaApiGatewayOrLocalHost:
           Type: Api
@@ -62,6 +62,16 @@ Resources:
           Type: Api
           Properties:
             Path: /admin-jwt
+            Method: GET
+        GetSpecificUserViaApiGatewayOrLocalHost:
+          Type: Api
+          Properties:
+            Path: /short-url/users/specific/{proxy+}
+            Method: GET
+        GetSpecificUserViaCustomDomain:
+          Type: Api
+          Properties:
+            Path: /specific/{proxy+}
             Method: GET
         GetAllUsersViaApiGatewayOrLocalHost:
           Type: Api
@@ -93,16 +103,6 @@ Resources:
           Properties:
             Path: /login
             Method: POST
-        GetUserDetailsViaApiGatewayOrLocalHost:
-          Type: Api
-          Properties:
-            Path: /short-url/users/details
-            Method: GET
-        GetUserDetailsViaCustomDomain:
-          Type: Api
-          Properties:
-            Path: /details
-            Method: GET
         ChangePasswordViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
@@ -113,15 +113,15 @@ Resources:
           Properties:
             Path: /change-password
             Method: PATCH
-        DeleteUserViaApiGatewayOrLocalHost:
+        DeleteSpecificUserViaApiGatewayOrLocalHost:
           Type: Api
           Properties:
-            Path: /short-url/users/specific
+            Path: /short-url/users/specific/{proxy+}
             Method: DELETE
-        DeleteUserViaCustomDomain:
+        DeleteSpecificUserViaCustomDomain:
           Type: Api
           Properties:
-            Path: /specific
+            Path: /specific/{proxy+}
             Method: DELETE
         DeleteAllUsersViaApiGatewayOrLocalHost:
           Type: Api

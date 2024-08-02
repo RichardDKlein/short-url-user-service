@@ -5,10 +5,7 @@
 
 package com.richarddklein.shorturluserservice.controller;
 
-import java.security.Principal;
-
 import com.richarddklein.shorturluserservice.controller.response.StatusAndShortUrlUserArrayResponse;
-import com.richarddklein.shorturluserservice.dto.Username;
 import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.dto.UsernameOldPasswordAndNewPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
@@ -45,13 +42,17 @@ public interface ShortUrlUserController {
      * @return An HTTP Response Entity containing the status (success
      * or failure) of the database initialization operation.
      */
-    @PostMapping("/db-init")
+    @PostMapping("/initialize-repository")
     ResponseEntity<StatusResponse>
     initializeShortUrlUserRepository(ServerHttpRequest request);
 
     @GetMapping("/admin-jwt")
     Mono<ResponseEntity<StatusAndJwtTokenResponse>>
     getAdminJwtToken();
+
+    @GetMapping("/specific/{username}")
+    Mono<ResponseEntity<StatusAndShortUrlUserResponse>>
+    getSpecificUser(@PathVariable String username);
 
     @GetMapping("/all")
     Mono<ResponseEntity<StatusAndShortUrlUserArrayResponse>>
@@ -65,18 +66,14 @@ public interface ShortUrlUserController {
     Mono<ResponseEntity<StatusAndJwtTokenResponse>>
     login(@RequestBody UsernameAndPassword usernameAndPasswordDto);
 
-    @GetMapping("/details")
-    Mono<ResponseEntity<StatusAndShortUrlUserResponse>>
-    getUserDetails(@RequestBody Username username);
-
     @PatchMapping("/change-password")
     Mono<ResponseEntity<StatusResponse>>
     changePassword(@RequestBody UsernameOldPasswordAndNewPassword
                                 usernameOldPasswordAndNewPassword);
 
-    @DeleteMapping("/specific")
+    @DeleteMapping("/specific/{username}")
     Mono<ResponseEntity<StatusResponse>>
-    deleteUser(@RequestBody Username username);
+    deleteSpecificUser(@PathVariable String username);
 
     @DeleteMapping("/all")
     Mono<ResponseEntity<StatusResponse>>

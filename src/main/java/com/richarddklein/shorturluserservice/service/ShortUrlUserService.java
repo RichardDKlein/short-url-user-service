@@ -5,8 +5,6 @@
 
 package com.richarddklein.shorturluserservice.service;
 
-import java.security.Principal;
-
 import com.richarddklein.shorturluserservice.dto.*;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
@@ -32,6 +30,9 @@ public interface ShortUrlUserService {
     Mono<StatusAndJwtToken>
     getAdminJwtToken();
 
+    Mono<StatusAndShortUrlUser>
+    getSpecificUser(String username);
+
     Mono<StatusAndShortUrlUserArray>
     getAllUsers();
 
@@ -41,15 +42,12 @@ public interface ShortUrlUserService {
     Mono<StatusAndJwtToken>
     login(UsernameAndPassword usernameAndPassword);
 
-    Mono<StatusAndShortUrlUser>
-    getUserDetails(String username);
-
     Mono<ShortUrlUserStatus>
     changePassword(UsernameOldPasswordAndNewPassword
                    usernameOldPasswordAndNewPassword);
 
     Mono<ShortUrlUserStatus>
-    deleteUser(Username username);
+    deleteSpecificUser(String username);
 
     Mono<ShortUrlUserStatus>
     deleteAllUsers();
