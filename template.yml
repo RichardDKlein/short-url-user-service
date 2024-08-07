@@ -29,7 +29,7 @@ Resources:
       # where the URL specifies the custom domain that redirects to the API
       # Gateway. Thus, an endpoint URL can have one of three possible values:
       #
-      # API Gateway:   <aws-api-ID>.execute-api.us-east-2.amazonaws.com/Prod/shorturl/users/<endpoint>
+      # API Gateway:   <aws-api-ID>.execute-api.us-east-2.amazonaws.com/Prod/short-url/users/<endpoint>
       # localhost:     localhost:6000/short-url/users/<endpoint>
       # Custom Domain: api.richarddklein.com/short-url/users/<endpoint>
       #
