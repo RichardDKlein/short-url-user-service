@@ -227,18 +227,19 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                 DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
 
             return updateShortUrlUser(shortUrlUser)
-            .map(updatedShortUrlUser -> new StatusAndRole(ShortUrlUserStatus.SUCCESS,
-                    updatedShortUrlUser.getRole()))
-            .onErrorResume(e -> {
-                System.err.println("====> " + e.getMessage());
-                return Mono.just(new StatusAndRole(ShortUrlUserStatus.UNKNOWN_ERROR,
-                        null));
-            });
+            .map(updatedShortUrlUser -> new StatusAndRole(
+                    ShortUrlUserStatus.SUCCESS, updatedShortUrlUser.getRole()));
         })
+        .retryWhen(Retry.backoff(5, Duration.ofSeconds(1))
+                .filter(e -> e instanceof ConditionalCheckFailedException)
+                .doAfterRetry(retrySignal -> System.out.println(
+                        "====> Retrying after error: " + retrySignal.failure().getMessage()))
+        )
         .onErrorResume(e -> {
-            System.out.printf("====> No such user: %s\n", username);
-            return Mono.just(new StatusAndRole(ShortUrlUserStatus.NO_SUCH_USER,
-                    null));
+            System.out.println("====> login() failed: " + e.getMessage());
+            return (e instanceof NoSuchUserException)
+                ? Mono.just(new StatusAndRole(ShortUrlUserStatus.NO_SUCH_USER, null))
+                : Mono.just(new StatusAndRole(ShortUrlUserStatus.UNKNOWN_ERROR, null));
         });
     }
 
@@ -267,15 +268,18 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                     .thenReturn(ShortUrlUserStatus.SUCCESS);
                 }
                 return Mono.just(ShortUrlUserStatus.SUCCESS);
-            })
-            .onErrorResume(e -> {
-                System.err.println("====> " + e.getMessage());
-                return Mono.just(ShortUrlUserStatus.UNKNOWN_ERROR);
             });
         })
+        .retryWhen(Retry.backoff(5, Duration.ofSeconds(1))
+            .filter(e -> e instanceof ConditionalCheckFailedException)
+            .doAfterRetry(retrySignal -> System.out.println(
+                    "====> Retrying after error: " + retrySignal.failure().getMessage()))
+        )
         .onErrorResume(e -> {
-            System.out.printf("====> No such user: %s\n", username);
-            return Mono.just(ShortUrlUserStatus.NO_SUCH_USER);
+            System.out.println("====> changePassword() failed: " + e.getMessage());
+            return (e instanceof NoSuchUserException)
+                ? Mono.just(ShortUrlUserStatus.NO_SUCH_USER)
+                : Mono.just(ShortUrlUserStatus.UNKNOWN_ERROR);
         });
     }
 
@@ -284,16 +288,14 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     deleteSpecificUser(String username) {
         return getSpecificUser(username)
         .flatMap(shortUrlUser ->
-                deleteShortUrlUser(shortUrlUser)
-                .map(deletedShortUrlUser -> ShortUrlUserStatus.SUCCESS)
-                .onErrorResume(e -> {
-                    System.out.println("====> " + e.getMessage());
-                    return Mono.just(ShortUrlUserStatus.UNKNOWN_ERROR);
-                }))
-        .onErrorResume(e -> {
-            System.out.printf("====> " + e.getMessage());
-            return Mono.just(ShortUrlUserStatus.NO_SUCH_USER);
-        });
+            deleteShortUrlUser(shortUrlUser)
+            .map(deletedShortUrlUser -> ShortUrlUserStatus.SUCCESS))
+            .onErrorResume(e -> {
+                System.out.println("====> deleteSpecificUser() failed: " + e.getMessage());
+                return (e instanceof NoSuchUserException)
+                    ? Mono.just(ShortUrlUserStatus.NO_SUCH_USER)
+                    : Mono.just(ShortUrlUserStatus.UNKNOWN_ERROR);
+            });
     }
 
     @Override
@@ -303,7 +305,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         .flatMap(this::deleteShortUrlUser)
         .then(Mono.just(ShortUrlUserStatus.SUCCESS))
         .onErrorResume(e -> {
-            System.out.println("====> " + e.getMessage());
+            System.out.println("====> deleteAllUsers() failed: " + e.getMessage());
             return Mono.just(ShortUrlUserStatus.UNKNOWN_ERROR);
         });
     }
