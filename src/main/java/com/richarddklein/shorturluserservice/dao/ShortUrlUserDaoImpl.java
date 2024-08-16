@@ -118,11 +118,11 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     /**
      * General constructor.
      *
-     * @param parameterStoreAcccessor Dependency injection of a class instance that
-     *                                is to play the role of getting and setting
-     *                                parameters residing in the Parameter Store
-     *                                component of the AWS Simple System Manager
-     *                                (SSM).
+     * @param parameterStoreAccessor Dependency injection of a class instance that
+     *                               is to play the role of getting and setting
+     *                               parameters residing in the Parameter Store
+     *                               component of the AWS Simple System Manager
+     *                               (SSM).
      * @param passwordEncoder Dependency injection of a class instance that is
      *                        able to encode (encrypt) passwords.
      * @param dynamoDbClient Dependency injection of a class instance that is to
@@ -161,17 +161,18 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         ShortUrlUser key = new ShortUrlUser();
         key.setUsername(username);
         return Mono.fromFuture(shortUrlUserTable.getItem(key))
-                .switchIfEmpty(Mono.error(new NoSuchUserException()));
+        .flatMap(user -> user != null ? Mono.just(user) : Mono.empty())
+        .switchIfEmpty(Mono.error(new NoSuchUserException()));
     }
 
     @Override
-    public Mono<StatusAndShortUrlUserArray> getAllUsers() {
+    public Mono<StatusAndShortUrlUserArray>
+    getAllUsers() {
         return Flux.from(shortUrlUserTable.scan().items())
         .collectList()
-        .map(users -> {
-            users.forEach(user -> user.setPassword(null));
+        .map(shortUrlUsers -> {
             return new StatusAndShortUrlUserArray(
-                ShortUrlUserStatus.SUCCESS, users);
+                    ShortUrlUserStatus.SUCCESS, shortUrlUsers);
         })
         .onErrorResume(e -> {
             System.out.println("====> " + e.getMessage());
@@ -386,9 +387,9 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     updateShortUrlUser(ShortUrlUser shortUrlUser) {
         return Mono.fromFuture(shortUrlUserTable.updateItem(shortUrlUser))
         .onErrorResume(ConditionalCheckFailedException.class, e -> {
-            // Version check failed. Someone updated the ShortUrlUser item
-            // in the database after we read the item, so the item we just
-            // tried to update contains stale data.
+            // Version check failed. Someone updated the ShortUrlUser item in the
+            // database after we read the item, so the item we just tried to update
+            // contains stale data.
             System.out.println("====> Version check failed: " + e.getMessage());
             return Mono.error(e);
         })
@@ -396,18 +397,14 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
             // Some other exception occurred.
             System.out.println("====> Unexpected exception: " + e.getMessage());
             return Mono.error(e);
-        })
-        .retryWhen(Retry.backoff(5, Duration.ofSeconds(1))
-                .filter(throwable ->
-                        throwable instanceof ConditionalCheckFailedException)
-        );
+        });
     }
 
     private Mono<ShortUrlUser>
     deleteShortUrlUser(ShortUrlUser shortUrlUser) {
         return Mono.fromFuture(shortUrlUserTable.deleteItem(shortUrlUser))
         .onErrorResume(e -> {
-            System.out.println("====> Deletion error: " + e.getMessage());
+            System.out.println("====> deleteShortUrlUser() failed: " + e.getMessage());
             return Mono.error(e);
         });
     }
