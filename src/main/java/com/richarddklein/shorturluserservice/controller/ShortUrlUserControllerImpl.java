@@ -86,7 +86,6 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
 
             ShortUrlUserStatus shortUrlUserStatus =
                     statusAndJwtToken.getStatus().getStatus();
-            String jwtToken = statusAndJwtToken.getJwtToken();
 
             HttpStatus httpStatus;
             String message;
@@ -112,8 +111,6 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
 
             ShortUrlUserStatus shortUrlUserStatus =
                     statusAndShortUrlUser.getStatus().getStatus();
-            ShortUrlUser shortUrlUser =
-                    statusAndShortUrlUser.getShortUrlUser();
 
             HttpStatus httpStatus;
             String message;
@@ -147,8 +144,6 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
 
             ShortUrlUserStatus shortUrlUserStatus =
                     statusAndShortUrlUserArray.getStatus().getStatus();
-            List<ShortUrlUser> users =
-                    statusAndShortUrlUserArray.getShortUrlUsers();
 
             HttpStatus httpStatus;
             String message;
@@ -219,7 +214,6 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
 
             ShortUrlUserStatus shortUrlUserStatus =
                     statusAndJwtToken.getStatus().getStatus();
-            String jwtToken = statusAndJwtToken.getJwtToken();
 
             HttpStatus httpStatus;
             String message;
