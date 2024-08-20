@@ -12,7 +12,7 @@ import com.richarddklein.shorturlcommonlibrary.security.dto.UsernameAndRole;
 import com.richarddklein.shorturlcommonlibrary.security.util.JwtUtils;
 import com.richarddklein.shorturluserservice.dto.*;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
-import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
+import com.richarddklein.shorturluserservice.dto.ShortUrlUserStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Service;
 
@@ -74,7 +74,7 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
                 .flatMap(adminUsername -> jwtUtils.generateToken(
                         new UsernameAndRole(adminUsername, "ADMIN"))
                         .map(jwtToken -> new StatusAndJwtToken(
-                                ShortUrlUserStatus.SUCCESS, jwtToken)));
+                                new Status(ShortUrlUserStatus.SUCCESS), jwtToken)));
     }
 
     @Override
@@ -83,10 +83,11 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
         return shortUrlUserDao.getSpecificUser(username)
                 .map(shortUrlUser -> {
                     shortUrlUser.setPassword(null);
-                    return new StatusAndShortUrlUser(ShortUrlUserStatus.SUCCESS, shortUrlUser);
+                    return new StatusAndShortUrlUser(
+                            new Status(ShortUrlUserStatus.SUCCESS), shortUrlUser);
                 })
                 .onErrorResume(e -> Mono.just(new StatusAndShortUrlUser(
-                        ShortUrlUserStatus.NO_SUCH_USER, null)));
+                        new Status(ShortUrlUserStatus.NO_SUCH_USER), null)));
     }
 
     @Override
@@ -119,16 +120,16 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
 
         if (username == null || username.isBlank()) {
             return Mono.just(new StatusAndJwtToken(
-                ShortUrlUserStatus.MISSING_USERNAME, null));
+                new Status(ShortUrlUserStatus.MISSING_USERNAME), null));
         }
 
         if (password == null || password.isBlank()) {
             return Mono.just(new StatusAndJwtToken(
-                ShortUrlUserStatus.MISSING_PASSWORD, null));
+                new Status(ShortUrlUserStatus.MISSING_PASSWORD), null));
         }
 
         return shortUrlUserDao.login(usernameAndPassword).flatMap(statusAndRole -> {
-            if (statusAndRole.getStatus() != ShortUrlUserStatus.SUCCESS) {
+            if (statusAndRole.getStatus().getStatus() != ShortUrlUserStatus.SUCCESS) {
                 return Mono.just(new StatusAndJwtToken(
                         statusAndRole.getStatus(), null));
             }
@@ -136,7 +137,7 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
             return jwtUtils.generateToken(new UsernameAndRole(
                 usernameAndPassword.getUsername(), statusAndRole.getRole()))
                     .map(jwtToken -> new StatusAndJwtToken(
-                            ShortUrlUserStatus.SUCCESS, jwtToken));
+                            new Status(ShortUrlUserStatus.SUCCESS), jwtToken));
         });
     }
 

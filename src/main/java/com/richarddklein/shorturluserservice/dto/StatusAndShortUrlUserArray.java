@@ -7,30 +7,29 @@ package com.richarddklein.shorturluserservice.dto;
 
 import java.util.List;
 
-import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 
 @SuppressWarnings("unused")
 public class StatusAndShortUrlUserArray {
-    private ShortUrlUserStatus status;
+    private Status status;
     private List<ShortUrlUser> shortUrlUsers;
 
     public StatusAndShortUrlUserArray() {
     }
 
     public StatusAndShortUrlUserArray
-            (ShortUrlUserStatus status,
+            (Status status,
              List<ShortUrlUser> shortUrlUsers) {
 
         this.status = status;
         this.shortUrlUsers = shortUrlUsers;
     }
 
-    public ShortUrlUserStatus getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(ShortUrlUserStatus status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 

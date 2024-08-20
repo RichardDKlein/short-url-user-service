@@ -11,12 +11,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 
 import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreAccessor;
-import com.richarddklein.shorturluserservice.dto.StatusAndRole;
-import com.richarddklein.shorturluserservice.dto.StatusAndShortUrlUserArray;
-import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
-import com.richarddklein.shorturluserservice.dto.UsernameOldPasswordAndNewPassword;
+import com.richarddklein.shorturluserservice.dto.*;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
-import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
 import com.richarddklein.shorturluserservice.exception.NoSuchUserException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
@@ -172,12 +168,12 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         .collectList()
         .map(shortUrlUsers -> {
             return new StatusAndShortUrlUserArray(
-                    ShortUrlUserStatus.SUCCESS, shortUrlUsers);
+                    new Status(ShortUrlUserStatus.SUCCESS), shortUrlUsers);
         })
         .onErrorResume(e -> {
             System.out.println("====> " + e.getMessage());
             return Mono.just(new StatusAndShortUrlUserArray(
-                    ShortUrlUserStatus.UNKNOWN_ERROR,
+                    new Status(ShortUrlUserStatus.UNKNOWN_ERROR),
                     Collections.emptyList()));
         });
     }
@@ -221,14 +217,14 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         .flatMap(shortUrlUser -> {
             if (!passwordEncoder.matches(password, shortUrlUser.getPassword())) {
                 return Mono.just(new StatusAndRole(
-                        ShortUrlUserStatus.WRONG_PASSWORD, null));
+                        new Status(ShortUrlUserStatus.WRONG_PASSWORD), null));
             }
             shortUrlUser.setLastLogin(LocalDateTime.now().format(
                 DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
 
             return updateShortUrlUser(shortUrlUser)
             .map(updatedShortUrlUser -> new StatusAndRole(
-                    ShortUrlUserStatus.SUCCESS, updatedShortUrlUser.getRole()));
+                    new Status(ShortUrlUserStatus.SUCCESS), updatedShortUrlUser.getRole()));
         })
         .retryWhen(Retry.backoff(5, Duration.ofSeconds(1))
                 .filter(e -> e instanceof ConditionalCheckFailedException)
@@ -238,8 +234,8 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         .onErrorResume(e -> {
             System.out.println("====> login() failed: " + e.getMessage());
             return (e instanceof NoSuchUserException)
-                ? Mono.just(new StatusAndRole(ShortUrlUserStatus.NO_SUCH_USER, null))
-                : Mono.just(new StatusAndRole(ShortUrlUserStatus.UNKNOWN_ERROR, null));
+                ? Mono.just(new StatusAndRole(new Status(ShortUrlUserStatus.NO_SUCH_USER), null))
+                : Mono.just(new StatusAndRole(new Status(ShortUrlUserStatus.UNKNOWN_ERROR), null));
         });
     }
 

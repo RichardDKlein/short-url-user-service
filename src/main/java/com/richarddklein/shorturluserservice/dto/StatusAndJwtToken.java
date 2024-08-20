@@ -5,26 +5,24 @@
 
 package com.richarddklein.shorturluserservice.dto;
 
-import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
-
 @SuppressWarnings("unused")
 public class StatusAndJwtToken {
-    private ShortUrlUserStatus status;
+    private Status status;
     private String jwtToken;
 
     public StatusAndJwtToken() {
     }
 
-    public StatusAndJwtToken(ShortUrlUserStatus status, String jwtToken) {
+    public StatusAndJwtToken(Status status, String jwtToken) {
         this.status = status;
         this.jwtToken = jwtToken;
     }
 
-    public ShortUrlUserStatus getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(ShortUrlUserStatus status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 

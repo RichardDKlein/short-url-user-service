@@ -3,7 +3,7 @@
  * (Copyright 2024 by Richard Klein)
  */
 
-package com.richarddklein.shorturluserservice.controller.response;
+package com.richarddklein.shorturluserservice.dto;
 
 /**
  * The Short URL User Status.

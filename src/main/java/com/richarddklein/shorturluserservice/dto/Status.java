@@ -3,25 +3,19 @@
  * (Copyright 2024 by Richard Klein)
  */
 
-package com.richarddklein.shorturluserservice.controller.response;
+package com.richarddklein.shorturluserservice.dto;
 
-/**
- * Class defining an HTTP Response containing a status
- * code/message only.
- */
-public class StatusResponse {
+public class Status {
     private ShortUrlUserStatus status;
     private String message;
 
-    /**
-     * General constructor.
-     *
-     * @param status The status code to be embedded in the HTTP Response.
-     * @param message The status message to be embedded in the HTTP Response.
-     */
-    public StatusResponse(ShortUrlUserStatus status, String message) {
+    public Status(ShortUrlUserStatus status, String message) {
         this.status = status;
         this.message = message;
+    }
+
+    public Status(ShortUrlUserStatus status) {
+        this.status = status;
     }
 
     public ShortUrlUserStatus getStatus() {
@@ -42,7 +36,7 @@ public class StatusResponse {
 
     @Override
     public String toString() {
-        return "StatusResponse{" +
+        return "Status{" +
                 "status=" + status +
                 ", message='" + message + '\'' +
                 '}';

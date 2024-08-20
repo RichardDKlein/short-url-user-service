@@ -5,17 +5,12 @@
 
 package com.richarddklein.shorturluserservice.controller;
 
-import com.richarddklein.shorturluserservice.controller.response.StatusAndShortUrlUserArrayResponse;
-import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
-import com.richarddklein.shorturluserservice.dto.UsernameOldPasswordAndNewPassword;
+import com.richarddklein.shorturluserservice.dto.*;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
-import com.richarddklein.shorturluserservice.controller.response.StatusAndJwtTokenResponse;
-import com.richarddklein.shorturluserservice.controller.response.StatusAndShortUrlUserResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 
-import com.richarddklein.shorturluserservice.controller.response.StatusResponse;
 import reactor.core.publisher.Mono;
 
 /**
@@ -43,39 +38,39 @@ public interface ShortUrlUserController {
      * or failure) of the database initialization operation.
      */
     @PostMapping("/initialize-repository")
-    ResponseEntity<StatusResponse>
+    ResponseEntity<Status>
     initializeShortUrlUserRepository(ServerHttpRequest request);
 
     @GetMapping("/admin-jwt")
-    Mono<ResponseEntity<StatusAndJwtTokenResponse>>
+    Mono<ResponseEntity<StatusAndJwtToken>>
     getAdminJwtToken();
 
     @GetMapping("/specific/{username}")
-    Mono<ResponseEntity<StatusAndShortUrlUserResponse>>
+    Mono<ResponseEntity<StatusAndShortUrlUser>>
     getSpecificUser(@PathVariable String username);
 
     @GetMapping("/all")
-    Mono<ResponseEntity<StatusAndShortUrlUserArrayResponse>>
+    Mono<ResponseEntity<StatusAndShortUrlUserArray>>
     getAllUsers();
 
     @PostMapping("/signup")
-    Mono<ResponseEntity<StatusResponse>>
+    Mono<ResponseEntity<Status>>
     signup(@RequestBody ShortUrlUser shortUrlUser);
 
     @PostMapping("/login")
-    Mono<ResponseEntity<StatusAndJwtTokenResponse>>
+    Mono<ResponseEntity<StatusAndJwtToken>>
     login(@RequestBody UsernameAndPassword usernameAndPasswordDto);
 
     @PatchMapping("/change-password")
-    Mono<ResponseEntity<StatusResponse>>
+    Mono<ResponseEntity<Status>>
     changePassword(@RequestBody UsernameOldPasswordAndNewPassword
                                 usernameOldPasswordAndNewPassword);
 
     @DeleteMapping("/specific/{username}")
-    Mono<ResponseEntity<StatusResponse>>
+    Mono<ResponseEntity<Status>>
     deleteSpecificUser(@PathVariable String username);
 
     @DeleteMapping("/all")
-    Mono<ResponseEntity<StatusResponse>>
+    Mono<ResponseEntity<Status>>
     deleteAllUsers();
 }

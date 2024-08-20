@@ -5,26 +5,24 @@
 
 package com.richarddklein.shorturluserservice.dto;
 
-import com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus;
-
 @SuppressWarnings("unused")
 public class StatusAndRole {
-    private ShortUrlUserStatus status;
+    private Status status;
     private String role;
 
     public StatusAndRole() {
     }
 
-    public StatusAndRole(ShortUrlUserStatus status, String role) {
+    public StatusAndRole(Status status, String role) {
         this.status = status;
         this.role = role;
     }
 
-    public ShortUrlUserStatus getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(ShortUrlUserStatus status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 

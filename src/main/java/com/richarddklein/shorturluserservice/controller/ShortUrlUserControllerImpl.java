@@ -8,9 +8,7 @@ package com.richarddklein.shorturluserservice.controller;
 import java.util.List;
 import java.util.Objects;
 
-import com.richarddklein.shorturluserservice.controller.response.*;
-import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
-import com.richarddklein.shorturluserservice.dto.UsernameOldPasswordAndNewPassword;
+import com.richarddklein.shorturluserservice.dto.*;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.service.ShortUrlUserService;
 import org.springframework.http.HttpStatus;
@@ -20,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import reactor.core.publisher.Mono;
 
-import static com.richarddklein.shorturluserservice.controller.response.ShortUrlUserStatus.SUCCESS;
+import static com.richarddklein.shorturluserservice.dto.ShortUrlUserStatus.SUCCESS;
 
 /**
  * The production implementation of the Short URL User Controller
@@ -49,7 +47,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     }
 
     @Override
-    public ResponseEntity<StatusResponse>
+    public ResponseEntity<Status>
     initializeShortUrlUserRepository(ServerHttpRequest request) {
         ShortUrlUserStatus shortUrlUserStatus = shortUrlUserService
                 .initializeShortUrlUserRepository(request);
@@ -76,18 +74,18 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                 message = "An unknown error occurred";
         }
 
-        return new ResponseEntity<>(new StatusResponse(
+        return new ResponseEntity<>(new Status(
                 shortUrlUserStatus, message), httpStatus);
     }
 
     @Override
-    public Mono<ResponseEntity<StatusAndJwtTokenResponse>>
+    public Mono<ResponseEntity<StatusAndJwtToken>>
     getAdminJwtToken() {
         return shortUrlUserService.getAdminJwtToken()
         .map(statusAndJwtToken -> {
 
             ShortUrlUserStatus shortUrlUserStatus =
-                    statusAndJwtToken.getStatus();
+                    statusAndJwtToken.getStatus().getStatus();
             String jwtToken = statusAndJwtToken.getJwtToken();
 
             HttpStatus httpStatus;
@@ -100,22 +98,20 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                 message = "An unknown error occurred";
             }
+            statusAndJwtToken.getStatus().setMessage(message);
 
-            return new ResponseEntity<>(
-                    new StatusAndJwtTokenResponse(new StatusResponse(
-                            shortUrlUserStatus, message), jwtToken),
-                    httpStatus);
+            return new ResponseEntity<>(statusAndJwtToken, httpStatus);
         });
     }
 
     @Override
-    public Mono<ResponseEntity<StatusAndShortUrlUserResponse>>
+    public Mono<ResponseEntity<StatusAndShortUrlUser>>
     getSpecificUser(@PathVariable String username) {
         return shortUrlUserService.getSpecificUser(username)
         .map(statusAndShortUrlUser -> {
 
             ShortUrlUserStatus shortUrlUserStatus =
-                    statusAndShortUrlUser.getStatus();
+                    statusAndShortUrlUser.getStatus().getStatus();
             ShortUrlUser shortUrlUser =
                     statusAndShortUrlUser.getShortUrlUser();
 
@@ -137,21 +133,22 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                     message = "An unknown error occurred";
                     break;
             }
+            statusAndShortUrlUser.getStatus().setMessage(message);
 
-            return new ResponseEntity<>(new StatusAndShortUrlUserResponse(
-                    new StatusResponse(shortUrlUserStatus, message),
-                    shortUrlUser), httpStatus);
+            return new ResponseEntity<>(statusAndShortUrlUser, httpStatus);
         });
     }
 
     @Override
-    public Mono<ResponseEntity<StatusAndShortUrlUserArrayResponse>>
+    public Mono<ResponseEntity<StatusAndShortUrlUserArray>>
     getAllUsers() {
         return shortUrlUserService.getAllUsers()
         .map(statusAndShortUrlUserArray -> {
 
-            ShortUrlUserStatus shortUrlUserStatus = statusAndShortUrlUserArray.getStatus();
-            List<ShortUrlUser> users = statusAndShortUrlUserArray.getShortUrlUsers();
+            ShortUrlUserStatus shortUrlUserStatus =
+                    statusAndShortUrlUserArray.getStatus().getStatus();
+            List<ShortUrlUser> users =
+                    statusAndShortUrlUserArray.getShortUrlUsers();
 
             HttpStatus httpStatus;
             String message;
@@ -163,15 +160,14 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                 message = "An unknown error occurred";
             }
+            statusAndShortUrlUserArray.getStatus().setMessage(message);
 
-            return new ResponseEntity<>(new StatusAndShortUrlUserArrayResponse(
-                    new StatusResponse(shortUrlUserStatus, message), users),
-                    httpStatus);
+            return new ResponseEntity<>(statusAndShortUrlUserArray, httpStatus);
         });
     }
 
     @Override
-    public Mono<ResponseEntity<StatusResponse>>
+    public Mono<ResponseEntity<Status>>
     signup(ShortUrlUser shortUrlUser) {
         return shortUrlUserService.signup(shortUrlUser)
         .map(shortUrlUserStatus -> {
@@ -210,19 +206,19 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                     break;
             }
 
-            return new ResponseEntity<>(new StatusResponse(
+            return new ResponseEntity<>(new Status(
                     shortUrlUserStatus, message), httpStatus);
         });
     }
 
     @Override
-    public Mono<ResponseEntity<StatusAndJwtTokenResponse>>
+    public Mono<ResponseEntity<StatusAndJwtToken>>
     login(UsernameAndPassword usernameAndPassword) {
         return shortUrlUserService.login(usernameAndPassword)
         .map(statusAndJwtToken -> {
 
             ShortUrlUserStatus shortUrlUserStatus =
-                    statusAndJwtToken.getStatus();
+                    statusAndJwtToken.getStatus().getStatus();
             String jwtToken = statusAndJwtToken.getJwtToken();
 
             HttpStatus httpStatus;
@@ -263,16 +259,14 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                     message = "An unknown error occurred";
                     break;
             }
+            statusAndJwtToken.getStatus().setMessage(message);
 
-            return new ResponseEntity<>(
-                    new StatusAndJwtTokenResponse(new StatusResponse(
-                            shortUrlUserStatus, message), jwtToken),
-                    httpStatus);
+            return new ResponseEntity<>(statusAndJwtToken, httpStatus);
         });
     }
 
     @Override
-    public Mono<ResponseEntity<StatusResponse>>
+    public Mono<ResponseEntity<Status>>
     changePassword(UsernameOldPasswordAndNewPassword
                    usernameOldPasswordAndNewPassword) {
 
@@ -328,13 +322,13 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
             };
 
             return new ResponseEntity<>(
-                    new StatusResponse(shortUrlUserStatus, message),
+                    new Status(shortUrlUserStatus, message),
                     httpStatus);
         });
     }
 
     @Override
-    public Mono<ResponseEntity<StatusResponse>>
+    public Mono<ResponseEntity<Status>>
     deleteSpecificUser(@PathVariable String username) {
         return shortUrlUserService.deleteSpecificUser(username)
         .map(shortUrlUserStatus -> {
@@ -364,13 +358,13 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
             };
 
             return new ResponseEntity<>(
-                    new StatusResponse(shortUrlUserStatus, message),
+                    new Status(shortUrlUserStatus, message),
                     httpStatus);
         });
     }
 
     @Override
-    public Mono<ResponseEntity<StatusResponse>>
+    public Mono<ResponseEntity<Status>>
     deleteAllUsers() {
         return shortUrlUserService.deleteAllUsers()
         .map(shortUrlUserStatus -> {
@@ -387,7 +381,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
             }
 
             return new ResponseEntity<>(
-                    new StatusResponse(shortUrlUserStatus, message),
+                    new Status(shortUrlUserStatus, message),
                     httpStatus);
         });
     }
