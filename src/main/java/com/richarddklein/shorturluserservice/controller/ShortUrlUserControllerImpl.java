@@ -5,7 +5,6 @@
 
 package com.richarddklein.shorturluserservice.controller;
 
-import java.util.List;
 import java.util.Objects;
 
 import com.richarddklein.shorturluserservice.dto.*;
@@ -74,8 +73,9 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                 message = "An unknown error occurred";
         }
 
-        return new ResponseEntity<>(new Status(
-                shortUrlUserStatus, message), httpStatus);
+        return new ResponseEntity<>(
+                new Status(shortUrlUserStatus, message),
+                httpStatus);
     }
 
     @Override
@@ -201,8 +201,9 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                     break;
             }
 
-            return new ResponseEntity<>(new Status(
-                    shortUrlUserStatus, message), httpStatus);
+            return new ResponseEntity<>(
+                    new Status(shortUrlUserStatus, message),
+                    httpStatus);
         });
     }
 
