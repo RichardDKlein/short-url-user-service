@@ -14,10 +14,10 @@ $ sam build
 
 ## Testing locally with the SAM CLI
 From the project root folder (where `template.yml` is located),
-use SAM CLI to deploy the project on `localhost:6000`:
+use SAM CLI to deploy the project on `localhost:2000`:
 
 ```bash
-$ sam local start-api -p 6000
+$ sam local start-api -p 2000
 ```
 
 ## Deploying to AWS Lambda and API Gateway
