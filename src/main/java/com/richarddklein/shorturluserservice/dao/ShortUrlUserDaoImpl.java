@@ -166,10 +166,9 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     getAllUsers() {
         return Flux.from(shortUrlUserTable.scan().items())
         .collectList()
-        .map(shortUrlUsers -> {
-            return new StatusAndShortUrlUserArray(
-                    new Status(ShortUrlUserStatus.SUCCESS), shortUrlUsers);
-        })
+        .map(shortUrlUsers -> new StatusAndShortUrlUserArray(
+                new Status(ShortUrlUserStatus.SUCCESS),
+                shortUrlUsers))
         .onErrorResume(e -> {
             System.out.println("====> " + e.getMessage());
             return Mono.just(new StatusAndShortUrlUserArray(
