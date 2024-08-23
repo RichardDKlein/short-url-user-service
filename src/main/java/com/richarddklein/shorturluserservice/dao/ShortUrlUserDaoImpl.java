@@ -196,7 +196,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
             .conditionExpression(Expression.builder()
                     .expression("attribute_not_exists(username)")
                     .build())
-            .returnConsumedCapacity(ReturnConsumedCapacity.TOTAL)))
+        ))
         .then(Mono.just(ShortUrlUserStatus.SUCCESS))
         .onErrorResume(ConditionalCheckFailedException.class, e ->
                 Mono.just(ShortUrlUserStatus.USER_ALREADY_EXISTS));
