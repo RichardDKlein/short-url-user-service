@@ -181,11 +181,6 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     @Override
     public Mono<ShortUrlUserStatus>
     signup(@RequestBody ShortUrlUser shortUrlUser) {
-        String plaintextPassword = shortUrlUser.getPassword();
-        if (plaintextPassword == null || plaintextPassword.isEmpty()) {
-            return Mono.just(ShortUrlUserStatus.MISSING_PASSWORD);
-        }
-
         ShortUrlUser shortUrlUserCopy = new ShortUrlUser(
                 shortUrlUser.getUsername(),
                 shortUrlUser.getPassword(),
