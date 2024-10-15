@@ -5,12 +5,12 @@
 
 package com.richarddklein.shorturluserservice.dao;
 
+import com.richarddklein.shorturlcommonlibrary.status.ShortUrlUserStatus;
 import com.richarddklein.shorturluserservice.dto.StatusAndRole;
 import com.richarddklein.shorturluserservice.dto.StatusAndShortUrlUserArray;
 import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;
 import com.richarddklein.shorturluserservice.dto.UsernameOldPasswordAndNewPassword;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
-import com.richarddklein.shorturluserservice.dto.ShortUrlUserStatus;
 import reactor.core.publisher.Mono;
 
 /**

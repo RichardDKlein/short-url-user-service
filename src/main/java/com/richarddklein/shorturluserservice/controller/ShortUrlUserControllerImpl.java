@@ -7,6 +7,7 @@ package com.richarddklein.shorturluserservice.controller;
 
 import java.util.Objects;
 
+import com.richarddklein.shorturlcommonlibrary.status.ShortUrlUserStatus;
 import com.richarddklein.shorturluserservice.dto.*;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.service.ShortUrlUserService;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import reactor.core.publisher.Mono;
 
-import static com.richarddklein.shorturluserservice.dto.ShortUrlUserStatus.SUCCESS;
+import static com.richarddklein.shorturlcommonlibrary.status.ShortUrlUserStatus.SUCCESS;
 
 /**
  * The production implementation of the Short URL User Controller

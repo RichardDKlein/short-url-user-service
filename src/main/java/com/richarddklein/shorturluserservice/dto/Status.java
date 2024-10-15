@@ -5,6 +5,11 @@
 
 package com.richarddklein.shorturluserservice.dto;
 
+import com.richarddklein.shorturlcommonlibrary.config.AwsConfig;
+import com.richarddklein.shorturlcommonlibrary.config.SecurityConfig;
+import com.richarddklein.shorturlcommonlibrary.status.ShortUrlUserStatus;
+import org.springframework.context.annotation.Import;
+
 public class Status {
     private ShortUrlUserStatus status;
     private String message;
