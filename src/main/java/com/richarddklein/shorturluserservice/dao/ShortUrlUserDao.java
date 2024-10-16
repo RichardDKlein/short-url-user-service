@@ -5,7 +5,7 @@
 
 package com.richarddklein.shorturluserservice.dao;
 
-import com.richarddklein.shorturlcommonlibrary.status.ShortUrlUserStatus;
+import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.ShortUrlUserStatus;
 import com.richarddklein.shorturluserservice.dto.StatusAndRole;
 import com.richarddklein.shorturluserservice.dto.StatusAndShortUrlUserArray;
 import com.richarddklein.shorturluserservice.dto.UsernameAndPassword;

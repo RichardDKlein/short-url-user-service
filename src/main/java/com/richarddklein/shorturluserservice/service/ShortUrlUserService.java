@@ -5,7 +5,7 @@
 
 package com.richarddklein.shorturluserservice.service;
 
-import com.richarddklein.shorturlcommonlibrary.status.ShortUrlUserStatus;
+import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.ShortUrlUserStatus;
 import com.richarddklein.shorturluserservice.dto.*;
 import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
 import org.springframework.http.server.reactive.ServerHttpRequest;

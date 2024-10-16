@@ -5,7 +5,7 @@
 
 package com.richarddklein.shorturluserservice.exception;
 
-import com.richarddklein.shorturlcommonlibrary.status.ShortUrlUserStatus;
+import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.ShortUrlUserStatus;
 import com.richarddklein.shorturluserservice.dto.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
