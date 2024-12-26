@@ -9,10 +9,10 @@ import java.util.Objects;
 
 import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreAccessor;
 import com.richarddklein.shorturlcommonlibrary.security.dto.UsernameAndRole;
+import com.richarddklein.shorturlcommonlibrary.security.util.HostUtils;
 import com.richarddklein.shorturlcommonlibrary.security.util.JwtUtils;
-import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.ShortUrlUserStatus;
-import com.richarddklein.shorturluserservice.dto.*;
-import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
+import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.dto.*;
+import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.entity.ShortUrlUser;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 public class ShortUrlUserServiceImpl implements ShortUrlUserService {
     private final ShortUrlUserDao shortUrlUserDao;
     private final ParameterStoreAccessor parameterStoreAccessor;
+    private final HostUtils hostUtils;
     private final JwtUtils jwtUtils;
 
     // ------------------------------------------------------------------------
@@ -38,16 +39,18 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
      * @param shortUrlUserDao Dependency injection of a class instance that is
      *                        to play the role of the Short URL User Data Access
      *                        Object (DAO).
-     * @param jwtUtils        Dependency injection of a class instance that is to able
+     * @param jwtUtils        Dependency injection of a class instance that is able
      *                        to provide utilities to handle JWT authentication tokens.
      */
     public ShortUrlUserServiceImpl(
             ShortUrlUserDao shortUrlUserDao,
             ParameterStoreAccessor parameterStoreAccessor,
+            HostUtils hostUtils,
             JwtUtils jwtUtils) {
 
         this.shortUrlUserDao = shortUrlUserDao;
         this.parameterStoreAccessor = parameterStoreAccessor;
+        this.hostUtils = hostUtils;
         this.jwtUtils = jwtUtils;
     }
 
@@ -58,8 +61,7 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
     @Override
     public ShortUrlUserStatus
     initializeShortUrlUserRepository(ServerHttpRequest request) {
-        if (!isRunningLocally(Objects.requireNonNull(
-                request.getRemoteAddress()).getHostString())) {
+        if (!hostUtils.isRunningLocally(request)) {
 
             return ShortUrlUserStatus.NOT_ON_LOCAL_MACHINE;
         }
@@ -179,17 +181,4 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
     // ------------------------------------------------------------------------
     // PRIVATE METHODS
     // ------------------------------------------------------------------------
-
-    /**
-     * Is the service running locally?
-     *
-     * <p>Determine whether the Short URL User Service is running on your local
-     * machine, or in the AWS cloud.</p>
-     *
-     * @param hostString The host that sent the HTTP request.
-     * @return 'true' if the service is running locally, 'false' otherwise.
-     */
-    private boolean isRunningLocally(String hostString) {
-        return hostString.contains("localhost");
-    }
 }

@@ -5,11 +5,8 @@
 
 package com.richarddklein.shorturluserservice.controller;
 
-import com.richarddklein.shorturlcommonlibrary.config.AwsConfig;
-import com.richarddklein.shorturlcommonlibrary.config.SecurityConfig;
-import com.richarddklein.shorturluserservice.dto.*;
-import com.richarddklein.shorturluserservice.entity.ShortUrlUser;
-import org.springframework.context.annotation.Import;
+import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.dto.*;
+import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.entity.ShortUrlUser;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;

@@ -5,8 +5,8 @@
 
 package com.richarddklein.shorturluserservice.exception;
 
-import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.ShortUrlUserStatus;
-import com.richarddklein.shorturluserservice.dto.Status;
+import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.dto.ShortUrlUserStatus;
+import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.dto.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -42,8 +42,8 @@ public class GlobalExceptionHandler {
     /**
      * Handle all other exceptions.
      *
-     * Handle all exceptions that are not handled by the above exception
-     * handlers.
+     * <p>Handle all exceptions that are not handled by the above exception
+     * handlers.</p>
      *
      * @param e The exception to be handled.
      * @return An HTTP Response Entity containing an error message as well
