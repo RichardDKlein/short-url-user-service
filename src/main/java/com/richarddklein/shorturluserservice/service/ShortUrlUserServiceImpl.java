@@ -5,8 +5,6 @@
 
 package com.richarddklein.shorturluserservice.service;
 
-import java.util.Objects;
-
 import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreAccessor;
 import com.richarddklein.shorturlcommonlibrary.security.dto.UsernameAndRole;
 import com.richarddklein.shorturlcommonlibrary.security.util.HostUtils;
