@@ -62,10 +62,8 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
     public ShortUrlUserStatus
     initializeShortUrlUserRepository(ServerHttpRequest request) {
         if (!hostUtils.isRunningLocally(request)) {
-
             return ShortUrlUserStatus.NOT_ON_LOCAL_MACHINE;
         }
-
         shortUrlUserDao.initializeShortUrlUserRepository();
         return ShortUrlUserStatus.SUCCESS;
     }
