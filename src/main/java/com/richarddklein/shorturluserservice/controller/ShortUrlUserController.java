@@ -59,7 +59,7 @@ public interface ShortUrlUserController {
 
     @PostMapping("/login")
     Mono<ResponseEntity<StatusAndJwtToken>>
-    login(@RequestBody UsernameAndPassword usernameAndPasswordDto);
+    login(@RequestBody UsernameAndPassword usernameAndPassword);
 
     @PatchMapping("/change-password")
     Mono<ResponseEntity<Status>>
