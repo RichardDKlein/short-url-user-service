@@ -5,9 +5,9 @@
 
 package com.richarddklein.shorturluserservice.service;
 
-import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreAccessor;
+import com.richarddklein.shorturlcommonlibrary.environment.HostUtils;
+import com.richarddklein.shorturlcommonlibrary.environment.ParameterStoreAccessor;
 import com.richarddklein.shorturlcommonlibrary.security.dto.UsernameAndRole;
-import com.richarddklein.shorturlcommonlibrary.security.util.HostUtils;
 import com.richarddklein.shorturlcommonlibrary.security.util.JwtUtils;
 import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.dto.*;
 import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.entity.ShortUrlUser;

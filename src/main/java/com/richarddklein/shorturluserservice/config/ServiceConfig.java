@@ -5,8 +5,8 @@
 
 package com.richarddklein.shorturluserservice.config;
 
-import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreAccessor;
-import com.richarddklein.shorturlcommonlibrary.security.util.HostUtils;
+import com.richarddklein.shorturlcommonlibrary.environment.HostUtils;
+import com.richarddklein.shorturlcommonlibrary.environment.ParameterStoreAccessor;
 import com.richarddklein.shorturlcommonlibrary.security.util.JwtUtils;
 import com.richarddklein.shorturluserservice.dao.ShortUrlUserDao;
 import org.springframework.beans.factory.annotation.Autowired;

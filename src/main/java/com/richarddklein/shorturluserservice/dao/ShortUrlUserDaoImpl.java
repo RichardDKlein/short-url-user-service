@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 
-import com.richarddklein.shorturlcommonlibrary.aws.ParameterStoreAccessor;
+import com.richarddklein.shorturlcommonlibrary.environment.ParameterStoreAccessor;
 import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.dto.*;
 import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.entity.ShortUrlUser;
 import com.richarddklein.shorturluserservice.exception.NoSuchUserException;
