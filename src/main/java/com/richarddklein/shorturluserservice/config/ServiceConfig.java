@@ -5,7 +5,6 @@
 
 package com.richarddklein.shorturluserservice.config;
 
-import com.richarddklein.shorturlcommonlibrary.config.EnvironmentConfig;
 import com.richarddklein.shorturlcommonlibrary.environment.HostUtils;
 import com.richarddklein.shorturlcommonlibrary.environment.ParameterStoreAccessor;
 import com.richarddklein.shorturlcommonlibrary.security.util.JwtUtils;
@@ -16,7 +15,6 @@ import org.springframework.context.annotation.Configuration;
 
 import com.richarddklein.shorturluserservice.service.ShortUrlUserService;
 import com.richarddklein.shorturluserservice.service.ShortUrlUserServiceImpl;
-import org.springframework.context.annotation.Import;
 
 /**
  * The Service @Configuration class.
@@ -25,7 +23,6 @@ import org.springframework.context.annotation.Import;
  * to implement the Service package.</p>
  */
 @Configuration
-@Import({EnvironmentConfig.class})
 public class ServiceConfig {
     @Autowired
     ShortUrlUserDao shortUrlUserDao;

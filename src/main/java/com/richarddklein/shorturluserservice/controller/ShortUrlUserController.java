@@ -45,14 +45,6 @@ public interface ShortUrlUserController {
     Mono<ResponseEntity<StatusAndJwtToken>>
     getAdminJwtToken();
 
-    @GetMapping("/specific/{username}")
-    Mono<ResponseEntity<StatusAndShortUrlUser>>
-    getSpecificUser(@PathVariable String username);
-
-    @GetMapping("/all")
-    Mono<ResponseEntity<StatusAndShortUrlUserArray>>
-    getAllUsers();
-
     @PostMapping("/signup")
     Mono<ResponseEntity<Status>>
     signup(@RequestBody ShortUrlUser shortUrlUser);
@@ -60,6 +52,14 @@ public interface ShortUrlUserController {
     @PostMapping("/login")
     Mono<ResponseEntity<StatusAndJwtToken>>
     login(@RequestBody UsernameAndPassword usernameAndPassword);
+
+    @GetMapping("/specific/{username}")
+    Mono<ResponseEntity<StatusAndShortUrlUser>>
+    getSpecificUser(@PathVariable String username);
+
+    @GetMapping("/all")
+    Mono<ResponseEntity<StatusAndShortUrlUserArray>>
+    getAllUsers();
 
     @PatchMapping("/change-password")
     Mono<ResponseEntity<Status>>

@@ -82,182 +82,177 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     public Mono<ResponseEntity<StatusAndJwtToken>>
     getAdminJwtToken() {
         return shortUrlUserService.getAdminJwtToken()
-        .map(statusAndJwtToken -> {
+            .map(statusAndJwtToken -> {
+                ShortUrlUserStatus shortUrlUserStatus =
+                        statusAndJwtToken.getStatus().getStatus();
 
-            ShortUrlUserStatus shortUrlUserStatus =
-                    statusAndJwtToken.getStatus().getStatus();
+                HttpStatus httpStatus;
+                String message;
 
-            HttpStatus httpStatus;
-            String message;
-
-            if (Objects.requireNonNull(shortUrlUserStatus) == SUCCESS) {
-                httpStatus = HttpStatus.OK;
-                message = "Admin JWT token successfully generated";
-            } else {
-                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                message = "An unknown error occurred";
-            }
-            statusAndJwtToken.getStatus().setMessage(message);
-
-            return new ResponseEntity<>(statusAndJwtToken, httpStatus);
-        });
-    }
-
-    @Override
-    public Mono<ResponseEntity<StatusAndShortUrlUser>>
-    getSpecificUser(@PathVariable String username) {
-        return shortUrlUserService.getSpecificUser(username)
-        .map(statusAndShortUrlUser -> {
-
-            ShortUrlUserStatus shortUrlUserStatus =
-                    statusAndShortUrlUser.getStatus().getStatus();
-
-            HttpStatus httpStatus;
-            String message;
-
-            switch (shortUrlUserStatus) {
-                case SUCCESS:
+                if (Objects.requireNonNull(shortUrlUserStatus) == SUCCESS) {
                     httpStatus = HttpStatus.OK;
-                    message = "User successfully retrieved";
-                    break;
-                case NO_SUCH_USER:
-                    httpStatus = HttpStatus.NOT_FOUND;
-                    message = String.format("User '%s' does not exist",
-                            username);
-                    break;
-                default:
+                    message = "Admin JWT token successfully generated";
+                } else {
                     httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                     message = "An unknown error occurred";
-                    break;
-            }
-            statusAndShortUrlUser.getStatus().setMessage(message);
+                }
+                statusAndJwtToken.getStatus().setMessage(message);
 
-            return new ResponseEntity<>(statusAndShortUrlUser, httpStatus);
-        });
-    }
-
-    @Override
-    public Mono<ResponseEntity<StatusAndShortUrlUserArray>>
-    getAllUsers() {
-        return shortUrlUserService.getAllUsers()
-        .map(statusAndShortUrlUserArray -> {
-
-            ShortUrlUserStatus shortUrlUserStatus =
-                    statusAndShortUrlUserArray.getStatus().getStatus();
-
-            HttpStatus httpStatus;
-            String message;
-
-            if (Objects.requireNonNull(shortUrlUserStatus) == SUCCESS) {
-                httpStatus = HttpStatus.OK;
-                message = "All users successfully retrieved";
-            } else {
-                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                message = "An unknown error occurred";
-            }
-            statusAndShortUrlUserArray.getStatus().setMessage(message);
-
-            return new ResponseEntity<>(statusAndShortUrlUserArray, httpStatus);
-        });
+                return new ResponseEntity<>(statusAndJwtToken, httpStatus);
+            });
     }
 
     @Override
     public Mono<ResponseEntity<Status>>
     signup(ShortUrlUser shortUrlUser) {
         return shortUrlUserService.signup(shortUrlUser)
-        .map(shortUrlUserStatus -> {
+            .map(shortUrlUserStatus -> {
+                HttpStatus httpStatus;
+                String message;
 
-            HttpStatus httpStatus;
-            String message;
+                switch (shortUrlUserStatus) {
+                    case SUCCESS:
+                        httpStatus = HttpStatus.OK;
+                        message = String.format(
+                                "User '%s' successfully created",
+                                shortUrlUser.getUsername());
+                        break;
 
-            switch (shortUrlUserStatus) {
-                case SUCCESS:
-                    httpStatus = HttpStatus.OK;
-                    message = String.format(
-                            "User '%s' successfully created",
-                            shortUrlUser.getUsername());
-                    break;
+                    case MISSING_PASSWORD:
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        message = "A non-empty password must be specified";
+                        break;
 
-                case MISSING_PASSWORD:
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                    message = "A non-empty password must be specified";
-                    break;
+                    case MISSING_USERNAME:
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        message = "A non-empty username must be specified";
+                        break;
 
-                case MISSING_USERNAME:
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                    message = "A non-empty username must be specified";
-                    break;
+                    case USER_ALREADY_EXISTS:
+                        httpStatus = HttpStatus.CONFLICT;
+                        message = String.format(
+                                "User '%s' already exists",
+                                shortUrlUser.getUsername());
+                        break;
 
-                case USER_ALREADY_EXISTS:
-                    httpStatus = HttpStatus.CONFLICT;
-                    message = String.format(
-                            "User '%s' already exists",
-                            shortUrlUser.getUsername());
-                    break;
+                    default:
+                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                        message = "An unknown error occurred";
+                        break;
+                }
 
-                default:
-                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                    message = "An unknown error occurred";
-                    break;
-            }
-
-            return new ResponseEntity<>(
-                    new Status(shortUrlUserStatus, message),
-                    httpStatus);
-        });
+                return new ResponseEntity<>(
+                        new Status(shortUrlUserStatus, message),
+                        httpStatus);
+            });
     }
 
     @Override
     public Mono<ResponseEntity<StatusAndJwtToken>>
     login(UsernameAndPassword usernameAndPassword) {
         return shortUrlUserService.login(usernameAndPassword)
-        .map(statusAndJwtToken -> {
+            .map(statusAndJwtToken -> {
+                ShortUrlUserStatus shortUrlUserStatus =
+                        statusAndJwtToken.getStatus().getStatus();
 
-            ShortUrlUserStatus shortUrlUserStatus =
-                    statusAndJwtToken.getStatus().getStatus();
+                HttpStatus httpStatus;
+                String message;
 
-            HttpStatus httpStatus;
-            String message;
+                switch (shortUrlUserStatus) {
+                    case SUCCESS:
+                        httpStatus = HttpStatus.OK;
+                        message = String.format(
+                                "User '%s' successfully logged in",
+                                usernameAndPassword.getUsername());
+                        break;
 
-            switch (shortUrlUserStatus) {
-                case SUCCESS:
+                    case MISSING_PASSWORD:
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        message = "A non-empty password must be specified";
+                        break;
+
+                    case MISSING_USERNAME:
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        message = "A non-empty username must be specified";
+                        break;
+
+                    case NO_SUCH_USER:
+                        httpStatus = HttpStatus.UNAUTHORIZED;
+                        message = String.format(
+                                "User '%s' does not exist",
+                                usernameAndPassword.getUsername());
+                        break;
+
+                    case WRONG_PASSWORD:
+                        httpStatus = HttpStatus.UNAUTHORIZED;
+                        message = "The specified password is not correct";
+                        break;
+
+                    default:
+                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                        message = "An unknown error occurred";
+                        break;
+                }
+                statusAndJwtToken.getStatus().setMessage(message);
+
+                return new ResponseEntity<>(statusAndJwtToken, httpStatus);
+            });
+    }
+
+    @Override
+    public Mono<ResponseEntity<StatusAndShortUrlUser>>
+    getSpecificUser(@PathVariable String username) {
+        return shortUrlUserService.getSpecificUser(username)
+            .map(statusAndShortUrlUser -> {
+                ShortUrlUserStatus shortUrlUserStatus =
+                        statusAndShortUrlUser.getStatus().getStatus();
+
+                HttpStatus httpStatus;
+                String message;
+
+                switch (shortUrlUserStatus) {
+                    case SUCCESS:
+                        httpStatus = HttpStatus.OK;
+                        message = "User successfully retrieved";
+                        break;
+                    case NO_SUCH_USER:
+                        httpStatus = HttpStatus.NOT_FOUND;
+                        message = String.format("User '%s' does not exist",
+                                username);
+                        break;
+                    default:
+                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                        message = "An unknown error occurred";
+                        break;
+                }
+                statusAndShortUrlUser.getStatus().setMessage(message);
+
+                return new ResponseEntity<>(statusAndShortUrlUser, httpStatus);
+            });
+    }
+
+    @Override
+    public Mono<ResponseEntity<StatusAndShortUrlUserArray>>
+    getAllUsers() {
+        return shortUrlUserService.getAllUsers()
+            .map(statusAndShortUrlUserArray -> {
+                ShortUrlUserStatus shortUrlUserStatus =
+                        statusAndShortUrlUserArray.getStatus().getStatus();
+
+                HttpStatus httpStatus;
+                String message;
+
+                if (Objects.requireNonNull(shortUrlUserStatus) == SUCCESS) {
                     httpStatus = HttpStatus.OK;
-                    message = String.format(
-                            "User '%s' successfully logged in",
-                            usernameAndPassword.getUsername());
-                    break;
-
-                case MISSING_PASSWORD:
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                    message = "A non-empty password must be specified";
-                    break;
-
-                case MISSING_USERNAME:
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                    message = "A non-empty username must be specified";
-                    break;
-
-                case NO_SUCH_USER:
-                    httpStatus = HttpStatus.UNAUTHORIZED;
-                    message = String.format(
-                            "User '%s' does not exist",
-                            usernameAndPassword.getUsername());
-                    break;
-
-                case WRONG_PASSWORD:
-                    httpStatus = HttpStatus.UNAUTHORIZED;
-                    message = "The specified password is not correct";
-                    break;
-
-                default:
+                    message = "All users successfully retrieved";
+                } else {
                     httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                     message = "An unknown error occurred";
-                    break;
-            }
-            statusAndJwtToken.getStatus().setMessage(message);
+                }
+                statusAndShortUrlUserArray.getStatus().setMessage(message);
 
-            return new ResponseEntity<>(statusAndJwtToken, httpStatus);
-        });
+                return new ResponseEntity<>(statusAndShortUrlUserArray, httpStatus);
+            });
     }
 
     @Override
@@ -265,120 +260,114 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     changePassword(UsernameOldPasswordAndNewPassword
                    usernameOldPasswordAndNewPassword) {
 
-        return shortUrlUserService.changePassword(
-                usernameOldPasswordAndNewPassword)
+        return shortUrlUserService.changePassword(usernameOldPasswordAndNewPassword)
+            .map(shortUrlUserStatus -> {
+                String username = usernameOldPasswordAndNewPassword.getUsername();
 
-        .map(shortUrlUserStatus -> {
+                HttpStatus httpStatus;
+                String message;
 
-            String username =
-                    usernameOldPasswordAndNewPassword.getUsername();
+                switch (shortUrlUserStatus) {
+                    case SUCCESS:
+                        httpStatus = HttpStatus.OK;
+                        message = String.format(
+                                "Password successfully changed for user '%s'",
+                                username);
+                        break;
 
-            HttpStatus httpStatus;
-            String message;
+                    case MISSING_NEW_PASSWORD:
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        message = "A non-empty new password must be specified";
+                        break;
 
-            switch (shortUrlUserStatus) {
-                case SUCCESS:
-                    httpStatus = HttpStatus.OK;
-                    message = String.format(
-                            "Password successfully changed for user '%s'",
-                            username);
-                    break;
+                    case MISSING_OLD_PASSWORD:
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        message = "The old password must be specified";
+                        break;
 
-                case MISSING_NEW_PASSWORD:
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                    message = "A non-empty new password must be specified";
-                    break;
+                    case MISSING_USERNAME:
+                        httpStatus = HttpStatus.BAD_REQUEST;
+                        message = "A non-empty username must be specified";
+                        break;
 
-                case MISSING_OLD_PASSWORD:
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                    message = "The old password must be specified";
-                    break;
+                    case NO_SUCH_USER:
+                        httpStatus = HttpStatus.UNAUTHORIZED;
+                        message = String.format(
+                                "User '%s' does not exist", username);
+                        break;
 
-                case MISSING_USERNAME:
-                    httpStatus = HttpStatus.BAD_REQUEST;
-                    message = "A non-empty username must be specified";
-                    break;
+                    case WRONG_PASSWORD:
+                        httpStatus = HttpStatus.UNAUTHORIZED;
+                        message = "The specified password is not correct";
+                        break;
 
-                case NO_SUCH_USER:
-                    httpStatus = HttpStatus.UNAUTHORIZED;
-                    message = String.format(
-                            "User '%s' does not exist", username);
-                    break;
+                    default:
+                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                        message = "An unknown error occurred";
+                        break;
+                };
 
-                case WRONG_PASSWORD:
-                    httpStatus = HttpStatus.UNAUTHORIZED;
-                    message = "The specified password is not correct";
-                    break;
-
-                default:
-                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                    message = "An unknown error occurred";
-                    break;
-            };
-
-            return new ResponseEntity<>(
-                    new Status(shortUrlUserStatus, message),
-                    httpStatus);
-        });
+                return new ResponseEntity<>(
+                        new Status(shortUrlUserStatus, message),
+                        httpStatus);
+            });
     }
 
     @Override
     public Mono<ResponseEntity<Status>>
     deleteSpecificUser(@PathVariable String username) {
         return shortUrlUserService.deleteSpecificUser(username)
-        .map(shortUrlUserStatus -> {
+            .map(shortUrlUserStatus -> {
+                HttpStatus httpStatus;
+                String message;
 
-            HttpStatus httpStatus;
-            String message;
+                switch (shortUrlUserStatus) {
+                    case SUCCESS:
+                        httpStatus = HttpStatus.OK;
+                        message = String.format(
+                                "User '%s' successfully deleted",
+                                username);
+                        break;
 
-            switch (shortUrlUserStatus) {
-                case SUCCESS:
-                    httpStatus = HttpStatus.OK;
-                    message = String.format(
-                            "User '%s' successfully deleted",
-                            username);
-                    break;
+                    case NO_SUCH_USER:
+                        httpStatus = HttpStatus.NOT_FOUND;
+                        message = String.format(
+                                "User '%s' does not exist",
+                                username);
+                        break;
 
-                case NO_SUCH_USER:
-                    httpStatus = HttpStatus.NOT_FOUND;
-                    message = String.format(
-                            "User '%s' does not exist",
-                            username);
-                    break;
+                    default:
+                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                        message = "An unknown error occurred";
+                        break;
+                };
 
-                default:
-                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                    message = "An unknown error occurred";
-                    break;
-            };
-
-            return new ResponseEntity<>(
-                    new Status(shortUrlUserStatus, message),
-                    httpStatus);
-        });
+                return new ResponseEntity<>(
+                        new Status(shortUrlUserStatus, message),
+                        httpStatus);
+            });
     }
 
     @Override
     public Mono<ResponseEntity<Status>>
     deleteAllUsers() {
         return shortUrlUserService.deleteAllUsers()
-        .map(shortUrlUserStatus -> {
+            .map(shortUrlUserStatus -> {
+                HttpStatus httpStatus;
+                String message;
 
-            HttpStatus httpStatus;
-            String message;
+                if (Objects.requireNonNull(shortUrlUserStatus) == SUCCESS) {
+                    httpStatus = HttpStatus.OK;
+                    message = "All users successfully deleted";
+                } else {
+                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                    message = "An unknown error occurred";
+                }
 
-            if (Objects.requireNonNull(shortUrlUserStatus) == SUCCESS) {
-                httpStatus = HttpStatus.OK;
-                message = "All users successfully deleted";
-            } else {
-                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                message = "An unknown error occurred";
-            }
-
-            return new ResponseEntity<>(
-                    new Status(shortUrlUserStatus, message),
-                    httpStatus);
-        });
+                return new ResponseEntity<>(
+                        new Status(shortUrlUserStatus, message),
+                        httpStatus);
+            });
     }
 
     // ------------------------------------------------------------------------

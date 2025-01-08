@@ -25,17 +25,17 @@ public interface ShortUrlUserDao {
      */
     void initializeShortUrlUserRepository();
 
-    Mono<ShortUrlUser>
-    getSpecificUser(String username);
-
-    Mono<StatusAndShortUrlUserArray>
-    getAllUsers();
-
     Mono<ShortUrlUserStatus>
     signup(ShortUrlUser shortUrlUser);
 
     Mono<StatusAndRole>
     login(UsernameAndPassword usernameAndPassword);
+
+    Mono<ShortUrlUser>
+    getSpecificUser(String username);
+
+    Mono<StatusAndShortUrlUserArray>
+    getAllUsers();
 
     Mono<ShortUrlUserStatus>
     changePassword(

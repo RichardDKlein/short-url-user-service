@@ -29,17 +29,17 @@ public interface ShortUrlUserService {
     Mono<StatusAndJwtToken>
     getAdminJwtToken();
 
-    Mono<StatusAndShortUrlUser>
-    getSpecificUser(String username);
-
-    Mono<StatusAndShortUrlUserArray>
-    getAllUsers();
-
     Mono<ShortUrlUserStatus>
     signup(ShortUrlUser shortUrlUser);
 
     Mono<StatusAndJwtToken>
     login(UsernameAndPassword usernameAndPassword);
+
+    Mono<StatusAndShortUrlUser>
+    getSpecificUser(String username);
+
+    Mono<StatusAndShortUrlUserArray>
+    getAllUsers();
 
     Mono<ShortUrlUserStatus>
     changePassword(UsernameOldPasswordAndNewPassword
