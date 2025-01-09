@@ -11,7 +11,6 @@ import com.richarddklein.shorturlcommonlibrary.security.dto.UsernameAndRole;
 import com.richarddklein.shorturlcommonlibrary.security.util.JwtUtils;
 import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.dto.*;
 import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.entity.ShortUrlUser;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Service;
 
 import com.richarddklein.shorturluserservice.dao.ShortUrlUserDao;
@@ -58,8 +57,8 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
     // synchronous logic will work just fine.
     @Override
     public ShortUrlUserStatus
-    initializeShortUrlUserRepository(ServerHttpRequest request) {
-        if (!hostUtils.isRunningLocally(request)) {
+    initializeShortUrlUserRepository() {
+        if (!hostUtils.isRunningLocally()) {
             return ShortUrlUserStatus.NOT_ON_LOCAL_MACHINE;
         }
         shortUrlUserDao.initializeShortUrlUserRepository();

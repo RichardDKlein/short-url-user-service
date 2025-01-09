@@ -12,7 +12,6 @@ import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.entit
 import com.richarddklein.shorturluserservice.service.ShortUrlUserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 
 import reactor.core.publisher.Mono;
@@ -47,9 +46,9 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
 
     @Override
     public ResponseEntity<Status>
-    initializeShortUrlUserRepository(ServerHttpRequest request) {
-        ShortUrlUserStatus shortUrlUserStatus = shortUrlUserService
-                .initializeShortUrlUserRepository(request);
+    initializeShortUrlUserRepository() {
+        ShortUrlUserStatus shortUrlUserStatus =
+                shortUrlUserService.initializeShortUrlUserRepository();
 
         HttpStatus httpStatus;
         String message;

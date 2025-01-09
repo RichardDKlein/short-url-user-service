@@ -8,7 +8,6 @@ package com.richarddklein.shorturluserservice.controller;
 import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.dto.*;
 import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.entity.ShortUrlUser;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 
 import reactor.core.publisher.Mono;
@@ -33,13 +32,12 @@ public interface ShortUrlUserController {
      * 30 seconds, this REST endpoint is available only when the Short
      * URL User Service is running on localhost, not on AWS.</p>
      *
-     * @param request The HTTP Request.
      * @return An HTTP Response Entity containing the status (success
      * or failure) of the database initialization operation.
      */
     @PostMapping("/initialize-repository")
     ResponseEntity<Status>
-    initializeShortUrlUserRepository(ServerHttpRequest request);
+    initializeShortUrlUserRepository();
 
     @GetMapping("/admin-jwt")
     Mono<ResponseEntity<StatusAndJwtToken>>

@@ -7,7 +7,6 @@ package com.richarddklein.shorturluserservice.service;
 
 import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.dto.*;
 import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.entity.ShortUrlUser;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import reactor.core.publisher.Mono;
 
 /**
@@ -24,7 +23,7 @@ public interface ShortUrlUserService {
      * initialization has completed successfully, or has failed.</p>
      */
     ShortUrlUserStatus
-    initializeShortUrlUserRepository(ServerHttpRequest request);
+    initializeShortUrlUserRepository();
 
     Mono<StatusAndJwtToken>
     getAdminJwtToken();
