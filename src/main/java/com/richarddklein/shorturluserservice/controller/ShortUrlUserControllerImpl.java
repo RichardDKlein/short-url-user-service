@@ -56,22 +56,21 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
         String message;
 
         switch (shortUrlUserStatus) {
-            case SUCCESS:
+            case SUCCESS -> {
                 httpStatus = HttpStatus.OK;
                 message = "Initialization of Short URL User table "
                         + "completed successfully";
-                break;
-
-            case NOT_ON_LOCAL_MACHINE:
+            }
+            case NOT_ON_LOCAL_MACHINE -> {
                 httpStatus = HttpStatus.FORBIDDEN;
                 message = "Initialization of the Short URL User "
                         + "table can be done only when the service is "
                         + "running on your local machine";
-                break;
-
-            default:
+            }
+            default -> {
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                 message = "An unknown error occurred";
+            }
         }
 
         return new ResponseEntity<>(
@@ -112,34 +111,30 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                 String message;
 
                 switch (shortUrlUserStatus) {
-                    case SUCCESS:
+                    case SUCCESS -> {
                         httpStatus = HttpStatus.OK;
                         message = String.format(
                                 "User '%s' successfully created",
                                 shortUrlUser.getUsername());
-                        break;
-
-                    case MISSING_PASSWORD:
+                    }
+                    case MISSING_PASSWORD -> {
                         httpStatus = HttpStatus.BAD_REQUEST;
                         message = "A non-empty password must be specified";
-                        break;
-
-                    case MISSING_USERNAME:
+                    }
+                    case MISSING_USERNAME -> {
                         httpStatus = HttpStatus.BAD_REQUEST;
                         message = "A non-empty username must be specified";
-                        break;
-
-                    case USER_ALREADY_EXISTS:
+                    }
+                    case USER_ALREADY_EXISTS -> {
                         httpStatus = HttpStatus.CONFLICT;
                         message = String.format(
                                 "User '%s' already exists",
                                 shortUrlUser.getUsername());
-                        break;
-
-                    default:
+                    }
+                    default -> {
                         httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                         message = "An unknown error occurred";
-                        break;
+                    }
                 }
 
                 return new ResponseEntity<>(
@@ -160,39 +155,34 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                 String message;
 
                 switch (shortUrlUserStatus) {
-                    case SUCCESS:
+                    case SUCCESS -> {
                         httpStatus = HttpStatus.OK;
                         message = String.format(
                                 "User '%s' successfully logged in",
                                 usernameAndPassword.getUsername());
-                        break;
-
-                    case MISSING_PASSWORD:
+                    }
+                    case MISSING_PASSWORD -> {
                         httpStatus = HttpStatus.BAD_REQUEST;
                         message = "A non-empty password must be specified";
-                        break;
-
-                    case MISSING_USERNAME:
+                    }
+                    case MISSING_USERNAME -> {
                         httpStatus = HttpStatus.BAD_REQUEST;
                         message = "A non-empty username must be specified";
-                        break;
-
-                    case NO_SUCH_USER:
+                    }
+                    case NO_SUCH_USER -> {
                         httpStatus = HttpStatus.UNAUTHORIZED;
                         message = String.format(
                                 "User '%s' does not exist",
                                 usernameAndPassword.getUsername());
-                        break;
-
-                    case WRONG_PASSWORD:
+                    }
+                    case WRONG_PASSWORD -> {
                         httpStatus = HttpStatus.UNAUTHORIZED;
                         message = "The specified password is not correct";
-                        break;
-
-                    default:
+                    }
+                    default -> {
                         httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                         message = "An unknown error occurred";
-                        break;
+                    }
                 }
                 statusAndJwtToken.getStatus().setMessage(message);
 
@@ -212,19 +202,19 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                 String message;
 
                 switch (shortUrlUserStatus) {
-                    case SUCCESS:
+                    case SUCCESS -> {
                         httpStatus = HttpStatus.OK;
                         message = "User successfully retrieved";
-                        break;
-                    case NO_SUCH_USER:
+                    }
+                    case NO_SUCH_USER -> {
                         httpStatus = HttpStatus.NOT_FOUND;
                         message = String.format("User '%s' does not exist",
                                 username);
-                        break;
-                    default:
+                    }
+                    default -> {
                         httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                         message = "An unknown error occurred";
-                        break;
+                    }
                 }
                 statusAndShortUrlUser.getStatus().setMessage(message);
 
@@ -269,44 +259,38 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                 String message;
 
                 switch (shortUrlUserStatus) {
-                    case SUCCESS:
+                    case SUCCESS -> {
                         httpStatus = HttpStatus.OK;
                         message = String.format(
                                 "Password successfully changed for user '%s'",
                                 username);
-                        break;
-
-                    case MISSING_NEW_PASSWORD:
+                    }
+                    case MISSING_NEW_PASSWORD -> {
                         httpStatus = HttpStatus.BAD_REQUEST;
                         message = "A non-empty new password must be specified";
-                        break;
-
-                    case MISSING_OLD_PASSWORD:
+                    }
+                    case MISSING_OLD_PASSWORD -> {
                         httpStatus = HttpStatus.BAD_REQUEST;
                         message = "The old password must be specified";
-                        break;
-
-                    case MISSING_USERNAME:
+                    }
+                    case MISSING_USERNAME -> {
                         httpStatus = HttpStatus.BAD_REQUEST;
                         message = "A non-empty username must be specified";
-                        break;
-
-                    case NO_SUCH_USER:
+                    }
+                    case NO_SUCH_USER -> {
                         httpStatus = HttpStatus.UNAUTHORIZED;
                         message = String.format(
                                 "User '%s' does not exist", username);
-                        break;
-
-                    case WRONG_PASSWORD:
+                    }
+                    case WRONG_PASSWORD -> {
                         httpStatus = HttpStatus.UNAUTHORIZED;
                         message = "The specified password is not correct";
-                        break;
-
-                    default:
+                    }
+                    default -> {
                         httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                         message = "An unknown error occurred";
-                        break;
-                };
+                    }
+                }
 
                 return new ResponseEntity<>(
                         new Status(shortUrlUserStatus, message),
@@ -323,25 +307,24 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                 String message;
 
                 switch (shortUrlUserStatus) {
-                    case SUCCESS:
+                    case SUCCESS -> {
                         httpStatus = HttpStatus.OK;
                         message = String.format(
                                 "User '%s' successfully deleted",
                                 username);
-                        break;
-
-                    case NO_SUCH_USER:
+                    }
+                    case NO_SUCH_USER -> {
                         httpStatus = HttpStatus.NOT_FOUND;
                         message = String.format(
                                 "User '%s' does not exist",
                                 username);
-                        break;
-
-                    default:
+                    }
+                    default -> {
                         httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                         message = "An unknown error occurred";
-                        break;
-                };
+                    }
+                }
+                ;
 
                 return new ResponseEntity<>(
                         new Status(shortUrlUserStatus, message),
