@@ -7,6 +7,7 @@ package com.richarddklein.shorturluserservice.service;
 
 import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.dto.*;
 import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.entity.ShortUrlUser;
+import com.richarddklein.shorturlcommonlibrary.service.status.ShortUrlStatus;
 import reactor.core.publisher.Mono;
 
 /**
@@ -22,13 +23,13 @@ public interface ShortUrlUserService {
      * <p>This is a synchronous method. It will return only when the
      * initialization has completed successfully, or has failed.</p>
      */
-    ShortUrlUserStatus
+    ShortUrlStatus
     initializeShortUrlUserRepository();
 
     Mono<StatusAndJwtToken>
     getAdminJwtToken();
 
-    Mono<ShortUrlUserStatus>
+    Mono<ShortUrlStatus>
     signup(ShortUrlUser shortUrlUser);
 
     Mono<StatusAndJwtToken>
@@ -40,13 +41,13 @@ public interface ShortUrlUserService {
     Mono<StatusAndShortUrlUserArray>
     getAllUsers();
 
-    Mono<ShortUrlUserStatus>
+    Mono<ShortUrlStatus>
     changePassword(UsernameOldPasswordAndNewPassword
                    usernameOldPasswordAndNewPassword);
 
-    Mono<ShortUrlUserStatus>
+    Mono<ShortUrlStatus>
     deleteSpecificUser(String username);
 
-    Mono<ShortUrlUserStatus>
+    Mono<ShortUrlStatus>
     deleteAllUsers();
 }

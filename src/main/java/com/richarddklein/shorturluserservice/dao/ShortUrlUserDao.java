@@ -7,6 +7,7 @@ package com.richarddklein.shorturluserservice.dao;
 
 import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.dto.*;
 import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.entity.ShortUrlUser;
+import com.richarddklein.shorturlcommonlibrary.service.status.ShortUrlStatus;
 import reactor.core.publisher.Mono;
 
 /**
@@ -25,7 +26,7 @@ public interface ShortUrlUserDao {
      */
     void initializeShortUrlUserRepository();
 
-    Mono<ShortUrlUserStatus>
+    Mono<ShortUrlStatus>
     signup(ShortUrlUser shortUrlUser);
 
     Mono<StatusAndRole>
@@ -37,14 +38,14 @@ public interface ShortUrlUserDao {
     Mono<StatusAndShortUrlUserArray>
     getAllUsers();
 
-    Mono<ShortUrlUserStatus>
+    Mono<ShortUrlStatus>
     changePassword(
             UsernameOldPasswordAndNewPassword
             usernameOldPasswordAndNewPassword);
 
-    Mono<ShortUrlUserStatus>
+    Mono<ShortUrlStatus>
     deleteSpecificUser(String username);
 
-    Mono<ShortUrlUserStatus>
+    Mono<ShortUrlStatus>
     deleteAllUsers();
 }

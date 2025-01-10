@@ -9,6 +9,8 @@ import java.util.Objects;
 
 import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.dto.*;
 import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.entity.ShortUrlUser;
+import com.richarddklein.shorturlcommonlibrary.service.status.ShortUrlStatus;
+import com.richarddklein.shorturlcommonlibrary.service.status.Status;
 import com.richarddklein.shorturluserservice.service.ShortUrlUserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import reactor.core.publisher.Mono;
 
-import static com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.dto.ShortUrlUserStatus.SUCCESS;
+import static com.richarddklein.shorturlcommonlibrary.service.status.ShortUrlStatus.SUCCESS;
 
 /**
  * The production implementation of the Short URL User Controller
@@ -47,7 +49,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     @Override
     public ResponseEntity<Status>
     initializeShortUrlUserRepository() {
-        ShortUrlUserStatus shortUrlUserStatus =
+        ShortUrlStatus shortUrlUserStatus =
                 shortUrlUserService.initializeShortUrlUserRepository();
 
         HttpStatus httpStatus;
@@ -82,7 +84,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     getAdminJwtToken() {
         return shortUrlUserService.getAdminJwtToken()
             .map(statusAndJwtToken -> {
-                ShortUrlUserStatus shortUrlUserStatus =
+                ShortUrlStatus shortUrlUserStatus =
                         statusAndJwtToken.getStatus().getStatus();
 
                 HttpStatus httpStatus;
@@ -151,7 +153,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     login(UsernameAndPassword usernameAndPassword) {
         return shortUrlUserService.login(usernameAndPassword)
             .map(statusAndJwtToken -> {
-                ShortUrlUserStatus shortUrlUserStatus =
+                ShortUrlStatus shortUrlUserStatus =
                         statusAndJwtToken.getStatus().getStatus();
 
                 HttpStatus httpStatus;
@@ -203,7 +205,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     getSpecificUser(@PathVariable String username) {
         return shortUrlUserService.getSpecificUser(username)
             .map(statusAndShortUrlUser -> {
-                ShortUrlUserStatus shortUrlUserStatus =
+                ShortUrlStatus shortUrlUserStatus =
                         statusAndShortUrlUser.getStatus().getStatus();
 
                 HttpStatus httpStatus;
@@ -235,7 +237,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     getAllUsers() {
         return shortUrlUserService.getAllUsers()
             .map(statusAndShortUrlUserArray -> {
-                ShortUrlUserStatus shortUrlUserStatus =
+                ShortUrlStatus shortUrlUserStatus =
                         statusAndShortUrlUserArray.getStatus().getStatus();
 
                 HttpStatus httpStatus;

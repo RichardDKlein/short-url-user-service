@@ -3,15 +3,12 @@
  * (Copyright 2024 by Richard Klein)
  */
 
-package com.richarddklein.shorturluserservice.config;
+package com.richarddklein.shorturluserservice.controller;
 
 import com.richarddklein.shorturluserservice.service.ShortUrlUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import com.richarddklein.shorturluserservice.controller.ShortUrlUserController;
-import com.richarddklein.shorturluserservice.controller.ShortUrlUserControllerImpl;
 
 /**
  * The Controller @Configuration class.

@@ -3,7 +3,7 @@
  * (Copyright 2024 by Richard Klein)
  */
 
-package com.richarddklein.shorturluserservice.config;
+package com.richarddklein.shorturluserservice.service;
 
 import com.richarddklein.shorturlcommonlibrary.environment.HostUtils;
 import com.richarddklein.shorturlcommonlibrary.environment.ParameterStoreAccessor;
@@ -12,9 +12,6 @@ import com.richarddklein.shorturluserservice.dao.ShortUrlUserDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import com.richarddklein.shorturluserservice.service.ShortUrlUserService;
-import com.richarddklein.shorturluserservice.service.ShortUrlUserServiceImpl;
 
 /**
  * The Service @Configuration class.

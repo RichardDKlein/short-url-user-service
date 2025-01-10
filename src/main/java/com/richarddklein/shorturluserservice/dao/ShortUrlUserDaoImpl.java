@@ -13,6 +13,8 @@ import java.util.Collections;
 import com.richarddklein.shorturlcommonlibrary.environment.ParameterStoreAccessor;
 import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.dto.*;
 import com.richarddklein.shorturlcommonlibrary.service.shorturluserservice.entity.ShortUrlUser;
+import com.richarddklein.shorturlcommonlibrary.service.status.ShortUrlStatus;
+import com.richarddklein.shorturlcommonlibrary.service.status.Status;
 import com.richarddklein.shorturluserservice.exception.NoSuchUserException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
@@ -27,6 +29,8 @@ import software.amazon.awssdk.enhanced.dynamodb.model.CreateTableEnhancedRequest
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.*;
 import software.amazon.awssdk.services.dynamodb.waiters.DynamoDbWaiter;
+
+import static com.richarddklein.shorturlcommonlibrary.service.status.ShortUrlStatus.*;
 
 /**
  * The production implementation of the Short URL User DAO interface.
@@ -152,7 +156,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
     }
 
     @Override
-    public Mono<ShortUrlUserStatus>
+    public Mono<ShortUrlStatus>
     signup(@RequestBody ShortUrlUser shortUrlUser) {
         ShortUrlUser shortUrlUserCopy = new ShortUrlUser(
             shortUrlUser.getUsername(),
@@ -170,9 +174,9 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                     .expression("attribute_not_exists(username)")
                     .build())
             ))
-            .then(Mono.just(ShortUrlUserStatus.SUCCESS))
+            .then(Mono.just(SUCCESS))
             .onErrorResume(ConditionalCheckFailedException.class, e ->
-                    Mono.just(ShortUrlUserStatus.USER_ALREADY_EXISTS));
+                    Mono.just(USER_ALREADY_EXISTS));
     }
 
     @Override
@@ -185,14 +189,14 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
             .flatMap(shortUrlUser -> {
                 if (!passwordEncoder.matches(password, shortUrlUser.getPassword())) {
                     return Mono.just(new StatusAndRole(
-                        new Status(ShortUrlUserStatus.WRONG_PASSWORD), null));
+                        new Status(WRONG_PASSWORD), null));
                 }
                 shortUrlUser.setLastLogin(LocalDateTime.now().format(
                     DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")));
 
                 return updateShortUrlUser(shortUrlUser)
                     .map(updatedShortUrlUser -> new StatusAndRole(
-                        new Status(ShortUrlUserStatus.SUCCESS), updatedShortUrlUser.getRole()));
+                        new Status(SUCCESS), updatedShortUrlUser.getRole()));
             })
             .retryWhen(Retry.backoff(5, Duration.ofSeconds(1))
                 .filter(e -> e instanceof ConditionalCheckFailedException)
@@ -203,9 +207,9 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                 System.out.println("====> login() failed: " + e.getMessage());
                 return (e instanceof NoSuchUserException)
                         ? Mono.just(new StatusAndRole(
-                                new Status(ShortUrlUserStatus.NO_SUCH_USER), null))
+                                new Status(NO_SUCH_USER), null))
                         : Mono.just(new StatusAndRole(
-                                new Status(ShortUrlUserStatus.UNKNOWN_ERROR), null));
+                                new Status(UNKNOWN_ERROR), null));
             });
     }
 
@@ -228,18 +232,18 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         return Flux.from(shortUrlUserTable.scan().items())
             .collectList()
             .map(shortUrlUsers -> new StatusAndShortUrlUserArray(
-                new Status(ShortUrlUserStatus.SUCCESS),
+                new Status(SUCCESS),
                 shortUrlUsers))
             .onErrorResume(e -> {
                 System.out.println("====> " + e.getMessage());
                 return Mono.just(new StatusAndShortUrlUserArray(
-                    new Status(ShortUrlUserStatus.UNKNOWN_ERROR),
+                    new Status(UNKNOWN_ERROR),
                     Collections.emptyList()));
             });
     }
 
     @Override
-    public Mono<ShortUrlUserStatus>
+    public Mono<ShortUrlStatus>
     changePassword(UsernameOldPasswordAndNewPassword
             usernameOldPasswordAndNewPassword) {
 
@@ -250,7 +254,7 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
         return getSpecificUser(username)
             .flatMap(shortUrlUser -> {
                 if (!passwordEncoder.matches(oldPassword, shortUrlUser.getPassword())) {
-                    return Mono.just(ShortUrlUserStatus.WRONG_PASSWORD);
+                    return Mono.just(WRONG_PASSWORD);
                 }
                 shortUrlUser.setPassword(passwordEncoder.encode(newPassword));
 
@@ -260,9 +264,9 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
                         // AWS Parameter Store.
                         if (updatedShortUrlUser.getRole().equals("ADMIN")) {
                             return parameterStoreAccessor.setAdminPassword(newPassword)
-                            .thenReturn(ShortUrlUserStatus.SUCCESS);
+                            .thenReturn(SUCCESS);
                         }
-                        return Mono.just(ShortUrlUserStatus.SUCCESS);
+                        return Mono.just(SUCCESS);
                     });
             })
             .retryWhen(Retry.backoff(5, Duration.ofSeconds(1))
@@ -273,35 +277,35 @@ public class ShortUrlUserDaoImpl implements ShortUrlUserDao {
             .onErrorResume(e -> {
                 System.out.println("====> changePassword() failed: " + e.getMessage());
                 return (e instanceof NoSuchUserException)
-                    ? Mono.just(ShortUrlUserStatus.NO_SUCH_USER)
-                    : Mono.just(ShortUrlUserStatus.UNKNOWN_ERROR);
+                    ? Mono.just(NO_SUCH_USER)
+                    : Mono.just(UNKNOWN_ERROR);
             });
     }
 
     @Override
-    public Mono<ShortUrlUserStatus>
+    public Mono<ShortUrlStatus>
     deleteSpecificUser(String username) {
         return getSpecificUser(username)
             .flatMap(shortUrlUser ->
                 deleteShortUrlUser(shortUrlUser)
-                .map(deletedShortUrlUser -> ShortUrlUserStatus.SUCCESS))
+                .map(deletedShortUrlUser -> SUCCESS))
                 .onErrorResume(e -> {
                     System.out.println("====> deleteSpecificUser() failed: " + e.getMessage());
                     return (e instanceof NoSuchUserException)
-                        ? Mono.just(ShortUrlUserStatus.NO_SUCH_USER)
-                        : Mono.just(ShortUrlUserStatus.UNKNOWN_ERROR);
+                        ? Mono.just(NO_SUCH_USER)
+                        : Mono.just(UNKNOWN_ERROR);
                 });
     }
 
     @Override
-    public Mono<ShortUrlUserStatus> deleteAllUsers() {
+    public Mono<ShortUrlStatus> deleteAllUsers() {
         return Flux.from(shortUrlUserTable.scan().items())
             .filter(user -> !ADMIN_ROLE.equals(user.getRole()))
             .flatMap(this::deleteShortUrlUser)
-            .then(Mono.just(ShortUrlUserStatus.SUCCESS))
+            .then(Mono.just(SUCCESS))
             .onErrorResume(e -> {
                 System.out.println("====> deleteAllUsers() failed: " + e.getMessage());
-                return Mono.just(ShortUrlUserStatus.UNKNOWN_ERROR);
+                return Mono.just(UNKNOWN_ERROR);
             });
     }
 
