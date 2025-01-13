@@ -363,9 +363,10 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
                     String message;
 
                     if (Objects.requireNonNull(shortUrlUserStatus) == SUCCESS) {
-                        httpStatus = HttpStatus.OK;
+                        httpStatus = HttpStatus.NO_CONTENT;
                         message = String.format(
-                            "Simulated JWT token expiration successfully set to %b", enabled);
+                            "Simulated JWT token expiration successfully %s",
+                                enabled ? "enabled" : "disabled");
                     } else {
                         httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
                         message = "An unknown error occurred";
