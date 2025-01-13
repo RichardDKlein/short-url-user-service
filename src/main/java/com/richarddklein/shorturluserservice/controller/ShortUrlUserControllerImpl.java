@@ -357,6 +357,7 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     @Override
     public Mono<ResponseEntity<Status>>
     simulateExpiredJwtToken(@PathVariable String enabled) {
+        System.out.println("====> simulateExpiredJwtToken: enabled = " + enabled);
         return shortUrlUserService.simulateExpiredJwtToken(Boolean.parseBoolean(enabled))
                 .map(shortUrlUserStatus -> {
                     HttpStatus httpStatus;
