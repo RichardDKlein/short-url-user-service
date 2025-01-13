@@ -359,24 +359,24 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
     simulateExpiredJwtToken(@PathVariable String enabled) {
         System.out.println("====> simulateExpiredJwtToken: enabled = " + enabled);
         return shortUrlUserService.simulateExpiredJwtToken(Boolean.parseBoolean(enabled))
-                .map(shortUrlUserStatus -> {
-                    HttpStatus httpStatus;
-                    String message;
+            .map(shortUrlUserStatus -> {
+                HttpStatus httpStatus;
+                String message;
 
-                    if (Objects.requireNonNull(shortUrlUserStatus) == SUCCESS) {
-                        httpStatus = HttpStatus.NO_CONTENT;
-                        message = String.format(
-                            "Simulated JWT token expiration successfully %s",
-                                Boolean.parseBoolean(enabled) ? "enabled" : "disabled");
-                    } else {
-                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                        message = "An unknown error occurred";
-                    }
+                if (Objects.requireNonNull(shortUrlUserStatus) == SUCCESS) {
+                    httpStatus = HttpStatus.OK;
+                    message = String.format(
+                        "Simulated JWT token expiration successfully %s",
+                            Boolean.parseBoolean(enabled) ? "enabled" : "disabled");
+                } else {
+                    httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                    message = "An unknown error occurred";
+                }
 
-                    return new ResponseEntity<>(
-                            new Status(shortUrlUserStatus, message),
-                            httpStatus);
-                });
+                return new ResponseEntity<>(
+                    new Status(shortUrlUserStatus, message),
+                    httpStatus);
+            });
     }
 
     // ------------------------------------------------------------------------
