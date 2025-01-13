@@ -73,7 +73,7 @@ public interface ShortUrlUserController {
     Mono<ResponseEntity<Status>>
     deleteAllUsers();
 
-    @PatchMapping("/simulate-expired-jwt/{enabled}")
+    @PatchMapping("/simulate-expired-jwt-token/{enabled}")
     Mono<ResponseEntity<Status>>
     simulateExpiredJwtToken(@PathVariable String enabled);
 }
