@@ -354,6 +354,29 @@ public class ShortUrlUserControllerImpl implements ShortUrlUserController {
             });
     }
 
+    @Override
+    public Mono<ResponseEntity<Status>>
+    simulateExpiredJwtToken(@RequestParam boolean enabled) {
+        return shortUrlUserService.simulateExpiredJwtToken(enabled)
+                .map(shortUrlUserStatus -> {
+                    HttpStatus httpStatus;
+                    String message;
+
+                    if (Objects.requireNonNull(shortUrlUserStatus) == SUCCESS) {
+                        httpStatus = HttpStatus.OK;
+                        message = String.format(
+                            "Simulated JWT token expiration successfully set to %b", enabled);
+                    } else {
+                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+                        message = "An unknown error occurred";
+                    }
+
+                    return new ResponseEntity<>(
+                            new Status(shortUrlUserStatus, message),
+                            httpStatus);
+                });
+    }
+
     // ------------------------------------------------------------------------
     // PRIVATE METHODS
     // ------------------------------------------------------------------------

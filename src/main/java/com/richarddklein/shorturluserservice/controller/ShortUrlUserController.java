@@ -72,4 +72,8 @@ public interface ShortUrlUserController {
     @DeleteMapping("/all")
     Mono<ResponseEntity<Status>>
     deleteAllUsers();
-}
+
+    @PatchMapping("/simulate-expired-jwt")
+    Mono<ResponseEntity<Status>>
+    simulateExpiredJwtToken(@RequestParam boolean enabled);
+    }
