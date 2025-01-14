@@ -136,16 +136,6 @@ Resources:
           Properties:
             Path: /all
             Method: DELETE
-        SimulateExpiredJwtTokenViaApiGatewayOrLocalHost:
-          Type: Api
-          Properties:
-            Path: /short-url/users/simulate-expired-jwt-token/{proxy+}
-            Method: PATCH
-        SimulateExpiredJwtTokenViaCustomDomain:
-          Type: Api
-          Properties:
-            Path: /simulate-expired-jwt-token/{proxy+}
-            Method: PATCH
 
   # Define the IAM Role for the Lambda function
   LambdaExecutionRole:

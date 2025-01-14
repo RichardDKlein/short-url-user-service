@@ -50,7 +50,4 @@ public interface ShortUrlUserService {
 
     Mono<ShortUrlStatus>
     deleteAllUsers();
-
-    Mono<ShortUrlStatus>
-    simulateExpiredJwtToken(boolean enabled);
 }

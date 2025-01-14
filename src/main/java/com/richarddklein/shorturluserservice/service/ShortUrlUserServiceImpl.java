@@ -177,12 +177,6 @@ public class ShortUrlUserServiceImpl implements ShortUrlUserService {
         return shortUrlUserDao.deleteAllUsers();
     }
 
-    @Override
-    public Mono<ShortUrlStatus> simulateExpiredJwtToken(boolean enabled) {
-        jwtUtils.setShouldSimulateExpiredToken(enabled);
-        return Mono.just(SUCCESS);
-    }
-
     // ------------------------------------------------------------------------
     // PRIVATE METHODS
     // ------------------------------------------------------------------------
